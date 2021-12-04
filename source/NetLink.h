@@ -33,8 +33,8 @@
 #pragma once
 
 #include <netinet/in.h>
-#include <sys/socket.h>
 #include <string>
+#include <sys/socket.h>
 
 #include "Options.h"
 

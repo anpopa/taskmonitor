@@ -36,8 +36,8 @@
 #include <unistd.h>
 
 #include "Application.h"
-#include "NetLink.h"
 #include "Defaults.h"
+#include "NetLink.h"
 
 namespace fs = std::filesystem;
 using std::shared_ptr;
@@ -54,13 +54,10 @@ NetLink::NetLink(std::shared_ptr<Options> &options)
         throw std::runtime_error("Fail to create netlink socket");
     }
 
-    lateSetup(
-        [this]() {
-            return true;
-        },
-        m_sockFd,
-        bswi::event::IPollable::Events::Level,
-        bswi::event::IEventSource::Priority::Normal);
+    lateSetup([this]() { return true; },
+              m_sockFd,
+              bswi::event::IPollable::Events::Level,
+              bswi::event::IEventSource::Priority::Normal);
 
     // We are ready for events only after connect
     setPrepare([]() { return false; });

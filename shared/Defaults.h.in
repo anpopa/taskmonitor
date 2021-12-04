@@ -35,32 +35,31 @@
 #include <map>
 #include <string>
 
-namespace tkm::monitor 
+namespace tkm::monitor
 {
 
 class Defaults
 {
 public:
-  enum class Default
-  {
-    Version,
-    ConfPath,
-    EnablePSI,
-  };
+    enum class Default {
+        Version,
+        ConfPath,
+        EnablePSI,
+    };
 
-  Defaults()
-  {
-    m_table.insert(std::pair<Default, std::string>(Default::Version, "@GIT_SHA1@"));
-    m_table.insert(std::pair<Default, std::string>(Default::ConfPath, "@TKM_CONFIG_FILE@"));
-    m_table.insert(std::pair<Default, std::string>(Default::EnablePSI, "true"));
-  }
+    Defaults()
+    {
+        m_table.insert(std::pair<Default, std::string>(Default::Version, "@GIT_SHA1@"));
+        m_table.insert(std::pair<Default, std::string>(Default::ConfPath, "@TKM_CONFIG_FILE@"));
+        m_table.insert(std::pair<Default, std::string>(Default::EnablePSI, "true"));
+    }
 
-  auto getFor(Default key) -> std::string& { return m_table.at(key); }
+    auto getFor(Default key) -> std::string & { return m_table.at(key); }
 
 private:
-  std::map<Default, std::string> m_table;
+    std::map<Default, std::string> m_table;
 };
 
-static Defaults tkmDefaults{};
+static Defaults tkmDefaults {};
 
 } // namespace tkm::monitor

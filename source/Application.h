@@ -37,8 +37,8 @@
 #include <string>
 
 #include "ActionManager.h"
-#include "NetLink.h"
 #include "Defaults.h"
+#include "NetLink.h"
 #include "Options.h"
 
 #include "../bswinfra/source/IApplication.h"

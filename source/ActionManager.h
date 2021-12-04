@@ -58,8 +58,7 @@ public:
     } Request;
 
 public:
-    explicit ActionManager(std::shared_ptr<Options> &options,
-                           std::shared_ptr<NetLink> &netlink);
+    explicit ActionManager(std::shared_ptr<Options> &options, std::shared_ptr<NetLink> &netlink);
 
     auto pushRequest(Request &request) -> int;
     auto getNetLink() -> std::shared_ptr<NetLink> { return m_netlink; }

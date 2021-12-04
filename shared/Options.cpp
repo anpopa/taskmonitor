@@ -52,7 +52,8 @@ auto Options::getFor(Key key) -> string const
     switch (key) {
     case Key::EnablePSI:
         if (hasConfigFile()) {
-            const optional<string> prop = m_configFile->getPropertyValue("monitor", -1, "EnablePSI");
+            const optional<string> prop
+                = m_configFile->getPropertyValue("monitor", -1, "EnablePSI");
             return prop.value_or(cdsDefaults.getFor(Defaults::Default::UserName));
         }
         return cdsDefaults.getFor(Defaults::Default::UserName);
