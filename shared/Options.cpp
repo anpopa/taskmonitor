@@ -54,9 +54,9 @@ auto Options::getFor(Key key) -> string const
         if (hasConfigFile()) {
             const optional<string> prop
                 = m_configFile->getPropertyValue("monitor", -1, "EnablePSI");
-            return prop.value_or(cdsDefaults.getFor(Defaults::Default::UserName));
+            return prop.value_or(tkmDefaults.getFor(Defaults::Default::EnablePSI));
         }
-        return cdsDefaults.getFor(Defaults::Default::UserName);
+        return tkmDefaults.getFor(Defaults::Default::EnablePSI);
     default:
         logError() << "Unknown option key";
         break;
