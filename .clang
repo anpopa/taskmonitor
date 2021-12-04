@@ -1,0 +1,8 @@
+-std=c++1z
+-Wno-unused-parameter
+-I./build/shared
+-I./build/interfaces/proto
+-I./shared
+-I./build/interfaces/proto
+-I./shared
+-I/usr/local/include

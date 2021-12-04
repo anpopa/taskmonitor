@@ -1,0 +1,3 @@
+[submodule "bswinfra"]
+	path = bswinfra
+	url = https://gitlab.com/anpopa/bswinfra.git
