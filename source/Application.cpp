@@ -49,10 +49,12 @@ Application::Application(const string &name, const string &description, const st
     appInstance = this;
 
     m_options = std::make_shared<Options>(configFile);
-    m_netlink = std::make_shared<NetLink>(m_options);
-    m_manager = std::make_unique<ActionManager>(m_options, m_netlink);
 
-    TaskMonitor()->addEventSource(m_netlink);
+    m_netlink = std::make_shared<NetLink>(m_options);
+    m_netlink->enableEvents();
+
+    m_manager = std::make_unique<ActionManager>(m_options, m_netlink);
+    m_manager->enableEvents();
 }
 
 } // namespace tkm::monitor

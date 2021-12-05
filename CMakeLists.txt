@@ -77,6 +77,16 @@ find_package          (PkgConfig REQUIRED)
 find_package		  (Threads REQUIRED)
 set                   (LIBS ${LIBS} pthread)
 
+# Use libnl
+pkg_check_modules     (LIBNL libnl-3.0 REQUIRED)
+include_directories   (${LIBNL_INCLUDE_DIRS})
+set                   (LIBS ${LIBS} ${LIBNL_LIBRARIES})
+
+# Use libnl-genl-3.0
+pkg_check_modules     (LIBNLGENL libnl-genl-3.0 REQUIRED)
+include_directories   (${LIBNLGENL_INCLUDE_DIRS})
+set                   (LIBS ${LIBS} ${LIBNLGENL_LIBRARIES})
+
 # Build
 add_subdirectory(source)
 

@@ -102,10 +102,10 @@ auto main(int argc, char **argv) -> int
     Application app {"TaskMonitor", "TaskMonitor", configPath};
 
     // Request connection
-    ActionManager::Request connectRequest {
-        .action = ActionManager::Action::Connect,
+    ActionManager::Request registerEvents {
+        .action = ActionManager::Action::RegisterEvents,
     };
-    app.getManager()->pushRequest(connectRequest);
+    app.getManager()->pushRequest(registerEvents);
 
     app.run();
 

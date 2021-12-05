@@ -47,10 +47,10 @@ using namespace bswi::event;
 namespace tkm::monitor
 {
 
-class ActionManager
+class ActionManager : public std::enable_shared_from_this<ActionManager>
 {
 public:
-    enum class Action { Connect };
+    enum class Action { RegisterEvents };
 
     typedef struct Request {
         Action action;
@@ -59,6 +59,9 @@ public:
 
 public:
     explicit ActionManager(std::shared_ptr<Options> &options, std::shared_ptr<NetLink> &netlink);
+
+    auto getShared() -> std::shared_ptr<ActionManager> { return shared_from_this(); }
+    void enableEvents();
 
     auto pushRequest(Request &request) -> int;
     auto getNetLink() -> std::shared_ptr<NetLink> { return m_netlink; }

@@ -7,5 +7,5 @@ set(BINARY_SRC
     Main.cpp
     )
 add_executable(${BINARY_NAME} ${BINARY_SRC})
-target_link_libraries(${BINARY_NAME} BSWInfra)
+target_link_libraries(${BINARY_NAME} ${LIBS} BSWInfra)
 install(TARGETS ${BINARY_NAME} RUNTIME DESTINATION bin)

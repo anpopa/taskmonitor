@@ -60,7 +60,7 @@ using namespace bswi::event;
 namespace tkm::monitor
 {
 
-class Application : public bswi::app::IApplication
+class Application final : public bswi::app::IApplication
 {
 public:
     explicit Application(const std::string &name,

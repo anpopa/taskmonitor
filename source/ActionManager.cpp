@@ -37,6 +37,8 @@
 #include "Application.h"
 #include "Defaults.h"
 
+#include "../bswinfra/source/Timer.h"
+
 using std::shared_ptr;
 using std::string;
 namespace fs = std::filesystem;
@@ -44,7 +46,8 @@ namespace fs = std::filesystem;
 namespace tkm::monitor
 {
 
-static auto doActionConnect(ActionManager *manager, const ActionManager::Request &request) -> bool;
+static auto doActionRegisterEvents(ActionManager *manager, const ActionManager::Request &request)
+    -> bool;
 
 ActionManager::ActionManager(shared_ptr<Options> &options, shared_ptr<NetLink> &netlink)
 : m_options(options)
@@ -52,8 +55,6 @@ ActionManager::ActionManager(shared_ptr<Options> &options, shared_ptr<NetLink> &
 {
     m_queue = std::make_shared<AsyncQueue<Request>>(
         "ActionManagerQueue", [this](const Request &request) { return requestHandler(request); });
-
-    TaskMonitor()->addEventSource(m_queue);
 }
 
 auto ActionManager::pushRequest(Request &request) -> int
@@ -61,11 +62,16 @@ auto ActionManager::pushRequest(Request &request) -> int
     return m_queue->push(request);
 }
 
+void ActionManager::enableEvents()
+{
+    TaskMonitor()->addEventSource(m_queue);
+}
+
 auto ActionManager::requestHandler(const Request &request) -> bool
 {
     switch (request.action) {
-    case ActionManager::Action::Connect:
-        return doActionConnect(this, request);
+    case ActionManager::Action::RegisterEvents:
+        return doActionRegisterEvents(this, request);
     default:
         break;
     }
@@ -74,11 +80,15 @@ auto ActionManager::requestHandler(const Request &request) -> bool
     return false;
 }
 
-static auto doActionConnect(ActionManager *manager, const ActionManager::Request &) -> bool
+static auto doActionRegisterEvents(ActionManager *manager, const ActionManager::Request &) -> bool
 {
-    if (manager->getNetLink()->connect() < 0) {
-        return false;
-    }
+    std::shared_ptr<Timer> pidMonitor = std::make_shared<Timer>("OurPidAccounting", [manager]() {
+        manager->getNetLink()->requestTaskAcct(getpid());
+        return true;
+    });
+
+    pidMonitor->start(3000000, true);
+    TaskMonitor()->addEventSource(pidMonitor);
 
     return true;
 }
