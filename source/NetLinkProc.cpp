@@ -133,7 +133,7 @@ NetLinkProc::NetLinkProc(std::shared_ptr<Options> &options)
                           << "To=" << nlcn_msg.proc_ev.event_data.id.e.egid;
                 break;
             case PROC_EVENT_EXIT:
-                logInfo() << "MON::PROC::GID TID=" << nlcn_msg.proc_ev.event_data.exit.process_tgid
+                logInfo() << "MON::PROC::EXIT TID=" << nlcn_msg.proc_ev.event_data.exit.process_tgid
                           << " "
                           << "PID=" << nlcn_msg.proc_ev.event_data.exit.process_pid << " "
                           << "ExitCode=" << nlcn_msg.proc_ev.event_data.exit.exit_code;

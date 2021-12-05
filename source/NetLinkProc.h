@@ -32,6 +32,7 @@
 
 #pragma once
 
+#include <linux/netlink.h>
 #include <string>
 #include <sys/socket.h>
 
