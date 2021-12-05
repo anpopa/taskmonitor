@@ -30,34 +30,46 @@
  * @author Alin Popa <alin.popa@fxdata.ro>
  */
 
-#include "Application.h"
+#pragma once
 
-using std::shared_ptr;
-using std::string;
+#include <netinet/in.h>
+#include <netlink/netlink.h>
+#include <string>
+#include <sys/socket.h>
+
+#include "Options.h"
+
+#include "../bswinfra/source/Exceptions.h"
+#include "../bswinfra/source/IApplication.h"
+#include "../bswinfra/source/Pollable.h"
+
+using namespace bswi::log;
+using namespace bswi::event;
 
 namespace tkm::monitor
 {
 
-Application *Application::appInstance = nullptr;
-
-Application::Application(const string &name, const string &description, const string &configFile)
-: bswi::app::IApplication(name, description)
+class NetLinkProc : public Pollable, public std::enable_shared_from_this<NetLinkProc>
 {
-    if (Application::appInstance != nullptr) {
-        throw bswi::except::SingleInstance();
-    }
-    appInstance = this;
+public:
+    explicit NetLinkProc(std::shared_ptr<Options> &options);
+    ~NetLinkProc();
 
-    m_options = std::make_shared<Options>(configFile);
+public:
+    NetLinkProc(NetLinkProc const &) = delete;
+    void operator=(NetLinkProc const &) = delete;
 
-    //m_nlStats = std::make_shared<NetLinkStats>(m_options);
-    //m_nlStats->enableEvents();
+    auto getShared() -> std::shared_ptr<NetLinkProc> { return shared_from_this(); }
+    void enableEvents();
+    [[nodiscard]] int getFD() const { return m_sockFd; }
 
-    m_nlProc = std::make_shared<NetLinkProc>(m_options);
-    m_nlProc->enableEvents();
+    auto startProcMonitoring(void) -> int;
 
-    m_manager = std::make_unique<ActionManager>(m_options, m_nlStats, m_nlProc);
-    m_manager->enableEvents();
-}
+private:
+    std::shared_ptr<Options> m_options = nullptr;
+    struct sockaddr_in m_addr = {};
+    struct nl_sock *m_nlSock = nullptr;
+    int m_sockFd = -1;
+};
 
 } // namespace tkm::monitor

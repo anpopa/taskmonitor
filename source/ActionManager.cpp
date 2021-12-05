@@ -49,9 +49,10 @@ namespace tkm::monitor
 static auto doActionRegisterEvents(ActionManager *manager, const ActionManager::Request &request)
     -> bool;
 
-ActionManager::ActionManager(shared_ptr<Options> &options, shared_ptr<NetLink> &netlink)
+ActionManager::ActionManager(shared_ptr<Options> &options, shared_ptr<NetLinkStats> &nlStats, shared_ptr<NetLinkProc> &nlProc)
 : m_options(options)
-, m_netlink(netlink)
+, m_nlStats(nlStats)
+, m_nlProc(nlProc)
 {
     m_queue = std::make_shared<AsyncQueue<Request>>(
         "ActionManagerQueue", [this](const Request &request) { return requestHandler(request); });
@@ -82,13 +83,16 @@ auto ActionManager::requestHandler(const Request &request) -> bool
 
 static auto doActionRegisterEvents(ActionManager *manager, const ActionManager::Request &) -> bool
 {
+    // Register event for ourselfs
     std::shared_ptr<Timer> pidMonitor = std::make_shared<Timer>("OurPidAccounting", [manager]() {
-        manager->getNetLink()->requestTaskAcct(getpid());
+        manager->getNetLinkStats()->requestTaskAcct(getpid());
         return true;
     });
+    //pidMonitor->start(3000000, true);
+    //TaskMonitor()->addEventSource(pidMonitor);
 
-    pidMonitor->start(3000000, true);
-    TaskMonitor()->addEventSource(pidMonitor);
+    // Start process monitoring
+    manager->getNetLinkProc()->startProcMonitoring();
 
     return true;
 }

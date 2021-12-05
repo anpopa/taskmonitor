@@ -49,17 +49,17 @@ using namespace bswi::event;
 namespace tkm::monitor
 {
 
-class NetLink : public Pollable, public std::enable_shared_from_this<NetLink>
+class NetLinkStats : public Pollable, public std::enable_shared_from_this<NetLinkStats>
 {
 public:
-    explicit NetLink(std::shared_ptr<Options> &options);
-    ~NetLink();
+    explicit NetLinkStats(std::shared_ptr<Options> &options);
+    ~NetLinkStats();
 
 public:
-    NetLink(NetLink const &) = delete;
-    void operator=(NetLink const &) = delete;
+    NetLinkStats(NetLinkStats const &) = delete;
+    void operator=(NetLinkStats const &) = delete;
 
-    auto getShared() -> std::shared_ptr<NetLink> { return shared_from_this(); }
+    auto getShared() -> std::shared_ptr<NetLinkStats> { return shared_from_this(); }
     void enableEvents();
     [[nodiscard]] int getFD() const { return m_sockFd; }
 

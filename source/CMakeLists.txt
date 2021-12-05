@@ -2,7 +2,8 @@ set(BINARY_NAME taskmonitor)
 set(BINARY_SRC 
     ${CMAKE_SOURCE_DIR}/shared/Options.cpp
     ActionManager.cpp
-    NetLink.cpp
+    NetLinkStats.cpp
+    NetLinkProc.cpp
     Application.cpp
     Main.cpp
     )

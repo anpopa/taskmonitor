@@ -48,7 +48,7 @@
 
 #include "Application.h"
 #include "Defaults.h"
-#include "NetLink.h"
+#include "NetLinkStats.h"
 
 namespace fs = std::filesystem;
 using std::shared_ptr;
@@ -105,7 +105,7 @@ static void printDelayAcct(struct taskstats *t)
               << "DelayAverage=" << average_ms(t->thrashing_delay_total, t->thrashing_count);
 }
 
-int callbackMessage(struct nl_msg *nlmsg, void *arg)
+int callbackStatisticsMessage(struct nl_msg *nlmsg, void *arg)
 {
 
     struct nlmsghdr *nlhdr;
@@ -135,8 +135,8 @@ int callbackMessage(struct nl_msg *nlmsg, void *arg)
 namespace tkm::monitor
 {
 
-NetLink::NetLink(std::shared_ptr<Options> &options)
-: Pollable("NetLink")
+NetLinkStats::NetLinkStats(std::shared_ptr<Options> &options)
+: Pollable("NetLinkStats")
 , m_options(options)
 {
     int err = NLE_SUCCESS;
@@ -164,7 +164,7 @@ NetLink::NetLink(std::shared_ptr<Options> &options)
         throw std::runtime_error("Fail to retirve family id");
     }
 
-    if ((err = nl_socket_modify_cb(m_nlSock, NL_CB_VALID, NL_CB_CUSTOM, callbackMessage, this))
+    if ((err = nl_socket_modify_cb(m_nlSock, NL_CB_VALID, NL_CB_CUSTOM, callbackStatisticsMessage, this))
         < 0) {
         logError() << "Error setting socket cb: " << nl_geterror(err);
         throw std::runtime_error("Fail to set message callback");
@@ -194,12 +194,12 @@ NetLink::NetLink(std::shared_ptr<Options> &options)
     });
 }
 
-void NetLink::enableEvents()
+void NetLinkStats::enableEvents()
 {
     TaskMonitor()->addEventSource(getShared());
 }
 
-NetLink::~NetLink()
+NetLinkStats::~NetLinkStats()
 {
     if (m_nlSock != nullptr) {
         nl_close(m_nlSock);
@@ -207,7 +207,7 @@ NetLink::~NetLink()
     }
 }
 
-auto NetLink::requestTaskAcct(int pid) -> int
+auto NetLinkStats::requestTaskAcct(int pid) -> int
 {
     struct nlmsghdr *hdr = nullptr;
     struct nl_msg *msg = nullptr;
@@ -241,7 +241,6 @@ auto NetLink::requestTaskAcct(int pid) -> int
 
     if ((err = nl_send_sync(m_nlSock, msg)) < 0) {
         logError() << "Error sending message: " << nl_geterror(err);
-        nlmsg_free(msg);
         return -1;
     } // nl_send_sync free the msg
 

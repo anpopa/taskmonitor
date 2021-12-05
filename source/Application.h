@@ -38,7 +38,8 @@
 
 #include "ActionManager.h"
 #include "Defaults.h"
-#include "NetLink.h"
+#include "NetLinkStats.h"
+#include "NetLinkProc.h"
 #include "Options.h"
 
 #include "../bswinfra/source/IApplication.h"
@@ -95,7 +96,8 @@ public:
 
 private:
     std::shared_ptr<Options> m_options = nullptr;
-    std::shared_ptr<NetLink> m_netlink = nullptr;
+    std::shared_ptr<NetLinkStats> m_nlStats = nullptr;
+    std::shared_ptr<NetLinkProc> m_nlProc = nullptr;
     std::shared_ptr<ActionManager> m_manager = nullptr;
 
 private:

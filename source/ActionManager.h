@@ -35,7 +35,8 @@
 #include <map>
 #include <string>
 
-#include "NetLink.h"
+#include "NetLinkStats.h"
+#include "NetLinkProc.h"
 #include "Options.h"
 
 #include "../bswinfra/source/AsyncQueue.h"
@@ -58,20 +59,22 @@ public:
     } Request;
 
 public:
-    explicit ActionManager(std::shared_ptr<Options> &options, std::shared_ptr<NetLink> &netlink);
+    explicit ActionManager(std::shared_ptr<Options> &options, std::shared_ptr<NetLinkStats> &nlStats, std::shared_ptr<NetLinkProc> &nlProc);
 
     auto getShared() -> std::shared_ptr<ActionManager> { return shared_from_this(); }
     void enableEvents();
 
     auto pushRequest(Request &request) -> int;
-    auto getNetLink() -> std::shared_ptr<NetLink> { return m_netlink; }
+    auto getNetLinkStats() -> std::shared_ptr<NetLinkStats> { return m_nlStats; }
+    auto getNetLinkProc() -> std::shared_ptr<NetLinkProc> { return m_nlProc; }
 
 private:
     auto requestHandler(const Request &request) -> bool;
 
 private:
     std::shared_ptr<Options> m_options = nullptr;
-    std::shared_ptr<NetLink> m_netlink = nullptr;
+    std::shared_ptr<NetLinkStats> m_nlStats = nullptr;
+    std::shared_ptr<NetLinkProc> m_nlProc = nullptr;
     std::shared_ptr<AsyncQueue<Request>> m_queue = nullptr;
 };
 
