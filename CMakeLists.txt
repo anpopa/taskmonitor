@@ -13,6 +13,9 @@ set(CMAKE_MODULE_PATH "${BSWINFRA_DIR}/cmake" "${INTERFACES_DIR}/cmake")
 
 message (STATUS "Module paths: ${CMAKE_MODULE_PATH}")
 
+option(WITH_TESTS "Build test suite" N)
+option(WITH_TIDY "Build with clang-tidy" N)
+
 include(BSWInfra)
 
 if(NOT CMAKE_BUILD_TYPE)
@@ -56,16 +59,8 @@ configure_file(
     ${CMAKE_SOURCE_DIR}/config/taskmonitor.conf.in
     ${CMAKE_BINARY_DIR}/config/taskmonitor.conf)
 
-option(WITH_TESTS "Build test suite" N)
-option(WITH_SYSLOG "Build Logger with syslog" Y)
-option(WITH_TIDY "Build with clang-tidy" N)
-
 if(WITH_TIDY)
 	set(CMAKE_CXX_CLANG_TIDY "clang-tidy;-checks=*")
-endif()
-
-if(WITH_SYSLOG)
-	add_compile_options("-DWITH_SYSLOG")
 endif()
 
 # Header files
@@ -131,6 +126,4 @@ add_compile_options (
 message (STATUS "SYSTEM_TYPE: "          ${CMAKE_SYSTEM_NAME})
 message (STATUS "CMAKE_BUILD_TYPE: "     ${CMAKE_BUILD_TYPE})
 message (STATUS "WITH_TESTS: "           ${WITH_TESTS})
-message (STATUS "WITH_SYSLOG: "          ${WITH_SYSLOG})
 message (STATUS "WITH_TIDY: "            ${WITH_TIDY})
-
