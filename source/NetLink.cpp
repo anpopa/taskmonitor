@@ -58,12 +58,27 @@ using std::string;
 
 static void printDelayAcct(struct taskstats *t)
 {
+    logInfo() << "MON::COMMON[" << t->ac_pid << "] "
+              << "Command=" << t->ac_comm << " "
+              << "UID=" << t->ac_uid << " "
+              << "GID=" << t->ac_gid << " "
+              << "PID=" << t->ac_pid << " "
+              << "PPID=" << t->ac_ppid << " "
+              << "UserCPUTime=" << t->ac_utime << " "
+              << "SystemCPUTime=" << t->ac_stime;
+
     logInfo() << "MON::CPU[" << t->ac_pid << "] "
               << "Count=" << t->cpu_count << " "
-              << "RealTotal=" << t->cpu_run_real_total << " "
-              << "VirtualTotal=" << t->cpu_run_virtual_total << " "
+              << "RealTotal=" << t->cpu_run_real_total << "ns "
+              << "VirtualTotal=" << t->cpu_run_virtual_total << "ns "
               << "DelayTotal=" << t->cpu_delay_total << " "
               << "DelayAverage=" << average_ms((double) t->cpu_delay_total, t->cpu_count);
+
+    logInfo() << "MON::MEMORY[" << t->ac_pid << "] "
+              << "CoreMem=" << t->coremem << "MB-usec "
+              << "VirtMem=" << t->virtmem << "MB-usec "
+              << "HiWaterRSS=" << t->hiwater_rss << "KBytes "
+              << "HiWaterVM=" << t->hiwater_vm << "KBytes";
 
     logInfo() << "MON::CONTEXT[" << t->ac_pid << "] "
               << "Voluntary=" << t->nvcsw << " "
