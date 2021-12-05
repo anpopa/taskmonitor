@@ -38,8 +38,8 @@
 
 #include "ActionManager.h"
 #include "Defaults.h"
-#include "NetLinkStats.h"
 #include "NetLinkProc.h"
+#include "NetLinkStats.h"
 #include "Options.h"
 
 #include "../bswinfra/source/IApplication.h"

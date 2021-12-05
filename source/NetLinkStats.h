@@ -67,7 +67,6 @@ public:
 
 private:
     std::shared_ptr<Options> m_options = nullptr;
-    struct sockaddr_in m_addr = {};
     struct nl_sock *m_nlSock = nullptr;
     int m_nlFamily = 0;
     int m_sockFd = -1;

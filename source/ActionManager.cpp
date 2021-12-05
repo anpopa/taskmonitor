@@ -49,7 +49,9 @@ namespace tkm::monitor
 static auto doActionRegisterEvents(ActionManager *manager, const ActionManager::Request &request)
     -> bool;
 
-ActionManager::ActionManager(shared_ptr<Options> &options, shared_ptr<NetLinkStats> &nlStats, shared_ptr<NetLinkProc> &nlProc)
+ActionManager::ActionManager(shared_ptr<Options> &options,
+                             shared_ptr<NetLinkStats> &nlStats,
+                             shared_ptr<NetLinkProc> &nlProc)
 : m_options(options)
 , m_nlStats(nlStats)
 , m_nlProc(nlProc)
@@ -88,8 +90,8 @@ static auto doActionRegisterEvents(ActionManager *manager, const ActionManager::
         manager->getNetLinkStats()->requestTaskAcct(getpid());
         return true;
     });
-    //pidMonitor->start(3000000, true);
-    //TaskMonitor()->addEventSource(pidMonitor);
+    pidMonitor->start(3000000, true);
+    TaskMonitor()->addEventSource(pidMonitor);
 
     // Start process monitoring
     manager->getNetLinkProc()->startProcMonitoring();

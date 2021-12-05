@@ -164,7 +164,8 @@ NetLinkStats::NetLinkStats(std::shared_ptr<Options> &options)
         throw std::runtime_error("Fail to retirve family id");
     }
 
-    if ((err = nl_socket_modify_cb(m_nlSock, NL_CB_VALID, NL_CB_CUSTOM, callbackStatisticsMessage, this))
+    if ((err = nl_socket_modify_cb(
+             m_nlSock, NL_CB_VALID, NL_CB_CUSTOM, callbackStatisticsMessage, this))
         < 0) {
         logError() << "Error setting socket cb: " << nl_geterror(err);
         throw std::runtime_error("Fail to set message callback");

@@ -32,8 +32,6 @@
 
 #pragma once
 
-#include <netinet/in.h>
-#include <netlink/netlink.h>
 #include <string>
 #include <sys/socket.h>
 
@@ -67,8 +65,7 @@ public:
 
 private:
     std::shared_ptr<Options> m_options = nullptr;
-    struct sockaddr_in m_addr = {};
-    struct nl_sock *m_nlSock = nullptr;
+    struct sockaddr_nl m_addr = {};
     int m_sockFd = -1;
 };
 

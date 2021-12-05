@@ -50,8 +50,8 @@ Application::Application(const string &name, const string &description, const st
 
     m_options = std::make_shared<Options>(configFile);
 
-    //m_nlStats = std::make_shared<NetLinkStats>(m_options);
-    //m_nlStats->enableEvents();
+    m_nlStats = std::make_shared<NetLinkStats>(m_options);
+    m_nlStats->enableEvents();
 
     m_nlProc = std::make_shared<NetLinkProc>(m_options);
     m_nlProc->enableEvents();

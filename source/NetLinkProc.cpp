@@ -37,16 +37,9 @@
 #include <string.h>
 #include <unistd.h>
 
-#include <linux/netlink.h>
-#include <linux/connector.h>
 #include <linux/cn_proc.h>
-
-#include <netlink/attr.h>
-#include <netlink/genl/ctrl.h>
-#include <netlink/genl/genl.h>
-#include <netlink/msg.h>
-#include <netlink/netlink.h>
-#include <netlink/socket.h>
+#include <linux/connector.h>
+#include <linux/netlink.h>
 #include <unistd.h>
 
 #include "Application.h"
@@ -57,81 +50,6 @@ namespace fs = std::filesystem;
 using std::shared_ptr;
 using std::string;
 
-int callbackProcessMessage(struct nl_msg *nlmsg, void *arg)
-{
-    struct __attribute__ ((aligned(NLMSG_ALIGNTO))) {
-        struct __attribute__ ((__packed__)) {
-            struct cn_msg cn_msg;
-            struct proc_event proc_ev;
-        };
-    } nlcn_msg;
-    struct nlmsghdr *nlhdr;
-
-    nlhdr = nlmsg_hdr(nlmsg);
-    memcpy(&nlcn_msg, nlmsg_data(nlhdr), sizeof(nlcn_msg));
-
-	enum what {
-		/* Use successive bits so the enums can be used to record
-		 * sets of events as well
-		 */
-		PROC_EVENT_NONE = 0x00000000,
-		PROC_EVENT_FORK = 0x00000001,
-		PROC_EVENT_EXEC = 0x00000002,
-		PROC_EVENT_UID  = 0x00000004,
-		PROC_EVENT_GID  = 0x00000040,
-		PROC_EVENT_SID  = 0x00000080,
-		PROC_EVENT_PTRACE = 0x00000100,
-		PROC_EVENT_COMM = 0x00000200,
-		/* "next" should be 0x00000400 */
-		/* "last" is the last process event: exit,
-		 * while "next to last" is coredumping event */
-		PROC_EVENT_COREDUMP = 0x40000000,
-		PROC_EVENT_EXIT = 0x80000000
-	};
-
-    switch (nlcn_msg.proc_ev.what) {
-            case PROC_EVENT_NONE:
-                printf("set mcast listen ok\n");
-                break;
-            case PROC_EVENT_FORK:
-                printf("fork: parent tid=%d pid=%d -> child tid=%d pid=%d\n",
-                        nlcn_msg.proc_ev.event_data.fork.parent_pid,
-                        nlcn_msg.proc_ev.event_data.fork.parent_tgid,
-                        nlcn_msg.proc_ev.event_data.fork.child_pid,
-                        nlcn_msg.proc_ev.event_data.fork.child_tgid);
-                break;
-            case PROC_EVENT_EXEC:
-                printf("exec: tid=%d pid=%d\n",
-                        nlcn_msg.proc_ev.event_data.exec.process_pid,
-                        nlcn_msg.proc_ev.event_data.exec.process_tgid);
-                break;
-            case PROC_EVENT_UID:
-                printf("uid change: tid=%d pid=%d from %d to %d\n",
-                        nlcn_msg.proc_ev.event_data.id.process_pid,
-                        nlcn_msg.proc_ev.event_data.id.process_tgid,
-                        nlcn_msg.proc_ev.event_data.id.r.ruid,
-                        nlcn_msg.proc_ev.event_data.id.e.euid);
-                break;
-            case PROC_EVENT_GID:
-                printf("gid change: tid=%d pid=%d from %d to %d\n",
-                        nlcn_msg.proc_ev.event_data.id.process_pid,
-                        nlcn_msg.proc_ev.event_data.id.process_tgid,
-                        nlcn_msg.proc_ev.event_data.id.r.rgid,
-                        nlcn_msg.proc_ev.event_data.id.e.egid);
-                break;
-            case PROC_EVENT_EXIT:
-                printf("exit: tid=%d pid=%d exit_code=%d\n",
-                        nlcn_msg.proc_ev.event_data.exit.process_pid,
-                        nlcn_msg.proc_ev.event_data.exit.process_tgid,
-                        nlcn_msg.proc_ev.event_data.exit.exit_code);
-                break;
-            default:
-                break;
-        }
-
-    return 0;
-}
-
 namespace tkm::monitor
 {
 
@@ -139,44 +57,89 @@ NetLinkProc::NetLinkProc(std::shared_ptr<Options> &options)
 : Pollable("NetLinkProc")
 , m_options(options)
 {
-    int err = NLE_SUCCESS;
-
-    if ((m_nlSock = nl_socket_alloc()) == nullptr) {
+    if ((m_sockFd = socket(PF_NETLINK, SOCK_DGRAM, NETLINK_CONNECTOR)) == -1) {
         throw std::runtime_error("Fail to create netlink socket");
     }
 
-    if ((err = nl_connect(m_nlSock, NETLINK_CONNECTOR)) < 0) {
-        logError() << "Error connecting: " << nl_geterror(err);
-        throw std::runtime_error("Fail to connect netlink socket");
-    }
+    m_addr.nl_family = AF_NETLINK;
+    m_addr.nl_groups = CN_IDX_PROC;
+    m_addr.nl_pid = getpid();
 
-    if ((err = nl_socket_set_nonblocking(m_nlSock)) < 0) {
-        logError() << "Error setting socket nonblocking: " << nl_geterror(err);
-        throw std::runtime_error("Fail to set nonblocking netlink socket");
-    }
-
-    if ((m_sockFd = nl_socket_get_fd(m_nlSock)) < 0) {
-        throw std::runtime_error("Fail to get netlink socket");
-    }
-
-    nl_socket_add_memberships(m_nlSock, CN_IDX_PROC, 0);
-    nl_socket_disable_seq_check(m_nlSock);
-
-    if ((err = nl_socket_modify_cb(m_nlSock, NL_CB_MSG_IN, NL_CB_CUSTOM, callbackProcessMessage, this))
-        < 0) {
-        logError() << "Error setting socket cb: " << nl_geterror(err);
-        throw std::runtime_error("Fail to set message callback");
+    if (bind(m_sockFd, (struct sockaddr *) &m_addr, sizeof(m_addr)) == -1) {
+        throw std::runtime_error("Fail to bind netlink socket");
     }
 
     lateSetup(
         [this]() {
-            int err = NLE_SUCCESS;
+            struct __attribute__((aligned(NLMSG_ALIGNTO))) {
+                struct nlmsghdr nl_hdr;
+                struct __attribute__((__packed__)) {
+                    struct cn_msg cn_msg;
+                    struct proc_event proc_ev;
+                };
+            } nlcn_msg;
+            int rc;
 
-            if ((err = nl_recvmsgs_default(m_nlSock)) < 0) {
-                if ((err != -NLE_AGAIN) && (err != -NLE_BUSY)) {
-                    logError() << "Error receiving message: " << nl_geterror(err);
-                    return false;
-                }
+            // see linux/cn_proc.h
+            enum what {
+                PROC_EVENT_NONE = 0x00000000,
+                PROC_EVENT_FORK = 0x00000001,
+                PROC_EVENT_EXEC = 0x00000002,
+                PROC_EVENT_UID = 0x00000004,
+                PROC_EVENT_GID = 0x00000040,
+                PROC_EVENT_SID = 0x00000080,
+                PROC_EVENT_PTRACE = 0x00000100,
+                PROC_EVENT_COMM = 0x00000200,
+                PROC_EVENT_COREDUMP = 0x40000000,
+                PROC_EVENT_EXIT = 0x80000000
+            };
+
+            rc = recv(m_sockFd, &nlcn_msg, sizeof(nlcn_msg), 0);
+            if (rc == 0) {
+                return true;
+            } else if (rc == -1) {
+                logError() << "Netlink process receive error";
+                return false;
+            }
+
+            switch (nlcn_msg.proc_ev.what) {
+            case PROC_EVENT_NONE:
+                logInfo() << "MON::PROC::NONE Set mcast listen OK";
+                break;
+            case PROC_EVENT_FORK:
+                logInfo() << "MON::PROC::FORK ParentTID="
+                          << nlcn_msg.proc_ev.event_data.fork.parent_pid << " "
+                          << "ParentPID=" << nlcn_msg.proc_ev.event_data.fork.parent_tgid << " "
+                          << "ChildTID=" << nlcn_msg.proc_ev.event_data.fork.child_tgid << " "
+                          << "ChildPID=" << nlcn_msg.proc_ev.event_data.fork.child_pid;
+                break;
+            case PROC_EVENT_EXEC:
+                logInfo() << "MON::PROC::EXEC TID=" << nlcn_msg.proc_ev.event_data.exec.process_tgid
+                          << " "
+                          << "PID=" << nlcn_msg.proc_ev.event_data.exec.process_pid;
+                break;
+            case PROC_EVENT_UID:
+                logInfo() << "MON::PROC::UID TID=" << nlcn_msg.proc_ev.event_data.id.process_tgid
+                          << " "
+                          << "PID=" << nlcn_msg.proc_ev.event_data.id.process_pid << " "
+                          << "From=" << nlcn_msg.proc_ev.event_data.id.r.ruid << " "
+                          << "To=" << nlcn_msg.proc_ev.event_data.id.e.euid;
+                break;
+            case PROC_EVENT_GID:
+                logInfo() << "MON::PROC::GID TID=" << nlcn_msg.proc_ev.event_data.id.process_tgid
+                          << " "
+                          << "PID=" << nlcn_msg.proc_ev.event_data.id.process_pid << " "
+                          << "From=" << nlcn_msg.proc_ev.event_data.id.r.rgid << " "
+                          << "To=" << nlcn_msg.proc_ev.event_data.id.e.egid;
+                break;
+            case PROC_EVENT_EXIT:
+                logInfo() << "MON::PROC::GID TID=" << nlcn_msg.proc_ev.event_data.exit.process_tgid
+                          << " "
+                          << "PID=" << nlcn_msg.proc_ev.event_data.exit.process_pid << " "
+                          << "ExitCode=" << nlcn_msg.proc_ev.event_data.exit.exit_code;
+                break;
+            default:
+                break;
             }
 
             return true;
@@ -199,48 +162,35 @@ void NetLinkProc::enableEvents()
 
 NetLinkProc::~NetLinkProc()
 {
-    if (m_nlSock != nullptr) {
-        nl_close(m_nlSock);
-        nl_socket_free(m_nlSock);
+    if (m_sockFd != -1) {
+        ::close(m_sockFd);
     }
 }
 
 auto NetLinkProc::startProcMonitoring(void) -> int
 {
-    struct nlmsghdr *hdr = nullptr;
-    struct nl_msg *msg = nullptr;
-    struct cn_msg cn_msg;
-    int err = NLE_SUCCESS;
+    struct __attribute__((aligned(NLMSG_ALIGNTO))) {
+        struct nlmsghdr nl_hdr;
+        struct __attribute__((__packed__)) {
+            struct cn_msg cn_msg;
+            enum proc_cn_mcast_op cn_mcast;
+        };
+    } nlcn_msg;
 
-    logDebug() << "Request process monitoring";
+    memset(&nlcn_msg, 0, sizeof(nlcn_msg));
+    nlcn_msg.nl_hdr.nlmsg_len = sizeof(nlcn_msg);
+    nlcn_msg.nl_hdr.nlmsg_pid = getpid();
+    nlcn_msg.nl_hdr.nlmsg_type = NLMSG_DONE;
 
-    if (!(msg = nlmsg_alloc())) {
-        logError() << "Failed to alloc message: " << nl_geterror(err);
+    nlcn_msg.cn_msg.id.idx = CN_IDX_PROC;
+    nlcn_msg.cn_msg.id.val = CN_VAL_PROC;
+    nlcn_msg.cn_msg.len = sizeof(enum proc_cn_mcast_op);
+    nlcn_msg.cn_mcast = PROC_CN_MCAST_LISTEN;
+
+    if (send(m_sockFd, &nlcn_msg, sizeof(nlcn_msg), 0) == -1) {
+        logError() << "Netlink send error";
         return -1;
     }
-
-    memset(&cn_msg, 0, sizeof(cn_msg));
-    cn_msg.id.idx = CN_IDX_PROC;
-    cn_msg.id.val = CN_VAL_PROC;
-
-    if (!(hdr = static_cast<struct nlmsghdr *>(nlmsg_put(msg,
-                                                         NL_AUTO_PID,
-                                                         NL_AUTO_SEQ,
-                                                         NLMSG_DONE,
-                                                         sizeof(cn_msg),
-                                                         NLM_F_REQUEST)))) {
-        logError() << "Error setting message header";
-        nlmsg_free(msg);
-        return -1;
-    }
-
-
-    memcpy(nlmsg_data(hdr), &cn_msg, sizeof(cn_msg));
-
-    if ((err = nl_send_sync(m_nlSock, msg)) < 0) {
-        logError() << "Error sending message: " << nl_geterror(err);
-        return -1;
-    } // nl_send_sync free the msg
 
     return 0;
 }
