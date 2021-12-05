@@ -1,7 +1,7 @@
 /*-
  * SPDX-License-Identifier: BSD-2-Clause
  *
- * Copyright (c) 2020 Alin Popa
+ * Copyright (c) 2021 Alin Popa
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
