@@ -41,13 +41,19 @@ void Registry::initFromProc(void)
         try {
             pid = std::stoi(entry.path().filename());
         } catch (...) {
+            // Discard non pid entries
         }
 
         if (pid != -1) {
             logDebug() << "Add process monitoring for pid " << pid;
-            TaskMonitor()->getRegistry()->addEntry(pid);
+            std::shared_ptr<ProcEntry> entry = std::make_shared<ProcEntry>(pid);
+            entry->startMonitoring(3000000);
+            m_list.append(entry);
         }
     }
+
+    // Commit our updated list
+    m_list.commit();
 }
 
 void Registry::addEntry(int pid)
