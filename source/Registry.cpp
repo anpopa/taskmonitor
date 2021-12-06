@@ -47,7 +47,7 @@ void Registry::initFromProc(void)
         if (pid != -1) {
             logDebug() << "Add process monitoring for pid " << pid;
             std::shared_ptr<ProcEntry> entry = std::make_shared<ProcEntry>(pid);
-            entry->startMonitoring(3000000);
+            entry->startMonitoring(m_pollInterval);
             m_list.append(entry);
         }
     }
@@ -68,7 +68,7 @@ void Registry::addEntry(int pid)
 
     if (!found) {
         std::shared_ptr<ProcEntry> entry = std::make_shared<ProcEntry>(pid);
-        entry->startMonitoring(3000000);
+        entry->startMonitoring(m_pollInterval);
         m_list.append(entry);
         m_list.commit();
     }

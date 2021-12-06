@@ -34,7 +34,20 @@ namespace tkm::monitor
 class Options
 {
 public:
-    enum class Key { EnablePSI };
+    enum class Key { 
+        PollInterval,
+        RxBufferSize,
+        TxBufferSize,
+        MsgBufferSize,
+        ReadProcAtInit,
+        WithCPU, 
+        WithMemory, 
+        WithContext,
+        WithIO,
+        WithSwap,
+        WithReclaim,
+        WithTrashing
+        };
 
 public:
     Options(const std::string &configFile);

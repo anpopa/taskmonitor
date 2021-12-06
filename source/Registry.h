@@ -40,7 +40,20 @@ class Registry
 {
 public:
     explicit Registry(std::shared_ptr<Options> &options)
-    : m_options(options) {};
+    : m_options(options)
+    {
+        long pollInterval = -1;
+
+        try {
+            pollInterval = std::stol(m_options->getFor(Options::Key::PollInterval));
+        } catch (...) {
+            // Discard non pid entries
+        }
+
+        if (pollInterval != -1) {
+            m_pollInterval = pollInterval;
+        }
+    };
     ~Registry() = default;
 
 public:
@@ -54,6 +67,7 @@ public:
 private:
     std::shared_ptr<Options> m_options = nullptr;
     bswi::util::SafeList<std::shared_ptr<ProcEntry>> m_list {"RegistryList"};
+    long m_pollInterval = 3000000;
 };
 
 } // namespace tkm::monitor

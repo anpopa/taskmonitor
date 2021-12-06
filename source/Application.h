@@ -74,6 +74,7 @@ public:
             m_mainEventLoop.reset();
         }
     }
+    auto getOptions() -> std::shared_ptr<Options> { return m_options; }
     auto getManager() -> std::shared_ptr<ActionManager> { return m_manager; }
     auto getRegistry() -> std::shared_ptr<Registry> { return m_registry; }
     auto hasConfigFile() -> bool { return m_options->hasConfigFile(); }

@@ -45,6 +45,14 @@ using std::string;
 
 #define average_ms(t, c) (t / 1000000ULL / (c ? c : 1))
 
+static bool withCPU = false;
+static bool withMemory = false;
+static bool withContext = false;
+static bool withIO = false;
+static bool withSwap = false;
+static bool withReclaim = false;
+static bool withTrashing = false;
+
 static void printDelayAcct(struct taskstats *t)
 {
     logInfo() << "MON::COMMON[" << t->ac_pid << "] "
@@ -56,42 +64,56 @@ static void printDelayAcct(struct taskstats *t)
               << "UserCPUTime=" << t->ac_utime << " "
               << "SystemCPUTime=" << t->ac_stime;
 
-    logInfo() << "MON::CPU[" << t->ac_pid << "] "
-              << "Count=" << t->cpu_count << " "
-              << "RealTotal=" << t->cpu_run_real_total << "ns "
-              << "VirtualTotal=" << t->cpu_run_virtual_total << "ns "
-              << "DelayTotal=" << t->cpu_delay_total << " "
-              << "DelayAverage=" << average_ms((double) t->cpu_delay_total, t->cpu_count);
+    if (withCPU) {
+        logInfo() << "MON::CPU[" << t->ac_pid << "] "
+                  << "Count=" << t->cpu_count << " "
+                  << "RealTotal=" << t->cpu_run_real_total << "ns "
+                  << "VirtualTotal=" << t->cpu_run_virtual_total << "ns "
+                  << "DelayTotal=" << t->cpu_delay_total << " "
+                  << "DelayAverage=" << average_ms((double) t->cpu_delay_total, t->cpu_count);
+    }
 
-    logInfo() << "MON::MEMORY[" << t->ac_pid << "] "
-              << "CoreMem=" << t->coremem << "MB-usec "
-              << "VirtMem=" << t->virtmem << "MB-usec "
-              << "HiWaterRSS=" << t->hiwater_rss << "KBytes "
-              << "HiWaterVM=" << t->hiwater_vm << "KBytes";
+    if (withMemory) {
+        logInfo() << "MON::MEMORY[" << t->ac_pid << "] "
+                  << "CoreMem=" << t->coremem << "MB-usec "
+                  << "VirtMem=" << t->virtmem << "MB-usec "
+                  << "HiWaterRSS=" << t->hiwater_rss << "KBytes "
+                  << "HiWaterVM=" << t->hiwater_vm << "KBytes";
+    }
 
-    logInfo() << "MON::CONTEXT[" << t->ac_pid << "] "
-              << "Voluntary=" << t->nvcsw << " "
-              << "NonVoluntary=" << t->nivcsw;
+    if (withContext) {
+        logInfo() << "MON::CONTEXT[" << t->ac_pid << "] "
+                  << "Voluntary=" << t->nvcsw << " "
+                  << "NonVoluntary=" << t->nivcsw;
+    }
 
-    logInfo() << "MON::IO[" << t->ac_pid << "] "
-              << "Count=" << t->blkio_count << " "
-              << "DelayTotal=" << t->blkio_delay_total << " "
-              << "DelayAverage=" << average_ms(t->blkio_delay_total, t->blkio_count);
+    if (withIO) {
+        logInfo() << "MON::IO[" << t->ac_pid << "] "
+                  << "Count=" << t->blkio_count << " "
+                  << "DelayTotal=" << t->blkio_delay_total << " "
+                  << "DelayAverage=" << average_ms(t->blkio_delay_total, t->blkio_count);
+    }
 
-    logInfo() << "MON::SWAP[" << t->ac_pid << "] "
-              << "Count=" << t->swapin_count << " "
-              << "DelayTotal=" << t->swapin_delay_total << " "
-              << "DelayAverage=" << average_ms(t->swapin_delay_total, t->swapin_count);
+    if (withSwap) {
+        logInfo() << "MON::SWAP[" << t->ac_pid << "] "
+                  << "Count=" << t->swapin_count << " "
+                  << "DelayTotal=" << t->swapin_delay_total << " "
+                  << "DelayAverage=" << average_ms(t->swapin_delay_total, t->swapin_count);
+    }
 
-    logInfo() << "MON::RECLAIM[" << t->ac_pid << "] "
-              << "Count=" << t->freepages_count << " "
-              << "DelayTotal=" << t->freepages_delay_total << " "
-              << "DelayAverage=" << average_ms(t->freepages_delay_total, t->freepages_count);
+    if (withReclaim) {
+        logInfo() << "MON::RECLAIM[" << t->ac_pid << "] "
+                  << "Count=" << t->freepages_count << " "
+                  << "DelayTotal=" << t->freepages_delay_total << " "
+                  << "DelayAverage=" << average_ms(t->freepages_delay_total, t->freepages_count);
+    }
 
-    logInfo() << "MON::THRASHING[" << t->ac_pid << "] "
-              << "Count=" << t->thrashing_count << " "
-              << "DelayTotal=" << t->thrashing_delay_total << " "
-              << "DelayAverage=" << average_ms(t->thrashing_delay_total, t->thrashing_count);
+    if (withTrashing) {
+        logInfo() << "MON::THRASHING[" << t->ac_pid << "] "
+                  << "Count=" << t->thrashing_count << " "
+                  << "DelayTotal=" << t->thrashing_delay_total << " "
+                  << "DelayAverage=" << average_ms(t->thrashing_delay_total, t->thrashing_count);
+    }
 }
 
 int callbackStatisticsMessage(struct nl_msg *nlmsg, void *arg)
@@ -128,7 +150,47 @@ NetLinkStats::NetLinkStats(std::shared_ptr<Options> &options)
 : Pollable("NetLinkStats")
 , m_options(options)
 {
+    long msgBufferSize, txBufferSize, rxBufferSize;
     int err = NLE_SUCCESS;
+
+    try {
+        msgBufferSize = std::stol(m_options->getFor(Options::Key::MsgBufferSize));
+        rxBufferSize = std::stol(m_options->getFor(Options::Key::TxBufferSize));
+        rxBufferSize = std::stol(m_options->getFor(Options::Key::RxBufferSize));
+    } catch (...) {
+        logWarn() << "Invalid buffer size in config. Use defaults";
+        msgBufferSize = 1048576;
+        txBufferSize = 1048576;
+        rxBufferSize = 1048576;
+    }
+
+    if (m_options->getFor(Options::Key::WithCPU) == "true") {
+        withCPU = true;
+    }
+
+    if (m_options->getFor(Options::Key::WithMemory) == "true") {
+        withMemory = true;
+    }
+
+    if (m_options->getFor(Options::Key::WithContext) == "true") {
+        withContext = true;
+    }
+
+    if (m_options->getFor(Options::Key::WithIO) == "true") {
+        withIO = true;
+    }
+
+    if (m_options->getFor(Options::Key::WithSwap) == "true") {
+        withSwap = true;
+    }
+
+    if (m_options->getFor(Options::Key::WithReclaim) == "true") {
+        withReclaim = true;
+    }
+
+    if (m_options->getFor(Options::Key::WithTrashing) == "true") {
+        withTrashing = true;
+    }
 
     if ((m_nlSock = nl_socket_alloc()) == nullptr) {
         throw std::runtime_error("Fail to create netlink socket");
@@ -149,11 +211,11 @@ NetLinkStats::NetLinkStats(std::shared_ptr<Options> &options)
     }
 
     // We need larger buffers to handle data for all entries
-    if (nl_socket_set_buffer_size(m_nlSock, 1048576, 1048576) < 0) {
+    if (nl_socket_set_buffer_size(m_nlSock, rxBufferSize, txBufferSize) < 0) {
         throw std::runtime_error("Fail to set socket buffer size");
     }
 
-    if (nl_socket_set_msg_buf_size(m_nlSock, 1048576) < 0) {
+    if (nl_socket_set_msg_buf_size(m_nlSock, msgBufferSize) < 0) {
         throw std::runtime_error("Fail to set socket msg buffer size");
     }
 

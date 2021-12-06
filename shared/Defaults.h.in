@@ -34,14 +34,36 @@ public:
     enum class Default {
         Version,
         ConfPath,
-        EnablePSI,
+        PollInterval,
+        RxBufferSize,
+        TxBufferSize,
+        MsgBufferSize,
+        ReadProcAtInit,
+        WithCPU, 
+        WithMemory, 
+        WithContext,
+        WithIO,
+        WithSwap,
+        WithReclaim,
+        WithTrashing
     };
 
     Defaults()
     {
         m_table.insert(std::pair<Default, std::string>(Default::Version, "@GIT_SHA1@"));
         m_table.insert(std::pair<Default, std::string>(Default::ConfPath, "@TKM_CONFIG_FILE@"));
-        m_table.insert(std::pair<Default, std::string>(Default::EnablePSI, "true"));
+        m_table.insert(std::pair<Default, std::string>(Default::PollInterval, "3000000"));
+        m_table.insert(std::pair<Default, std::string>(Default::RxBufferSize, "1048576"));
+        m_table.insert(std::pair<Default, std::string>(Default::TxBufferSize, "1048576"));
+        m_table.insert(std::pair<Default, std::string>(Default::MsgBufferSize, "1048576"));
+        m_table.insert(std::pair<Default, std::string>(Default::ReadProcAtInit, "true"));
+        m_table.insert(std::pair<Default, std::string>(Default::WithCPU, "true"));
+        m_table.insert(std::pair<Default, std::string>(Default::WithMemory, "true"));
+        m_table.insert(std::pair<Default, std::string>(Default::WithContext, "true"));
+        m_table.insert(std::pair<Default, std::string>(Default::WithIO, "true"));
+        m_table.insert(std::pair<Default, std::string>(Default::WithSwap, "false"));
+        m_table.insert(std::pair<Default, std::string>(Default::WithReclaim, "false"));
+        m_table.insert(std::pair<Default, std::string>(Default::WithTrashing, "false"));
     }
 
     auto getFor(Default key) -> std::string & { return m_table.at(key); }
