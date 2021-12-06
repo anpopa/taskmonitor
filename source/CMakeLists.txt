@@ -5,6 +5,8 @@ set(BINARY_SRC
     NetLinkStats.cpp
     NetLinkProc.cpp
     Application.cpp
+    ProcEntry.cpp
+    Registry.cpp
     Main.cpp
     )
 add_executable(${BINARY_NAME} ${BINARY_SRC})

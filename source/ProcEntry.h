@@ -20,39 +20,35 @@
  * \author Alin Popa <alin.popa@fxdata.ro>
  */
 
-#include "Options.h"
-#include "Defaults.h"
+#pragma once
 
-using namespace std;
+#include <memory>
+#include <string>
+
+#include "../bswinfra/source/Timer.h"
+
+using namespace bswi::event;
 
 namespace tkm::monitor
 {
 
-Options::Options(const string &configFile)
+class ProcEntry
 {
-    m_configFile = std::make_shared<bswi::kf::KeyFile>(configFile);
-    if (m_configFile->parseFile() != 0) {
-        logWarn() << "Fail to parse config file: " << configFile;
-        m_configFile.reset();
-    }
-}
+public:
+    explicit ProcEntry(int pid);
+    ~ProcEntry() = default;
 
-auto Options::getFor(Key key) -> string const
-{
-    switch (key) {
-    case Key::EnablePSI:
-        if (hasConfigFile()) {
-            const optional<string> prop
-                = m_configFile->getPropertyValue("monitor", -1, "EnablePSI");
-            return prop.value_or(tkmDefaults.getFor(Defaults::Default::EnablePSI));
-        }
-        return tkmDefaults.getFor(Defaults::Default::EnablePSI);
-    default:
-        logError() << "Unknown option key";
-        break;
-    }
+public:
+    ProcEntry(ProcEntry const &) = delete;
+    void operator=(ProcEntry const &) = delete;
 
-    throw std::runtime_error("Cannot provide option for key");
-}
+    auto getPid() -> int { return m_pid; }
+    void startMonitoring(size_t interval);
+    void disable(void);
+
+private:
+    std::shared_ptr<Timer> m_timer = nullptr;
+    int m_pid = 0;
+};
 
 } // namespace tkm::monitor

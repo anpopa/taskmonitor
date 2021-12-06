@@ -20,39 +20,40 @@
  * \author Alin Popa <alin.popa@fxdata.ro>
  */
 
-#include "Options.h"
-#include "Defaults.h"
+#pragma once
 
-using namespace std;
+#include <list>
+#include <memory>
+#include <string>
+
+#include "Options.h"
+#include "ProcEntry.h"
+
+#include "../bswinfra/source/SafeList.h"
+
+using namespace bswi::event;
 
 namespace tkm::monitor
 {
 
-Options::Options(const string &configFile)
+class Registry
 {
-    m_configFile = std::make_shared<bswi::kf::KeyFile>(configFile);
-    if (m_configFile->parseFile() != 0) {
-        logWarn() << "Fail to parse config file: " << configFile;
-        m_configFile.reset();
-    }
-}
+public:
+    explicit Registry(std::shared_ptr<Options> &options)
+    : m_options(options) {};
+    ~Registry() = default;
 
-auto Options::getFor(Key key) -> string const
-{
-    switch (key) {
-    case Key::EnablePSI:
-        if (hasConfigFile()) {
-            const optional<string> prop
-                = m_configFile->getPropertyValue("monitor", -1, "EnablePSI");
-            return prop.value_or(tkmDefaults.getFor(Defaults::Default::EnablePSI));
-        }
-        return tkmDefaults.getFor(Defaults::Default::EnablePSI);
-    default:
-        logError() << "Unknown option key";
-        break;
-    }
+public:
+    Registry(Registry const &) = delete;
+    void operator=(Registry const &) = delete;
 
-    throw std::runtime_error("Cannot provide option for key");
-}
+    void initFromProc(void);
+    void addEntry(int pid);
+    void remEntry(int pid);
+
+private:
+    std::shared_ptr<Options> m_options = nullptr;
+    bswi::util::SafeList<std::shared_ptr<ProcEntry>> m_list {"RegistryList"};
+};
 
 } // namespace tkm::monitor

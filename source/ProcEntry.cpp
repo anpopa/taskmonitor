@@ -20,39 +20,32 @@
  * \author Alin Popa <alin.popa@fxdata.ro>
  */
 
-#include "Options.h"
-#include "Defaults.h"
-
-using namespace std;
+#include "ProcEntry.h"
+#include "Application.h"
 
 namespace tkm::monitor
 {
 
-Options::Options(const string &configFile)
+ProcEntry::ProcEntry(int pid)
+: m_pid(pid)
 {
-    m_configFile = std::make_shared<bswi::kf::KeyFile>(configFile);
-    if (m_configFile->parseFile() != 0) {
-        logWarn() << "Fail to parse config file: " << configFile;
-        m_configFile.reset();
-    }
+    m_timer = std::make_shared<Timer>("ProcEntry", [this]() {
+        return (TaskMonitor()->getManager()->getNetLinkStats()->requestTaskAcct(m_pid) != -1)
+                   ? true
+                   : false;
+    });
+};
+
+void ProcEntry::startMonitoring(size_t interval)
+{
+    m_timer->start(interval, true);
+    TaskMonitor()->addEventSource(m_timer);
 }
 
-auto Options::getFor(Key key) -> string const
+void ProcEntry::disable(void)
 {
-    switch (key) {
-    case Key::EnablePSI:
-        if (hasConfigFile()) {
-            const optional<string> prop
-                = m_configFile->getPropertyValue("monitor", -1, "EnablePSI");
-            return prop.value_or(tkmDefaults.getFor(Defaults::Default::EnablePSI));
-        }
-        return tkmDefaults.getFor(Defaults::Default::EnablePSI);
-    default:
-        logError() << "Unknown option key";
-        break;
-    }
-
-    throw std::runtime_error("Cannot provide option for key");
+    m_timer->stop();
+    TaskMonitor()->remEventSource(m_timer);
 }
 
 } // namespace tkm::monitor
