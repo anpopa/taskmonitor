@@ -29,7 +29,6 @@ using std::shared_ptr;
 using std::string;
 
 #define USEC2SEC(x) (x / 1000000)
-#define USEC2SECHALF(x) (uint)(x / 1000000 / 2)
 
 namespace tkm::monitor
 {
@@ -80,7 +79,7 @@ void Application::startWatchdog(void)
             return true;
         });
 
-        timer->start(USEC2SECHALF(usec), true);
+        timer->start((usec / 2), true);
         TaskMonitor()->addEventSource(timer);
     } else {
         if (status == 0) {
