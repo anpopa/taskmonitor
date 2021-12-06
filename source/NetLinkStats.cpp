@@ -148,6 +148,15 @@ NetLinkStats::NetLinkStats(std::shared_ptr<Options> &options)
         throw std::runtime_error("Fail to get netlink socket");
     }
 
+    // We need larger buffers to handle data for all entries
+    if (nl_socket_set_buffer_size(m_nlSock, 1048576, 1048576) < 0) {
+        throw std::runtime_error("Fail to set socket buffer size");
+    }
+
+    if (nl_socket_set_msg_buf_size(m_nlSock, 1048576) < 0) {
+        throw std::runtime_error("Fail to set socket msg buffer size");
+    }
+
     if ((m_nlFamily = genl_ctrl_resolve(m_nlSock, TASKSTATS_GENL_NAME)) == 0) {
         logError() << "Error retrieving family id: " << nl_geterror(err);
         throw std::runtime_error("Fail to retirve family id");
