@@ -65,6 +65,9 @@ public:
     void remEntry(int pid);
 
 private:
+    bool isBlacklisted(int pid);
+
+private:
     std::shared_ptr<Options> m_options = nullptr;
     bswi::util::SafeList<std::shared_ptr<ProcEntry>> m_list {"RegistryList"};
     long m_pollInterval = 3000000;
