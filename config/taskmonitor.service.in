@@ -1,0 +1,15 @@
+###############################################################################
+#  Task Monitor
+###############################################################################
+[Unit]
+Description=Task Monitor Service
+
+[Service]
+Type=simple
+User=root
+Group=root
+ExecStart=@CMAKE_INSTALL_PREFIX@/bin/taskmonitor -c /etc/taskmonitor.conf
+WatchdogSec=10
+
+[Install]
+WantedBy=multi-user.target

@@ -13,6 +13,7 @@ set(CMAKE_MODULE_PATH "${BSWINFRA_DIR}/cmake" "${INTERFACES_DIR}/cmake")
 
 message (STATUS "Module paths: ${CMAKE_MODULE_PATH}")
 
+option(WITH_WATCHDOG "Build with systemd watchdog support" Y)
 option(WITH_TESTS "Build test suite" N)
 option(WITH_TIDY "Build with clang-tidy" N)
 
@@ -49,7 +50,7 @@ else(EXISTS "${CMAKE_SOURCE_DIR}/.git")
     set(GIT_SHA1 "")
 endif(EXISTS "${CMAKE_SOURCE_DIR}/.git")
 
-set(TKM_CONFIG_FILE "taskmonitor.conf" CACHE PATH "Default config file path")
+set(TKM_CONFIG_FILE "/etc/taskmonitor.conf" CACHE PATH "Default config file path")
 
 configure_file(
     ${CMAKE_SOURCE_DIR}/shared/Defaults.h.in
@@ -58,6 +59,14 @@ configure_file(
 configure_file(
     ${CMAKE_SOURCE_DIR}/config/taskmonitor.conf.in
     ${CMAKE_BINARY_DIR}/config/taskmonitor.conf)
+
+configure_file(
+    ${CMAKE_SOURCE_DIR}/config/taskmonitor.service.in
+    ${CMAKE_BINARY_DIR}/config/taskmonitor.service)
+    
+if(WITH_WATCHDOG)
+    add_compile_options("-DWITH_WATCHDOG")
+endif()
 
 if(WITH_TIDY)
 	set(CMAKE_CXX_CLANG_TIDY "clang-tidy;-checks=*")
@@ -82,7 +91,14 @@ pkg_check_modules     (LIBNLGENL libnl-genl-3.0 REQUIRED)
 include_directories   (${LIBNLGENL_INCLUDE_DIRS})
 set                   (LIBS ${LIBS} ${LIBNLGENL_LIBRARIES})
 
+if(WITH_WATCHDOG)
+    pkg_check_modules     (LIBSYSTEMD libsystemd REQUIRED)
+    include_directories   (${LIBSYSTEMD_INCLUDE_DIRS})
+    set                   (LIBS ${LIBS} ${LIBSYSTEMD_LIBRARIES})
+endif()
+
 # Build
+add_subdirectory(config)
 add_subdirectory(source)
 
 if(WITH_TESTS)
@@ -125,5 +141,6 @@ add_compile_options (
 # Status reporting
 message (STATUS "SYSTEM_TYPE: "          ${CMAKE_SYSTEM_NAME})
 message (STATUS "CMAKE_BUILD_TYPE: "     ${CMAKE_BUILD_TYPE})
+message (STATUS "WITH_WATCHDOG: "        ${WITH_WATCHDOG})
 message (STATUS "WITH_TESTS: "           ${WITH_TESTS})
 message (STATUS "WITH_TIDY: "            ${WITH_TIDY})

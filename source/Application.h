@@ -88,6 +88,9 @@ public:
     void operator=(Application const &) = delete;
 
 private:
+    void startWatchdog(void);
+
+private:
     std::shared_ptr<Options> m_options = nullptr;
     std::shared_ptr<NetLinkStats> m_nlStats = nullptr;
     std::shared_ptr<NetLinkProc> m_nlProc = nullptr;
