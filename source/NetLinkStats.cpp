@@ -39,7 +39,6 @@
 #include "Defaults.h"
 #include "NetLinkStats.h"
 
-namespace fs = std::filesystem;
 using std::shared_ptr;
 using std::string;
 
@@ -55,64 +54,54 @@ static bool withTrashing = false;
 
 static void printDelayAcct(struct taskstats *t)
 {
-    logInfo() << "MON::COMMON[" << t->ac_pid << "] "
-              << "Command=" << t->ac_comm << " "
-              << "UID=" << t->ac_uid << " "
-              << "GID=" << t->ac_gid << " "
-              << "PID=" << t->ac_pid << " "
-              << "PPID=" << t->ac_ppid << " "
-              << "UserCPUTime=" << t->ac_utime << " "
+    logInfo() << "MON::COMMON[" << t->ac_pid << "]"
+              << " Command=" << t->ac_comm << " UID=" << t->ac_uid << " GID=" << t->ac_gid
+              << " PID=" << t->ac_pid << " PPID=" << t->ac_ppid << " UserCPUTime=" << t->ac_utime
               << "SystemCPUTime=" << t->ac_stime;
 
     if (withCPU) {
-        logInfo() << "MON::CPU[" << t->ac_pid << "] "
-                  << "Count=" << t->cpu_count << " "
-                  << "RealTotal=" << t->cpu_run_real_total << "ns "
-                  << "VirtualTotal=" << t->cpu_run_virtual_total << "ns "
-                  << "DelayTotal=" << t->cpu_delay_total << " "
-                  << "DelayAverage=" << average_ms((double) t->cpu_delay_total, t->cpu_count);
+        logInfo() << "MON::CPU[" << t->ac_pid << "]"
+                  << " Count=" << t->cpu_count << " RealTotal=" << t->cpu_run_real_total << "ns"
+                  << " VirtualTotal=" << t->cpu_run_virtual_total << "ns"
+                  << " DelayTotal=" << t->cpu_delay_total
+                  << " DelayAverage=" << average_ms((double) t->cpu_delay_total, t->cpu_count);
     }
 
     if (withMemory) {
-        logInfo() << "MON::MEMORY[" << t->ac_pid << "] "
-                  << "CoreMem=" << t->coremem << "MB-usec "
-                  << "VirtMem=" << t->virtmem << "MB-usec "
-                  << "HiWaterRSS=" << t->hiwater_rss << "KBytes "
-                  << "HiWaterVM=" << t->hiwater_vm << "KBytes";
+        logInfo() << "MON::MEMORY[" << t->ac_pid << "]"
+                  << " CoreMem=" << t->coremem << "MB-usec"
+                  << " VirtMem=" << t->virtmem << "MB-usec"
+                  << " HiWaterRSS=" << t->hiwater_rss << "KBytes"
+                  << " HiWaterVM=" << t->hiwater_vm << "KBytes";
     }
 
     if (withContext) {
-        logInfo() << "MON::CONTEXT[" << t->ac_pid << "] "
-                  << "Voluntary=" << t->nvcsw << " "
-                  << "NonVoluntary=" << t->nivcsw;
+        logInfo() << "MON::CONTEXT[" << t->ac_pid << "]"
+                  << " Voluntary=" << t->nvcsw << " NonVoluntary=" << t->nivcsw;
     }
 
     if (withIO) {
-        logInfo() << "MON::IO[" << t->ac_pid << "] "
-                  << "Count=" << t->blkio_count << " "
-                  << "DelayTotal=" << t->blkio_delay_total << " "
-                  << "DelayAverage=" << average_ms(t->blkio_delay_total, t->blkio_count);
+        logInfo() << "MON::IO[" << t->ac_pid << "]"
+                  << " Count=" << t->blkio_count << " DelayTotal=" << t->blkio_delay_total
+                  << " DelayAverage=" << average_ms(t->blkio_delay_total, t->blkio_count);
     }
 
     if (withSwap) {
-        logInfo() << "MON::SWAP[" << t->ac_pid << "] "
-                  << "Count=" << t->swapin_count << " "
-                  << "DelayTotal=" << t->swapin_delay_total << " "
-                  << "DelayAverage=" << average_ms(t->swapin_delay_total, t->swapin_count);
+        logInfo() << "MON::SWAP[" << t->ac_pid << "]"
+                  << " Count=" << t->swapin_count << " DelayTotal=" << t->swapin_delay_total
+                  << " DelayAverage=" << average_ms(t->swapin_delay_total, t->swapin_count);
     }
 
     if (withReclaim) {
-        logInfo() << "MON::RECLAIM[" << t->ac_pid << "] "
-                  << "Count=" << t->freepages_count << " "
-                  << "DelayTotal=" << t->freepages_delay_total << " "
-                  << "DelayAverage=" << average_ms(t->freepages_delay_total, t->freepages_count);
+        logInfo() << "MON::RECLAIM[" << t->ac_pid << "]"
+                  << " Count=" << t->freepages_count << " DelayTotal=" << t->freepages_delay_total
+                  << " DelayAverage=" << average_ms(t->freepages_delay_total, t->freepages_count);
     }
 
     if (withTrashing) {
-        logInfo() << "MON::THRASHING[" << t->ac_pid << "] "
-                  << "Count=" << t->thrashing_count << " "
-                  << "DelayTotal=" << t->thrashing_delay_total << " "
-                  << "DelayAverage=" << average_ms(t->thrashing_delay_total, t->thrashing_count);
+        logInfo() << "MON::THRASHING[" << t->ac_pid << "]"
+                  << " Count=" << t->thrashing_count << " DelayTotal=" << t->thrashing_delay_total
+                  << " DelayAverage=" << average_ms(t->thrashing_delay_total, t->thrashing_count);
     }
 }
 

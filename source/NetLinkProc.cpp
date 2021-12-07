@@ -36,7 +36,6 @@
 #include "Defaults.h"
 #include "NetLinkProc.h"
 
-namespace fs = std::filesystem;
 using std::shared_ptr;
 using std::string;
 
@@ -70,20 +69,6 @@ NetLinkProc::NetLinkProc(std::shared_ptr<Options> &options)
             } nlcn_msg;
             int rc;
 
-            // see linux/cn_proc.h
-            enum what {
-                PROC_EVENT_NONE = 0x00000000,
-                PROC_EVENT_FORK = 0x00000001,
-                PROC_EVENT_EXEC = 0x00000002,
-                PROC_EVENT_UID = 0x00000004,
-                PROC_EVENT_GID = 0x00000040,
-                PROC_EVENT_SID = 0x00000080,
-                PROC_EVENT_PTRACE = 0x00000100,
-                PROC_EVENT_COMM = 0x00000200,
-                PROC_EVENT_COREDUMP = 0x40000000,
-                PROC_EVENT_EXIT = 0x80000000
-            };
-
             rc = recv(m_sockFd, &nlcn_msg, sizeof(nlcn_msg), 0);
             if (rc == 0) {
                 return true;
@@ -93,35 +78,35 @@ NetLinkProc::NetLinkProc(std::shared_ptr<Options> &options)
             }
 
             switch (nlcn_msg.proc_ev.what) {
-            case PROC_EVENT_NONE:
+            case proc_event::what::PROC_EVENT_NONE:
                 logInfo() << "MON::PROC::NONE Set mcast listen OK";
                 break;
-            case PROC_EVENT_FORK:
+            case proc_event::what::PROC_EVENT_FORK:
                 logInfo() << "MON::PROC::FORK ParentTID="
                           << nlcn_msg.proc_ev.event_data.fork.parent_pid
                           << " ParentPID=" << nlcn_msg.proc_ev.event_data.fork.parent_tgid
                           << " ChildTID=" << nlcn_msg.proc_ev.event_data.fork.child_tgid
                           << " ChildPID=" << nlcn_msg.proc_ev.event_data.fork.child_pid;
                 break;
-            case PROC_EVENT_EXEC:
+            case proc_event::what::PROC_EVENT_EXEC:
                 logInfo() << "MON::PROC::EXEC TID=" << nlcn_msg.proc_ev.event_data.exec.process_tgid
                           << " PID=" << nlcn_msg.proc_ev.event_data.exec.process_pid;
                 TaskMonitor()->getRegistry()->addEntry(
                     nlcn_msg.proc_ev.event_data.exec.process_pid);
                 break;
-            case PROC_EVENT_UID:
+            case proc_event::what::PROC_EVENT_UID:
                 logInfo() << "MON::PROC::UID TID=" << nlcn_msg.proc_ev.event_data.id.process_tgid
                           << " PID=" << nlcn_msg.proc_ev.event_data.id.process_pid
                           << " From=" << nlcn_msg.proc_ev.event_data.id.r.ruid
                           << " To=" << nlcn_msg.proc_ev.event_data.id.e.euid;
                 break;
-            case PROC_EVENT_GID:
+            case proc_event::what::PROC_EVENT_GID:
                 logInfo() << "MON::PROC::GID TID=" << nlcn_msg.proc_ev.event_data.id.process_tgid
                           << " PID=" << nlcn_msg.proc_ev.event_data.id.process_pid
                           << " From=" << nlcn_msg.proc_ev.event_data.id.r.rgid
                           << " To=" << nlcn_msg.proc_ev.event_data.id.e.egid;
                 break;
-            case PROC_EVENT_EXIT:
+            case proc_event::what::PROC_EVENT_EXIT:
                 logInfo() << "MON::PROC::EXIT TID=" << nlcn_msg.proc_ev.event_data.exit.process_tgid
                           << " PID=" << nlcn_msg.proc_ev.event_data.exit.process_pid
                           << " ExitCode=" << nlcn_msg.proc_ev.event_data.exit.exit_code;

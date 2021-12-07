@@ -91,7 +91,6 @@ auto main(int argc, char **argv) -> int
 
     Application app {"TaskMonitor", "TaskMonitor", configPath};
 
-    // Request connection
     ActionManager::Request registerEvents {
         .action = ActionManager::Action::RegisterEvents,
     };

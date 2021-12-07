@@ -35,18 +35,6 @@
 
 #include "../bswinfra/source/IApplication.h"
 
-#include "../bswinfra/source/AsyncQueue.h"
-#include "../bswinfra/source/EventLoop.h"
-#include "../bswinfra/source/Exceptions.h"
-#include "../bswinfra/source/KeyFile.h"
-#include "../bswinfra/source/Logger.h"
-#include "../bswinfra/source/PathEvent.h"
-#include "../bswinfra/source/Pollable.h"
-#include "../bswinfra/source/Timer.h"
-#include "../bswinfra/source/UserEvent.h"
-
-using namespace bswi::kf;
-using namespace bswi::log;
 using namespace bswi::event;
 
 namespace tkm::monitor

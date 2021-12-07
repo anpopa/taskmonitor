@@ -30,8 +30,6 @@
 #include "Options.h"
 
 #include "../bswinfra/source/AsyncQueue.h"
-#include "../bswinfra/source/Exceptions.h"
-#include "../bswinfra/source/Logger.h"
 
 using namespace bswi::event;
 
@@ -53,9 +51,9 @@ public:
                            std::shared_ptr<NetLinkStats> &nlStats,
                            std::shared_ptr<NetLinkProc> &nlProc);
 
+public:
     auto getShared() -> std::shared_ptr<ActionManager> { return shared_from_this(); }
     void enableEvents();
-
     auto pushRequest(Request &request) -> int;
     auto getNetLinkStats() -> std::shared_ptr<NetLinkStats> { return m_nlStats; }
     auto getNetLinkProc() -> std::shared_ptr<NetLinkProc> { return m_nlProc; }

@@ -26,12 +26,10 @@
 #include "ActionManager.h"
 #include "Application.h"
 #include "Defaults.h"
-
 #include "ProcEntry.h"
 
 using std::shared_ptr;
 using std::string;
-namespace fs = std::filesystem;
 
 namespace tkm::monitor
 {

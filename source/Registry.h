@@ -60,6 +60,7 @@ public:
     Registry(Registry const &) = delete;
     void operator=(Registry const &) = delete;
 
+public:
     void initFromProc(void);
     void addEntry(int pid);
     void remEntry(int pid);

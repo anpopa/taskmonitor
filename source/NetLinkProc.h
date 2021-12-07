@@ -32,7 +32,6 @@
 #include "../bswinfra/source/IApplication.h"
 #include "../bswinfra/source/Pollable.h"
 
-using namespace bswi::log;
 using namespace bswi::event;
 
 namespace tkm::monitor
@@ -48,11 +47,11 @@ public:
     NetLinkProc(NetLinkProc const &) = delete;
     void operator=(NetLinkProc const &) = delete;
 
+public:
     auto getShared() -> std::shared_ptr<NetLinkProc> { return shared_from_this(); }
     void enableEvents();
-    [[nodiscard]] int getFD() const { return m_sockFd; }
-
     auto startProcMonitoring(void) -> int;
+    [[nodiscard]] int getFD() const { return m_sockFd; }
 
 private:
     std::shared_ptr<Options> m_options = nullptr;

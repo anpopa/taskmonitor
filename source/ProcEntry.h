@@ -42,6 +42,7 @@ public:
     ProcEntry(ProcEntry const &) = delete;
     void operator=(ProcEntry const &) = delete;
 
+public:
     auto getPid() -> int { return m_pid; }
     void startMonitoring(size_t interval);
     void disable(void);

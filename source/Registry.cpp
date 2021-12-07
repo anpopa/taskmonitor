@@ -28,7 +28,10 @@
 #include <iostream>
 #include <streambuf>
 
+#include "../bswinfra/source/KeyFile.h"
+
 namespace fs = std::filesystem;
+using namespace bswi::kf;
 
 namespace tkm::monitor
 {
