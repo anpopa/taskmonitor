@@ -6,11 +6,13 @@
 ; Monitor configuration option
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 [monitor]
-PollInterval=3000000
+StatPollInterval=1000000
+ProcPollInterval=3000000
 RxBufferSize=1048576
 TxBufferSize=1048576
 MsgBufferSize=1048576
 ReadProcAtInit=true
+EnableSysStat=true
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Statistics configuration option

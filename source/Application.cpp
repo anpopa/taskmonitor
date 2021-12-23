@@ -52,6 +52,7 @@ Application::Application(const string &name, const string &description, const st
     m_nlProc->enableEvents();
 
     m_registry = std::make_shared<Registry>(m_options);
+    m_sysProcStat = std::make_shared<SysProcStat>(m_options);
 
     m_manager = std::make_unique<ActionManager>(m_options, m_nlStats, m_nlProc);
     m_manager->enableEvents();

@@ -83,6 +83,10 @@ static auto doActionRegisterEvents(ActionManager *manager, const ActionManager::
         TaskMonitor()->getRegistry()->addEntry(getpid());
     }
 
+    if (TaskMonitor()->getOptions()->getFor(Options::Key::EnableSysStat) == "true") {
+        TaskMonitor()->getSysProcStat()->startMonitoring();
+    }
+
     // Start process monitoring
     manager->getNetLinkProc()->startProcMonitoring();
 

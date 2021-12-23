@@ -45,7 +45,7 @@ public:
         long pollInterval = -1;
 
         try {
-            pollInterval = std::stol(m_options->getFor(Options::Key::PollInterval));
+            pollInterval = std::stol(m_options->getFor(Options::Key::ProcPollInterval));
         } catch (...) {
             // Discard non pid entries
         }

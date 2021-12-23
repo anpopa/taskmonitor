@@ -35,11 +35,13 @@ class Options
 {
 public:
     enum class Key { 
-        PollInterval,
+        StatPollInterval,
+        ProcPollInterval,
         RxBufferSize,
         TxBufferSize,
         MsgBufferSize,
         ReadProcAtInit,
+        EnableSysStat,
         WithCPU, 
         WithMemory, 
         WithContext,

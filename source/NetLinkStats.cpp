@@ -57,7 +57,7 @@ static void printDelayAcct(struct taskstats *t)
     logInfo() << "MON::COMMON[" << t->ac_pid << "]"
               << " Command=" << t->ac_comm << " UID=" << t->ac_uid << " GID=" << t->ac_gid
               << " PID=" << t->ac_pid << " PPID=" << t->ac_ppid << " UserCPUTime=" << t->ac_utime
-              << "SystemCPUTime=" << t->ac_stime;
+              << " SystemCPUTime=" << t->ac_stime;
 
     if (withCPU) {
         logInfo() << "MON::CPU[" << t->ac_pid << "]"

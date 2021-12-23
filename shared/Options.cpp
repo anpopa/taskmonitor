@@ -40,13 +40,20 @@ Options::Options(const string &configFile)
 auto Options::getFor(Key key) -> string const
 {
     switch (key) {
-    case Key::PollInterval:
+    case Key::StatPollInterval:
         if (hasConfigFile()) {
             const optional<string> prop
-                = m_configFile->getPropertyValue("monitor", -1, "PollInterval");
-            return prop.value_or(tkmDefaults.getFor(Defaults::Default::PollInterval));
+                = m_configFile->getPropertyValue("monitor", -1, "StatPollInterval");
+            return prop.value_or(tkmDefaults.getFor(Defaults::Default::StatPollInterval));
         }
-        return tkmDefaults.getFor(Defaults::Default::PollInterval);
+        return tkmDefaults.getFor(Defaults::Default::StatPollInterval);
+    case Key::ProcPollInterval:
+        if (hasConfigFile()) {
+            const optional<string> prop
+                = m_configFile->getPropertyValue("monitor", -1, "ProcPollInterval");
+            return prop.value_or(tkmDefaults.getFor(Defaults::Default::ProcPollInterval));
+        }
+        return tkmDefaults.getFor(Defaults::Default::ProcPollInterval);
     case Key::RxBufferSize:
         if (hasConfigFile()) {
             const optional<string> prop
@@ -75,6 +82,13 @@ auto Options::getFor(Key key) -> string const
             return prop.value_or(tkmDefaults.getFor(Defaults::Default::ReadProcAtInit));
         }
         return tkmDefaults.getFor(Defaults::Default::ReadProcAtInit);
+    case Key::EnableSysStat:
+        if (hasConfigFile()) {
+            const optional<string> prop
+                = m_configFile->getPropertyValue("monitor", -1, "EnableSysStat");
+            return prop.value_or(tkmDefaults.getFor(Defaults::Default::EnableSysStat));
+        }
+        return tkmDefaults.getFor(Defaults::Default::EnableSysStat);
     case Key::WithCPU:
         if (hasConfigFile()) {
             const optional<string> prop
