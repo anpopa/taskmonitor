@@ -43,17 +43,24 @@ auto Options::getFor(Key key) -> string const
     case Key::StatPollInterval:
         if (hasConfigFile()) {
             const optional<string> prop
-                = m_configFile->getPropertyValue("monitor", -1, "StatPollInterval");
+                = m_configFile->getPropertyValue("systats", -1, "PollInterval");
             return prop.value_or(tkmDefaults.getFor(Defaults::Default::StatPollInterval));
         }
         return tkmDefaults.getFor(Defaults::Default::StatPollInterval);
     case Key::ProcPollInterval:
         if (hasConfigFile()) {
             const optional<string> prop
-                = m_configFile->getPropertyValue("monitor", -1, "ProcPollInterval");
+                = m_configFile->getPropertyValue("process", -1, "PollInterval");
             return prop.value_or(tkmDefaults.getFor(Defaults::Default::ProcPollInterval));
         }
         return tkmDefaults.getFor(Defaults::Default::ProcPollInterval);
+    case Key::PressurePollInterval:
+        if (hasConfigFile()) {
+            const optional<string> prop
+                = m_configFile->getPropertyValue("monitor", -1, "PressurePollInterval");
+            return prop.value_or(tkmDefaults.getFor(Defaults::Default::PressurePollInterval));
+        }
+        return tkmDefaults.getFor(Defaults::Default::PressurePollInterval);
     case Key::RxBufferSize:
         if (hasConfigFile()) {
             const optional<string> prop
@@ -78,7 +85,7 @@ auto Options::getFor(Key key) -> string const
     case Key::ReadProcAtInit:
         if (hasConfigFile()) {
             const optional<string> prop
-                = m_configFile->getPropertyValue("monitor", -1, "ReadProcAtInit");
+                = m_configFile->getPropertyValue("process", -1, "ReadProcAtInit");
             return prop.value_or(tkmDefaults.getFor(Defaults::Default::ReadProcAtInit));
         }
         return tkmDefaults.getFor(Defaults::Default::ReadProcAtInit);
@@ -89,55 +96,83 @@ auto Options::getFor(Key key) -> string const
             return prop.value_or(tkmDefaults.getFor(Defaults::Default::EnableSysStat));
         }
         return tkmDefaults.getFor(Defaults::Default::EnableSysStat);
+    case Key::EnableSysPressure:
+        if (hasConfigFile()) {
+            const optional<string> prop
+                = m_configFile->getPropertyValue("monitor", -1, "EnableSysPressure");
+            return prop.value_or(tkmDefaults.getFor(Defaults::Default::EnableSysPressure));
+        }
+        return tkmDefaults.getFor(Defaults::Default::EnableSysPressure);
     case Key::WithCPU:
         if (hasConfigFile()) {
             const optional<string> prop
-                = m_configFile->getPropertyValue("stats", -1, "WithCPU");
+                = m_configFile->getPropertyValue("process", -1, "WithCPU");
             return prop.value_or(tkmDefaults.getFor(Defaults::Default::WithCPU));
         }
         return tkmDefaults.getFor(Defaults::Default::WithCPU);
     case Key::WithMemory:
         if (hasConfigFile()) {
             const optional<string> prop
-                = m_configFile->getPropertyValue("stats", -1, "WithMemory");
+                = m_configFile->getPropertyValue("process", -1, "WithMemory");
             return prop.value_or(tkmDefaults.getFor(Defaults::Default::WithMemory));
         }
         return tkmDefaults.getFor(Defaults::Default::WithMemory);
     case Key::WithContext:
         if (hasConfigFile()) {
             const optional<string> prop
-                = m_configFile->getPropertyValue("stats", -1, "WithContext");
+                = m_configFile->getPropertyValue("process", -1, "WithContext");
             return prop.value_or(tkmDefaults.getFor(Defaults::Default::WithContext));
         }
         return tkmDefaults.getFor(Defaults::Default::WithContext);
     case Key::WithIO:
         if (hasConfigFile()) {
             const optional<string> prop
-                = m_configFile->getPropertyValue("stats", -1, "WithIO");
+                = m_configFile->getPropertyValue("process", -1, "WithIO");
             return prop.value_or(tkmDefaults.getFor(Defaults::Default::WithIO));
         }
         return tkmDefaults.getFor(Defaults::Default::WithIO);
     case Key::WithSwap:
         if (hasConfigFile()) {
             const optional<string> prop
-                = m_configFile->getPropertyValue("stats", -1, "WithSwap");
+                = m_configFile->getPropertyValue("process", -1, "WithSwap");
             return prop.value_or(tkmDefaults.getFor(Defaults::Default::WithSwap));
         }
         return tkmDefaults.getFor(Defaults::Default::WithSwap);
     case Key::WithReclaim:
         if (hasConfigFile()) {
             const optional<string> prop
-                = m_configFile->getPropertyValue("stats", -1, "WithReclaim");
+                = m_configFile->getPropertyValue("process", -1, "WithReclaim");
             return prop.value_or(tkmDefaults.getFor(Defaults::Default::WithReclaim));
         }
         return tkmDefaults.getFor(Defaults::Default::WithReclaim);
     case Key::WithTrashing:
         if (hasConfigFile()) {
             const optional<string> prop
-                = m_configFile->getPropertyValue("stats", -1, "WithTrashing");
+                = m_configFile->getPropertyValue("process", -1, "WithTrashing");
             return prop.value_or(tkmDefaults.getFor(Defaults::Default::WithTrashing));
         }
         return tkmDefaults.getFor(Defaults::Default::WithTrashing);
+    case Key::PressureWithCPU:
+        if (hasConfigFile()) {
+            const optional<string> prop
+                = m_configFile->getPropertyValue("pressure", -1, "WithCPU");
+            return prop.value_or(tkmDefaults.getFor(Defaults::Default::PressureWithCPU));
+        }
+        return tkmDefaults.getFor(Defaults::Default::PressureWithCPU);
+    case Key::PressureWithMemory:
+        if (hasConfigFile()) {
+            const optional<string> prop
+                = m_configFile->getPropertyValue("pressure", -1, "WithMemory");
+            return prop.value_or(tkmDefaults.getFor(Defaults::Default::PressureWithMemory));
+        }
+        return tkmDefaults.getFor(Defaults::Default::PressureWithMemory);
+    case Key::PressureWithIO:
+        if (hasConfigFile()) {
+            const optional<string> prop
+                = m_configFile->getPropertyValue("pressure", -1, "WithIO");
+            return prop.value_or(tkmDefaults.getFor(Defaults::Default::PressureWithIO));
+        }
+        return tkmDefaults.getFor(Defaults::Default::PressureWithIO);
     default:
         logError() << "Unknown option key";
         break;

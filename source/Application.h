@@ -32,6 +32,7 @@
 #include "NetLinkStats.h"
 #include "Options.h"
 #include "Registry.h"
+#include "SysProcPressure.h"
 #include "SysProcStat.h"
 
 #include "../bswinfra/source/IApplication.h"
@@ -67,6 +68,7 @@ public:
     auto getManager() -> std::shared_ptr<ActionManager> { return m_manager; }
     auto getRegistry() -> std::shared_ptr<Registry> { return m_registry; }
     auto getSysProcStat() -> std::shared_ptr<SysProcStat> { return m_sysProcStat; }
+    auto getSysProcPressure() -> std::shared_ptr<SysProcPressure> { return m_sysProcPressure; }
     auto hasConfigFile() -> bool { return m_options->hasConfigFile(); }
     auto getConfigFile() -> std::shared_ptr<bswi::kf::KeyFile>
     {
@@ -87,6 +89,7 @@ private:
     std::shared_ptr<ActionManager> m_manager = nullptr;
     std::shared_ptr<Registry> m_registry = nullptr;
     std::shared_ptr<SysProcStat> m_sysProcStat = nullptr;
+    std::shared_ptr<SysProcPressure> m_sysProcPressure = nullptr;
 
 private:
     static Application *appInstance;

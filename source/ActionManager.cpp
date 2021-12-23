@@ -87,6 +87,10 @@ static auto doActionRegisterEvents(ActionManager *manager, const ActionManager::
         TaskMonitor()->getSysProcStat()->startMonitoring();
     }
 
+    if (TaskMonitor()->getOptions()->getFor(Options::Key::EnableSysPressure) == "true") {
+        TaskMonitor()->getSysProcPressure()->startMonitoring();
+    }
+
     // Start process monitoring
     manager->getNetLinkProc()->startProcMonitoring();
 

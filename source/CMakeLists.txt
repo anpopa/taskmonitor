@@ -8,6 +8,7 @@ set(BINARY_SRC
     ProcEntry.cpp
     Registry.cpp
     SysProcStat.cpp
+    SysProcPressure.cpp
     Main.cpp
     )
 add_executable(${BINARY_NAME} ${BINARY_SRC})

@@ -36,18 +36,23 @@ public:
         ConfPath,
         StatPollInterval,
         ProcPollInterval,
+        PressurePollInterval,
         RxBufferSize,
         TxBufferSize,
         MsgBufferSize,
         ReadProcAtInit,
         EnableSysStat,
+        EnableSysPressure,
         WithCPU, 
         WithMemory, 
         WithContext,
         WithIO,
         WithSwap,
         WithReclaim,
-        WithTrashing
+        WithTrashing,
+        PressureWithCPU,
+        PressureWithMemory,
+        PressureWithIO
     };
 
     Defaults()
@@ -56,11 +61,13 @@ public:
         m_table.insert(std::pair<Default, std::string>(Default::ConfPath, "@TKM_CONFIG_FILE@"));
         m_table.insert(std::pair<Default, std::string>(Default::StatPollInterval, "1000000"));
         m_table.insert(std::pair<Default, std::string>(Default::ProcPollInterval, "3000000"));
+        m_table.insert(std::pair<Default, std::string>(Default::PressurePollInterval, "5000000"));
         m_table.insert(std::pair<Default, std::string>(Default::RxBufferSize, "1048576"));
         m_table.insert(std::pair<Default, std::string>(Default::TxBufferSize, "1048576"));
         m_table.insert(std::pair<Default, std::string>(Default::MsgBufferSize, "1048576"));
         m_table.insert(std::pair<Default, std::string>(Default::ReadProcAtInit, "true"));
         m_table.insert(std::pair<Default, std::string>(Default::EnableSysStat, "true"));
+        m_table.insert(std::pair<Default, std::string>(Default::EnableSysPressure, "true"));
         m_table.insert(std::pair<Default, std::string>(Default::WithCPU, "true"));
         m_table.insert(std::pair<Default, std::string>(Default::WithMemory, "true"));
         m_table.insert(std::pair<Default, std::string>(Default::WithContext, "true"));
@@ -68,6 +75,9 @@ public:
         m_table.insert(std::pair<Default, std::string>(Default::WithSwap, "false"));
         m_table.insert(std::pair<Default, std::string>(Default::WithReclaim, "false"));
         m_table.insert(std::pair<Default, std::string>(Default::WithTrashing, "false"));
+        m_table.insert(std::pair<Default, std::string>(Default::PressureWithCPU, "true"));
+        m_table.insert(std::pair<Default, std::string>(Default::PressureWithMemory, "true"));
+        m_table.insert(std::pair<Default, std::string>(Default::PressureWithIO, "true"));
     }
 
     auto getFor(Default key) -> std::string & { return m_table.at(key); }

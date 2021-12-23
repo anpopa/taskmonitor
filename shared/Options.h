@@ -37,10 +37,12 @@ public:
     enum class Key { 
         StatPollInterval,
         ProcPollInterval,
+        PressurePollInterval,
         RxBufferSize,
         TxBufferSize,
         MsgBufferSize,
         ReadProcAtInit,
+        EnableSysPressure,
         EnableSysStat,
         WithCPU, 
         WithMemory, 
@@ -48,8 +50,11 @@ public:
         WithIO,
         WithSwap,
         WithReclaim,
-        WithTrashing
-        };
+        WithTrashing,
+        PressureWithCPU,
+        PressureWithMemory,
+        PressureWithIO
+    };
 
 public:
     Options(const std::string &configFile);
