@@ -39,7 +39,7 @@ void PressureStat::printStats(void)
     if (file.is_open()) {
         std::string line;
         while (std::getline(file, line)) {
-            logInfo() << "MON::STAT::PRESSURE[" << m_name << "] " << line;
+            logInfo() << "MON::SYS::PSI[" << m_name << "] " << line;
         }
     } else {
         logError() << "Cannot open pressure file: "
@@ -60,18 +60,16 @@ SysProcPressure::SysProcPressure(std::shared_ptr<Options> &options)
         std::shared_ptr<PressureStat> entry = std::make_shared<PressureStat>("cpu");
         m_entries.append(entry);
     }
-
     if (options->getFor(Options::Key::PressureWithMemory) == "true") {
         std::shared_ptr<PressureStat> entry = std::make_shared<PressureStat>("memory");
         m_entries.append(entry);
     }
-
     if (options->getFor(Options::Key::PressureWithIO) == "true") {
         std::shared_ptr<PressureStat> entry = std::make_shared<PressureStat>("io");
         m_entries.append(entry);
     }
-
     m_entries.commit();
+    
     m_timer = std::make_shared<Timer>("SysProcPressure", [this]() { return processOnTick(); });
 }
 
@@ -90,7 +88,6 @@ void SysProcPressure::disable(void)
 bool SysProcPressure::processOnTick(void)
 {
     m_entries.foreach ([this](const std::shared_ptr<PressureStat> &entry) { entry->printStats(); });
-
     return true;
 }
 
