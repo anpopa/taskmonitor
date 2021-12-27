@@ -69,7 +69,7 @@ SysProcPressure::SysProcPressure(std::shared_ptr<Options> &options)
         m_entries.append(entry);
     }
     m_entries.commit();
-    
+
     m_timer = std::make_shared<Timer>("SysProcPressure", [this]() { return processOnTick(); });
 }
 

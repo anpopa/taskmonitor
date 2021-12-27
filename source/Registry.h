@@ -62,8 +62,10 @@ public:
 
 public:
     void initFromProc(void);
+    long getPollInterval(void) { return m_pollInterval; }
     void addEntry(int pid);
     void remEntry(int pid);
+    auto getEntry(int pid) -> const std::shared_ptr<ProcEntry>;
 
 private:
     bool isBlacklisted(int pid);

@@ -76,10 +76,8 @@ static auto doActionRegisterEvents(ActionManager *manager, const ActionManager::
     logDebug() << "Opt proc at init "
                << TaskMonitor()->getOptions()->getFor(Options::Key::ReadProcAtInit);
     if (TaskMonitor()->getOptions()->getFor(Options::Key::ReadProcAtInit) == "true") {
-        // Read initial proc entries which includes ourselfs
         TaskMonitor()->getRegistry()->initFromProc();
     } else {
-        // Add entry for ourselfs
         TaskMonitor()->getRegistry()->addEntry(getpid());
     }
 

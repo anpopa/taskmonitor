@@ -64,6 +64,19 @@ void Registry::initFromProc(void)
     m_list.commit();
 }
 
+auto Registry::getEntry(int pid) -> const std::shared_ptr<ProcEntry>
+{
+    std::shared_ptr<ProcEntry> retEntry = nullptr;
+
+    m_list.foreach ([this, pid, &retEntry](const std::shared_ptr<ProcEntry> &entry) {
+        if (entry->getPid() == pid) {
+            retEntry = entry;
+        }
+    });
+
+    return retEntry;
+}
+
 void Registry::addEntry(int pid)
 {
     auto found = false;

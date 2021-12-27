@@ -52,12 +52,38 @@ static bool withSwap = false;
 static bool withReclaim = false;
 static bool withTrashing = false;
 
-static void printDelayAcct(struct taskstats *t)
+static void processDelayAcct(struct taskstats *t)
 {
+    auto registry = TaskMonitor()->getRegistry();
+    auto entry = registry->getEntry(t->ac_pid);
+
+    if (entry == nullptr) {
+        logError() << "Stat entry with PID " << t->ac_pid << " not in registry";
+        return;
+    }
+
+    if (entry->getLastUserCPUTime() == 0) {
+        entry->setLastUserCPUTime(t->ac_utime);
+    }
+
+    if (entry->getLastSystemCPUTime() == 0) {
+        entry->setLastSystemCPUTime(t->ac_stime);
+    }
+
+    auto userCPUPercent
+        = ((t->ac_utime - entry->getLastUserCPUTime()) * 100) / registry->getPollInterval();
+    auto systemCPUPercent
+        = ((t->ac_stime - entry->getLastSystemCPUTime()) * 100) / registry->getPollInterval();
+
+    entry->setLastUserCPUTime(t->ac_utime);
+    entry->setLastSystemCPUTime(t->ac_stime);
+
     logInfo() << "MON::COMMON[" << t->ac_pid << "]"
               << " Command=" << t->ac_comm << " UID=" << t->ac_uid << " GID=" << t->ac_gid
               << " PID=" << t->ac_pid << " PPID=" << t->ac_ppid << " UserCPUTime=" << t->ac_utime
-              << " SystemCPUTime=" << t->ac_stime;
+              << " UserCPUTimeInterval=" << userCPUPercent << "%"
+              << " SystemCPUTime=" << t->ac_stime << " SystemCPUTimeInterval=" << systemCPUPercent
+              << "%";
 
     if (withCPU) {
         logInfo() << "MON::CPU[" << t->ac_pid << "]"
@@ -123,7 +149,7 @@ int callbackStatisticsMessage(struct nl_msg *nlmsg, void *arg)
     if ((nlattr = nlattrs[TASKSTATS_TYPE_AGGR_PID]) || (nlattr = nlattrs[TASKSTATS_TYPE_TGID])) {
         stats = static_cast<struct taskstats *>(
             nla_data(nla_next(static_cast<struct nlattr *>(nla_data(nlattr)), &rem)));
-        printDelayAcct(stats);
+        processDelayAcct(stats);
     } else {
         logError() << "Unknown attribute format received";
         return -1;
