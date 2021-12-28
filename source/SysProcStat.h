@@ -55,6 +55,13 @@ public:
     void updateStats(uint64_t newUserJiffies, uint64_t newSystemJiffies);
     void printStats(void);
 
+    auto getPollInterval(void) -> int { return m_usecInterval; }
+    auto getLastUserCPUTime(void) -> uint64_t { return (m_lastUserJiffies * 1000000 / m_sysHZ); }
+    auto getLastSystemCPUTime(void) -> uint64_t
+    {
+        return (m_lastSystemJiffies * 1000000 / m_sysHZ);
+    }
+
 private:
     auto jiffiesToPercent(uint64_t jiffies) -> int
     {
@@ -88,6 +95,7 @@ public:
 
     void startMonitoring(void);
     void disable(void);
+    auto getCPUStat(const std::string &name) -> const std::shared_ptr<CPUStat>;
 
 private:
     bool processOnTick(void);

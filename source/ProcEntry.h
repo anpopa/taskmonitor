@@ -44,18 +44,16 @@ public:
 
 public:
     auto getPid() -> int { return m_pid; }
-    void startMonitoring(size_t interval);
+    void startMonitoring(int interval);
     void disable(void);
-
-    void setLastUserCPUTime(uint64_t cpuTime) { m_lastUserCPUTime = cpuTime; }
-    void setLastSystemCPUTime(uint64_t cpuTime) { m_lastSystemCPUTime = cpuTime; }
-    auto getLastUserCPUTime(void) -> uint64_t { return m_lastUserCPUTime; }
-    auto getLastSystemCPUTime(void) -> uint64_t { return m_lastSystemCPUTime; }
+    auto getUserCPUPercent(uint64_t cpuTime) -> int;
+    auto getSystemCPUPercent(uint64_t cpuTime) -> int;
 
 private:
     std::shared_ptr<Timer> m_timer = nullptr;
     uint64_t m_lastUserCPUTime = 0;
     uint64_t m_lastSystemCPUTime = 0;
+    int m_pollInterval = 0;
     int m_pid = 0;
 };
 

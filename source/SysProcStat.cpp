@@ -160,4 +160,17 @@ bool SysProcStat::processOnTick(void)
     return true;
 }
 
+auto SysProcStat::getCPUStat(const std::string &name) -> const std::shared_ptr<CPUStat>
+{
+    std::shared_ptr<CPUStat> cpuStat = nullptr;
+
+    m_cpus.foreach ([this, &name, &cpuStat](const std::shared_ptr<CPUStat> &entry) {
+        if (entry->getName() == name) {
+            cpuStat = entry;
+        }
+    });
+
+    return cpuStat;
+}
+
 } // namespace tkm::monitor

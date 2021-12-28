@@ -54,36 +54,19 @@ static bool withTrashing = false;
 
 static void processDelayAcct(struct taskstats *t)
 {
-    auto registry = TaskMonitor()->getRegistry();
-    auto entry = registry->getEntry(t->ac_pid);
+    auto entry = TaskMonitor()->getRegistry()->getEntry(t->ac_pid);
 
     if (entry == nullptr) {
         logError() << "Stat entry with PID " << t->ac_pid << " not in registry";
         return;
     }
 
-    if (entry->getLastUserCPUTime() == 0) {
-        entry->setLastUserCPUTime(t->ac_utime);
-    }
-
-    if (entry->getLastSystemCPUTime() == 0) {
-        entry->setLastSystemCPUTime(t->ac_stime);
-    }
-
-    auto userCPUPercent
-        = ((t->ac_utime - entry->getLastUserCPUTime()) * 100) / registry->getPollInterval();
-    auto systemCPUPercent
-        = ((t->ac_stime - entry->getLastSystemCPUTime()) * 100) / registry->getPollInterval();
-
-    entry->setLastUserCPUTime(t->ac_utime);
-    entry->setLastSystemCPUTime(t->ac_stime);
-
     logInfo() << "MON::COMMON[" << t->ac_pid << "]"
               << " Command=" << t->ac_comm << " UID=" << t->ac_uid << " GID=" << t->ac_gid
               << " PID=" << t->ac_pid << " PPID=" << t->ac_ppid << " UserCPUTime=" << t->ac_utime
-              << " UserCPUTimeInterval=" << userCPUPercent << "%"
-              << " SystemCPUTime=" << t->ac_stime << " SystemCPUTimeInterval=" << systemCPUPercent
-              << "%";
+              << " UserCPUTimeInterval=" << entry->getUserCPUPercent(t->ac_utime) << "%"
+              << " SystemCPUTime=" << t->ac_stime
+              << " SystemCPUTimeInterval=" << entry->getSystemCPUPercent(t->ac_stime) << "%";
 
     if (withCPU) {
         logInfo() << "MON::CPU[" << t->ac_pid << "]"
