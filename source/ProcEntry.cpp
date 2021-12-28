@@ -51,28 +51,11 @@ void ProcEntry::disable(void)
 
 auto ProcEntry::getUserCPUPercent(uint64_t cpuTime) -> int
 {
-    auto cpuTotal = TaskMonitor()->getSysProcStat()->getCPUStat("cpu");
-
-    if (cpuTotal == nullptr) {
-        return -1;
-    }
-
     if (m_lastUserCPUTime == 0) {
         m_lastUserCPUTime = cpuTime;
     }
 
-    int pollIntervalFactor1 = 1;
-    int pollIntervalFactor2 = 1;
-
-    if ((m_pollInterval - cpuTotal->getPollInterval()) > 0) {
-        pollIntervalFactor1 = m_pollInterval / cpuTotal->getPollInterval();
-    } else {
-        pollIntervalFactor2 = cpuTotal->getPollInterval() / m_pollInterval;
-    }
-
-    auto userCPUPercent = (((cpuTime - m_lastUserCPUTime) * 100) * pollIntervalFactor2)
-                          / (cpuTotal->getLastUserCPUTime() * pollIntervalFactor1);
-
+    auto userCPUPercent = ((cpuTime - m_lastUserCPUTime) * 100) / m_pollInterval;
     m_lastUserCPUTime = cpuTime;
 
     return userCPUPercent;
@@ -80,28 +63,11 @@ auto ProcEntry::getUserCPUPercent(uint64_t cpuTime) -> int
 
 auto ProcEntry::getSystemCPUPercent(uint64_t cpuTime) -> int
 {
-    auto cpuTotal = TaskMonitor()->getSysProcStat()->getCPUStat("cpu");
-
-    if (cpuTotal == nullptr) {
-        return -1;
-    }
-
     if (m_lastSystemCPUTime == 0) {
         m_lastSystemCPUTime = cpuTime;
     }
 
-    int pollIntervalFactor1 = 1;
-    int pollIntervalFactor2 = 1;
-
-    if ((m_pollInterval - cpuTotal->getPollInterval()) > 0) {
-        pollIntervalFactor1 = m_pollInterval / cpuTotal->getPollInterval();
-    } else {
-        pollIntervalFactor2 = cpuTotal->getPollInterval() / m_pollInterval;
-    }
-
-    auto sysCPUPercent = (((cpuTime - m_lastSystemCPUTime) * 100) * pollIntervalFactor2)
-                         / (cpuTotal->getLastSystemCPUTime() * pollIntervalFactor1);
-
+    auto sysCPUPercent = ((cpuTime - m_lastSystemCPUTime) * 100) / m_pollInterval;
     m_lastSystemCPUTime = cpuTime;
 
     return sysCPUPercent;
