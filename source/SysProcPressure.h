@@ -14,6 +14,7 @@
 #include <time.h>
 #include <unistd.h>
 
+#include "JsonWriter.h"
 #include "Options.h"
 
 #include "../bswinfra/source/Exceptions.h"
@@ -34,10 +35,12 @@ public:
     PressureStat(PressureStat const &) = delete;
     void operator=(PressureStat const &) = delete;
 
+    void updateStats(void);
     auto getName(void) -> const std::string & { return m_name; }
-    void printStats(void);
+    auto getJsonData(void) -> Json::Value & { return m_jsonData; }
 
 private:
+    Json::Value m_jsonData;
     std::string m_name;
 };
 

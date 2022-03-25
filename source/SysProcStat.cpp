@@ -47,14 +47,10 @@ void CPUStat::updateStats(uint64_t newUserJiffies, uint64_t newSystemJiffies)
     m_userPercent = jiffiesToPercent(userJiffiesDiff);
     m_sysPercent = jiffiesToPercent(sysJiffiesDiff);
     m_totalPercent = jiffiesToPercent(userJiffiesDiff + sysJiffiesDiff);
-}
 
-void CPUStat::printStats(void)
-{
-    logInfo() << "MON::SYS::STAT[" << m_name << "] "
-              << "Total=" << m_totalPercent << "% "
-              << "User=" << m_userPercent << "% "
-              << "System=" << m_sysPercent << "%";
+    m_jsonData["all"] = m_totalPercent;
+    m_jsonData["usr"] = m_userPercent;
+    m_jsonData["sys"] = m_sysPercent;
 }
 
 SysProcStat::SysProcStat(std::shared_ptr<Options> &options)
@@ -90,6 +86,10 @@ bool SysProcStat::processOnTick(void)
 {
     m_file->seekg(0, std::ios::beg);
 
+    Json::Value head;
+    head["type"] = "proc.stat";
+    head["time"] = time(NULL);
+
     std::string line;
     while (std::getline(*m_file, line)) {
         std::vector<std::string> tokens;
@@ -109,7 +109,7 @@ bool SysProcStat::processOnTick(void)
             return false;
         }
 
-        auto updateCpuStatEntry = [this, tokens](const std::shared_ptr<CPUStat> &entry) {
+        auto updateCpuStatEntry = [this, &head, tokens](const std::shared_ptr<CPUStat> &entry) {
             uint64_t newUserJiffies = 0;
             uint64_t newSysJiffies = 0;
 
@@ -122,7 +122,7 @@ bool SysProcStat::processOnTick(void)
             }
 
             entry->updateStats(newUserJiffies, newSysJiffies);
-            entry->printStats();
+            head[entry->getName()] = entry->getJsonData();
         };
 
         auto found = false;
@@ -141,10 +141,13 @@ bool SysProcStat::processOnTick(void)
                 = std::make_shared<CPUStat>(tokens[statCpuNamePos].c_str(), m_usecInterval);
 
             updateCpuStatEntry(entry);
+            head[entry->getName()] = entry->getJsonData();
             m_cpus.append(entry);
             m_cpus.commit();
         }
     }
+
+    writeJsonStream() << head;
 
     return true;
 }

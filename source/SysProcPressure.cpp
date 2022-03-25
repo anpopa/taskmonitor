@@ -21,14 +21,53 @@
 namespace tkm::monitor
 {
 
-void PressureStat::printStats(void)
+std::vector<std::string> tokenize(const std::string &str, const char &ch)
+{
+    std::string next;
+    std::vector<std::string> result;
+
+    for (std::string::const_iterator it = str.begin(); it != str.end(); it++) {
+        if (*it == ch) {
+            if (!next.empty()) {
+                result.push_back(next);
+                next.clear();
+            }
+        } else {
+            next += *it;
+        }
+    }
+
+    if (!next.empty())
+        result.push_back(next);
+
+    return result;
+}
+
+void PressureStat::updateStats(void)
 {
     std::ifstream file("/proc/pressure/" + m_name);
 
     if (file.is_open()) {
         std::string line;
         while (std::getline(file, line)) {
-            logInfo() << "MON::SYS::PSI[" << m_name << "] " << line;
+            std::vector<std::string> tokens;
+            std::stringstream ss(line);
+            std::string buf;
+
+            while (ss >> buf) {
+                tokens.push_back(buf);
+            }
+
+            Json::Value data;
+            for (size_t i = 1; i < tokens.size(); i++) {
+                std::vector<std::string> keyVal = tokenize(tokens[i], '=');
+
+                if (keyVal.size() == 2) {
+                    data[keyVal[0]] = keyVal[1];
+                }
+            }
+
+            m_jsonData[tokens[0]] = data;
         }
     } else {
         logError() << "Cannot open pressure file: "
@@ -76,7 +115,17 @@ void SysProcPressure::disable(void)
 
 bool SysProcPressure::processOnTick(void)
 {
-    m_entries.foreach ([this](const std::shared_ptr<PressureStat> &entry) { entry->printStats(); });
+    Json::Value head;
+    head["type"] = "psi";
+    head["time"] = time(NULL);
+
+    m_entries.foreach ([this, &head](const std::shared_ptr<PressureStat> &entry) {
+        entry->updateStats();
+        head[entry->getName()] = entry->getJsonData();
+    });
+
+    writeJsonStream() << head;
+
     return true;
 }
 

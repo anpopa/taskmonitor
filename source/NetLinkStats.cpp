@@ -27,6 +27,7 @@
 
 #include "Application.h"
 #include "Defaults.h"
+#include "JsonWriter.h"
 #include "NetLinkStats.h"
 
 using std::shared_ptr;
@@ -51,57 +52,85 @@ static void processDelayAcct(struct taskstats *t)
         return;
     }
 
-    logInfo() << "MON::COMMON[" << t->ac_pid << "]"
-              << " Command=" << t->ac_comm << " UID=" << t->ac_uid << " GID=" << t->ac_gid
-              << " PID=" << t->ac_pid << " PPID=" << t->ac_ppid << " UserCPUTime=" << t->ac_utime
-              << " UserCPUTimeInterval=" << entry->getUserCPUPercent(t->ac_utime) << "%"
-              << " SystemCPUTime=" << t->ac_stime
-              << " SystemCPUTimeInterval=" << entry->getSystemCPUPercent(t->ac_stime) << "%";
+    Json::Value head;
+    head["type"] = "stats";
+    head["time"] = time(NULL);
+
+    Json::Value common;
+    common["ac_comm"] = t->ac_comm;
+    common["ac_uid"] = t->ac_uid;
+    common["ac_gid"] = t->ac_gid;
+    common["ac_pid"] = t->ac_pid;
+    common["ac_ppid"] = t->ac_ppid;
+    common["ac_utime"] = static_cast<unsigned long>(t->ac_utime);
+    common["ac_stime"] = static_cast<unsigned long>(t->ac_stime);
+    common["user_cpu_percent"] = entry->getUserCPUPercent(t->ac_utime);
+    common["sys_cpu_percent"] = entry->getSystemCPUPercent(t->ac_stime);
+    head["common"] = common;
 
     if (withCPU) {
-        logInfo() << "MON::CPU[" << t->ac_pid << "]"
-                  << " Count=" << t->cpu_count << " RealTotal=" << t->cpu_run_real_total << "ns"
-                  << " VirtualTotal=" << t->cpu_run_virtual_total << "ns"
-                  << " DelayTotal=" << t->cpu_delay_total
-                  << " DelayAverage=" << average_ms((double) t->cpu_delay_total, t->cpu_count);
+        Json::Value cpu;
+        cpu["cpu_count"] = static_cast<unsigned long>(t->cpu_count);
+        cpu["cpu_run_real_total"] = static_cast<unsigned long>(t->cpu_run_real_total);
+        cpu["cpu_run_virtual_total"] = static_cast<unsigned long>(t->cpu_run_virtual_total);
+        cpu["cpu_delay_total"] = static_cast<unsigned long>(t->cpu_delay_total);
+        cpu["cpu_delay_average"] = average_ms((double) t->cpu_delay_total, t->cpu_count);
+        head["cpu"] = cpu;
     }
 
     if (withMemory) {
-        logInfo() << "MON::MEMORY[" << t->ac_pid << "]"
-                  << " CoreMem=" << t->coremem << "MB-usec"
-                  << " VirtMem=" << t->virtmem << "MB-usec"
-                  << " HiWaterRSS=" << t->hiwater_rss << "KBytes"
-                  << " HiWaterVM=" << t->hiwater_vm << "KBytes";
+        Json::Value memory;
+        memory["coremem"] = static_cast<unsigned long>(t->coremem);
+        memory["virtmem"] = static_cast<unsigned long>(t->virtmem);
+        memory["hiwater_rss"] = static_cast<unsigned long>(t->hiwater_rss);
+        memory["hiwater_vm"] = static_cast<unsigned long>(t->hiwater_vm);
+        head["memory"] = memory;
     }
 
     if (withContext) {
-        logInfo() << "MON::CONTEXT[" << t->ac_pid << "]"
-                  << " Voluntary=" << t->nvcsw << " NonVoluntary=" << t->nivcsw;
+        Json::Value context;
+        context["nvcsw"] = static_cast<unsigned long>(t->nvcsw);
+        context["nivcsw"] = static_cast<unsigned long>(t->nivcsw);
+        head["context"] = context;
     }
 
     if (withIO) {
-        logInfo() << "MON::IO[" << t->ac_pid << "]"
-                  << " Count=" << t->blkio_count << " DelayTotal=" << t->blkio_delay_total
-                  << " DelayAverage=" << average_ms(t->blkio_delay_total, t->blkio_count);
+        Json::Value io;
+        io["blkio_count"] = static_cast<unsigned long>(t->blkio_count);
+        io["blkio_delay_total"] = static_cast<unsigned long>(t->blkio_delay_total);
+        io["blkio_delay_average"]
+            = static_cast<unsigned long>(average_ms(t->blkio_delay_total, t->blkio_count));
+        head["io"] = io;
     }
 
     if (withSwap) {
-        logInfo() << "MON::SWAP[" << t->ac_pid << "]"
-                  << " Count=" << t->swapin_count << " DelayTotal=" << t->swapin_delay_total
-                  << " DelayAverage=" << average_ms(t->swapin_delay_total, t->swapin_count);
+        Json::Value swap;
+        swap["swapin_count"] = static_cast<unsigned long>(t->swapin_count);
+        swap["swapin_delay_total"] = static_cast<unsigned long>(t->swapin_delay_total);
+        swap["swapin_delay_average"]
+            = static_cast<unsigned long>(average_ms(t->swapin_delay_total, t->swapin_count));
+        head["swap"] = swap;
     }
 
     if (withReclaim) {
-        logInfo() << "MON::RECLAIM[" << t->ac_pid << "]"
-                  << " Count=" << t->freepages_count << " DelayTotal=" << t->freepages_delay_total
-                  << " DelayAverage=" << average_ms(t->freepages_delay_total, t->freepages_count);
+        Json::Value reclaim;
+        reclaim["freepages_count"] = static_cast<unsigned long>(t->freepages_count);
+        reclaim["freepages_delay_total"] = static_cast<unsigned long>(t->freepages_delay_total);
+        reclaim["freepages_delay_average"]
+            = static_cast<unsigned long>(average_ms(t->freepages_delay_total, t->freepages_count));
+        head["reclaim"] = reclaim;
     }
 
     if (withTrashing) {
-        logInfo() << "MON::THRASHING[" << t->ac_pid << "]"
-                  << " Count=" << t->thrashing_count << " DelayTotal=" << t->thrashing_delay_total
-                  << " DelayAverage=" << average_ms(t->thrashing_delay_total, t->thrashing_count);
+        Json::Value trashing;
+        trashing["thrashing_count"] = static_cast<unsigned long>(t->thrashing_count);
+        trashing["thrashing_delay_total"] = static_cast<unsigned long>(t->thrashing_delay_total);
+        trashing["thrashing_delay_average"]
+            = static_cast<unsigned long>(average_ms(t->thrashing_delay_total, t->thrashing_count));
+        head["trashing"] = trashing;
     }
+
+    writeJsonStream() << head;
 }
 
 int callbackStatisticsMessage(struct nl_msg *nlmsg, void *arg)

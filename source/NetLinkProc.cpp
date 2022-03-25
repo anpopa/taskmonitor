@@ -16,6 +16,7 @@
 #include <string.h>
 #include <unistd.h>
 
+#include <json/json.h>
 #include <linux/cn_proc.h>
 #include <linux/connector.h>
 #include <linux/netlink.h>
@@ -23,6 +24,7 @@
 
 #include "Application.h"
 #include "Defaults.h"
+#include "JsonWriter.h"
 #include "NetLinkProc.h"
 
 using std::shared_ptr;
@@ -66,39 +68,54 @@ NetLinkProc::NetLinkProc(std::shared_ptr<Options> &options)
                 return false;
             }
 
+            Json::Value head;
+            Json::Value body;
+
+            head["type"] = "proc";
+            head["time"] = time(NULL);
+
             switch (nlcn_msg.proc_ev.what) {
             case proc_event::what::PROC_EVENT_NONE:
-                logInfo() << "MON::PROC::NONE Set mcast listen OK";
+                logDebug() << "NetLinkProc Set mcast listen OK";
                 break;
             case proc_event::what::PROC_EVENT_FORK:
-                logInfo() << "MON::PROC::FORK ParentTID="
-                          << nlcn_msg.proc_ev.event_data.fork.parent_pid
-                          << " ParentPID=" << nlcn_msg.proc_ev.event_data.fork.parent_tgid
-                          << " ChildTID=" << nlcn_msg.proc_ev.event_data.fork.child_tgid
-                          << " ChildPID=" << nlcn_msg.proc_ev.event_data.fork.child_pid;
+                body["parent_id"] = nlcn_msg.proc_ev.event_data.fork.parent_pid;
+                body["parent_tgid"] = nlcn_msg.proc_ev.event_data.fork.parent_tgid;
+                body["child_pid"] = nlcn_msg.proc_ev.event_data.fork.child_pid;
+                body["child_tgid"] = nlcn_msg.proc_ev.event_data.fork.child_tgid;
+                head["fork"] = body;
+                writeJsonStream() << head;
                 break;
             case proc_event::what::PROC_EVENT_EXEC:
-                logInfo() << "MON::PROC::EXEC TID=" << nlcn_msg.proc_ev.event_data.exec.process_tgid
-                          << " PID=" << nlcn_msg.proc_ev.event_data.exec.process_pid;
+                body["process_pid"] = nlcn_msg.proc_ev.event_data.exec.process_pid;
+                body["process_tgid"] = nlcn_msg.proc_ev.event_data.exec.process_tgid;
+                head["exec"] = body;
+                writeJsonStream() << head;
                 TaskMonitor()->getRegistry()->addEntry(
                     nlcn_msg.proc_ev.event_data.exec.process_pid);
                 break;
             case proc_event::what::PROC_EVENT_UID:
-                logInfo() << "MON::PROC::UID TID=" << nlcn_msg.proc_ev.event_data.id.process_tgid
-                          << " PID=" << nlcn_msg.proc_ev.event_data.id.process_pid
-                          << " From=" << nlcn_msg.proc_ev.event_data.id.r.ruid
-                          << " To=" << nlcn_msg.proc_ev.event_data.id.e.euid;
+                body["process_pid"] = nlcn_msg.proc_ev.event_data.id.process_pid;
+                body["process_tgid"] = nlcn_msg.proc_ev.event_data.id.process_tgid;
+                body["ruid"] = nlcn_msg.proc_ev.event_data.id.r.ruid;
+                body["euid"] = nlcn_msg.proc_ev.event_data.id.e.euid;
+                head["uid"] = body;
+                writeJsonStream() << head;
                 break;
             case proc_event::what::PROC_EVENT_GID:
-                logInfo() << "MON::PROC::GID TID=" << nlcn_msg.proc_ev.event_data.id.process_tgid
-                          << " PID=" << nlcn_msg.proc_ev.event_data.id.process_pid
-                          << " From=" << nlcn_msg.proc_ev.event_data.id.r.rgid
-                          << " To=" << nlcn_msg.proc_ev.event_data.id.e.egid;
+                body["process_pid"] = nlcn_msg.proc_ev.event_data.id.process_pid;
+                body["process_tgid"] = nlcn_msg.proc_ev.event_data.id.process_tgid;
+                body["rgid"] = nlcn_msg.proc_ev.event_data.id.r.rgid;
+                body["egid"] = nlcn_msg.proc_ev.event_data.id.e.egid;
+                head["gid"] = body;
+                writeJsonStream() << head;
                 break;
             case proc_event::what::PROC_EVENT_EXIT:
-                logInfo() << "MON::PROC::EXIT TID=" << nlcn_msg.proc_ev.event_data.exit.process_tgid
-                          << " PID=" << nlcn_msg.proc_ev.event_data.exit.process_pid
-                          << " ExitCode=" << nlcn_msg.proc_ev.event_data.exit.exit_code;
+                body["process_pid"] = nlcn_msg.proc_ev.event_data.exit.process_pid;
+                body["process_tgid"] = nlcn_msg.proc_ev.event_data.exit.process_tgid;
+                body["exit_code"] = nlcn_msg.proc_ev.event_data.exit.exit_code;
+                head["exit"] = body;
+                writeJsonStream() << head;
                 TaskMonitor()->getRegistry()->remEntry(
                     nlcn_msg.proc_ev.event_data.exec.process_pid);
                 break;

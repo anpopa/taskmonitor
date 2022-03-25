@@ -1,6 +1,7 @@
 set(BINARY_NAME taskmonitor)
 set(BINARY_SRC 
     ${CMAKE_SOURCE_DIR}/shared/Options.cpp
+    JsonWriter.cpp
     ActionManager.cpp
     NetLinkStats.cpp
     NetLinkProc.cpp

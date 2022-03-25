@@ -91,6 +91,11 @@ pkg_check_modules     (LIBNLGENL libnl-genl-3.0 REQUIRED)
 include_directories   (${LIBNLGENL_INCLUDE_DIRS})
 set                   (LIBS ${LIBS} ${LIBNLGENL_LIBRARIES})
 
+# Use jsoncpp
+pkg_check_modules     (JSONCPP jsoncpp REQUIRED)
+include_directories   (${JSONCPP_INCLUDE_DIRS})
+set                   (LIBS ${LIBS} ${JSONCPP_LIBRARIES})
+
 if(WITH_WATCHDOG)
     pkg_check_modules     (LIBSYSTEMD libsystemd REQUIRED)
     include_directories   (${LIBSYSTEMD_INCLUDE_DIRS})
