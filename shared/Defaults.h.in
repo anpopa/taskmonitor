@@ -32,6 +32,9 @@ public:
         ReadProcAtInit,
         EnableSysStat,
         EnableSysPressure,
+        EnableNetServer,
+        NetServerAddress,
+        NetServerPort,
         WithCPU, 
         WithMemory, 
         WithContext,
@@ -57,6 +60,9 @@ public:
         m_table.insert(std::pair<Default, std::string>(Default::ReadProcAtInit, "true"));
         m_table.insert(std::pair<Default, std::string>(Default::EnableSysStat, "true"));
         m_table.insert(std::pair<Default, std::string>(Default::EnableSysPressure, "true"));
+        m_table.insert(std::pair<Default, std::string>(Default::EnableNetServer, "true"));
+        m_table.insert(std::pair<Default, std::string>(Default::NetServerAddress, "localhost"));
+        m_table.insert(std::pair<Default, std::string>(Default::NetServerPort, "3357"));
         m_table.insert(std::pair<Default, std::string>(Default::WithCPU, "true"));
         m_table.insert(std::pair<Default, std::string>(Default::WithMemory, "true"));
         m_table.insert(std::pair<Default, std::string>(Default::WithContext, "true"));

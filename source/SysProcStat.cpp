@@ -87,7 +87,7 @@ bool SysProcStat::processOnTick(void)
     m_file->seekg(0, std::ios::beg);
 
     Json::Value head;
-    head["type"] = "proc.stat";
+    head["type"] = "stat";
     head["time"] = time(NULL);
 
     std::string line;

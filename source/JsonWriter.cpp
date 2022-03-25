@@ -11,6 +11,7 @@
 
 #include "JsonWriter.h"
 #include "../bswinfra/source/Logger.h"
+#include "Application.h"
 #include <json/writer.h>
 #include <memory>
 
@@ -27,7 +28,12 @@ JsonWriter::JsonWriter()
 
 void JsonWriter::Payload::print()
 {
+    if (TaskMonitor()->getNetServer() != nullptr) {
+        TaskMonitor()->getNetServer()->broadcastPayloadString(m_stream.str());
+    }
+#ifdef WITH_LOG_OUTPUT
     logInfo() << m_stream.str();
+#endif
 }
 
 } // namespace tkm::monitor

@@ -34,6 +34,18 @@ Application::Application(const string &name, const string &description, const st
 
     m_options = std::make_shared<Options>(configFile);
 
+    if (m_options->getFor(Options::Key::EnableNetServer) == "true") {
+        m_netServer = std::make_shared<NetServer>();
+        m_netServer->enableEvents();
+
+        // Start server interfaces
+        try {
+            m_netServer->start();
+        } catch (std::exception &e) {
+            logError() << "Fail to start server. Exception: " << e.what();
+        }
+    }
+
     m_nlStats = std::make_shared<NetLinkStats>(m_options);
     m_nlStats->enableEvents();
 

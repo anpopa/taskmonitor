@@ -66,6 +66,7 @@ auto main(int argc, char **argv) -> int
         exit(EXIT_SUCCESS);
     }
 
+    signal(SIGPIPE, SIG_IGN);
     signal(SIGINT, terminate);
     signal(SIGTERM, terminate);
 

@@ -53,7 +53,7 @@ static void processDelayAcct(struct taskstats *t)
     }
 
     Json::Value head;
-    head["type"] = "stats";
+    head["type"] = "acct";
     head["time"] = time(NULL);
 
     Json::Value common;
@@ -290,8 +290,6 @@ auto NetLinkStats::requestTaskAcct(int pid) -> int
     struct nlmsghdr *hdr = nullptr;
     struct nl_msg *msg = nullptr;
     int err = NLE_SUCCESS;
-
-    logDebug() << "Request task accounting for pid " << pid;
 
     if (!(msg = nlmsg_alloc())) {
         logError() << "Failed to alloc message: " << nl_geterror(err);

@@ -8,6 +8,8 @@ set(BINARY_SRC
     Application.cpp
     ProcEntry.cpp
     Registry.cpp
+    NetClient.cpp
+    NetServer.cpp
     SysProcStat.cpp
     SysProcPressure.cpp
     Main.cpp

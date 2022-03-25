@@ -85,6 +85,13 @@ auto Options::getFor(Key key) -> string const
             return prop.value_or(tkmDefaults.getFor(Defaults::Default::EnableSysStat));
         }
         return tkmDefaults.getFor(Defaults::Default::EnableSysStat);
+    case Key::EnableNetServer:
+        if (hasConfigFile()) {
+            const optional<string> prop
+                = m_configFile->getPropertyValue("monitor", -1, "EnableNetServer");
+            return prop.value_or(tkmDefaults.getFor(Defaults::Default::EnableNetServer));
+        }
+        return tkmDefaults.getFor(Defaults::Default::EnableNetServer);
     case Key::EnableSysPressure:
         if (hasConfigFile()) {
             const optional<string> prop
@@ -92,6 +99,20 @@ auto Options::getFor(Key key) -> string const
             return prop.value_or(tkmDefaults.getFor(Defaults::Default::EnableSysPressure));
         }
         return tkmDefaults.getFor(Defaults::Default::EnableSysPressure);
+    case Key::NetServerAddress:
+        if (hasConfigFile()) {
+            const optional<string> prop
+                = m_configFile->getPropertyValue("netserver", -1, "ServerAddress");
+            return prop.value_or(tkmDefaults.getFor(Defaults::Default::NetServerAddress));
+        }
+        return tkmDefaults.getFor(Defaults::Default::NetServerAddress);
+    case Key::NetServerPort:
+        if (hasConfigFile()) {
+            const optional<string> prop
+                = m_configFile->getPropertyValue("netserver", -1, "ServerPort");
+            return prop.value_or(tkmDefaults.getFor(Defaults::Default::NetServerPort));
+        }
+        return tkmDefaults.getFor(Defaults::Default::NetServerPort);
     case Key::WithCPU:
         if (hasConfigFile()) {
             const optional<string> prop

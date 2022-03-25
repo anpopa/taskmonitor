@@ -19,6 +19,7 @@
 #include "Defaults.h"
 #include "NetLinkProc.h"
 #include "NetLinkStats.h"
+#include "NetServer.h"
 #include "Options.h"
 #include "Registry.h"
 #include "SysProcPressure.h"
@@ -54,6 +55,7 @@ public:
         }
     }
     auto getOptions() -> std::shared_ptr<Options> { return m_options; }
+    auto getNetServer() -> std::shared_ptr<NetServer> { return m_netServer; }
     auto getManager() -> std::shared_ptr<ActionManager> { return m_manager; }
     auto getRegistry() -> std::shared_ptr<Registry> { return m_registry; }
     auto getSysProcStat() -> std::shared_ptr<SysProcStat> { return m_sysProcStat; }
@@ -73,6 +75,7 @@ private:
 
 private:
     std::shared_ptr<Options> m_options = nullptr;
+    std::shared_ptr<NetServer> m_netServer = nullptr;
     std::shared_ptr<NetLinkStats> m_nlStats = nullptr;
     std::shared_ptr<NetLinkProc> m_nlProc = nullptr;
     std::shared_ptr<ActionManager> m_manager = nullptr;
