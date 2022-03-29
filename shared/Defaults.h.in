@@ -30,7 +30,9 @@ public:
         TxBufferSize,
         MsgBufferSize,
         ReadProcAtInit,
+        SkipIfNoClients,
         EnableSysStat,
+        SysStatsPrintToLog,
         EnableSysPressure,
         EnableNetServer,
         NetServerAddress,
@@ -53,7 +55,9 @@ public:
         m_table.insert(std::pair<Default, std::string>(Default::TxBufferSize, "1048576"));
         m_table.insert(std::pair<Default, std::string>(Default::MsgBufferSize, "1048576"));
         m_table.insert(std::pair<Default, std::string>(Default::ReadProcAtInit, "true"));
+        m_table.insert(std::pair<Default, std::string>(Default::SkipIfNoClients, "false"));
         m_table.insert(std::pair<Default, std::string>(Default::EnableSysStat, "true"));
+        m_table.insert(std::pair<Default, std::string>(Default::SysStatsPrintToLog, "true"));
         m_table.insert(std::pair<Default, std::string>(Default::EnableSysPressure, "true"));
         m_table.insert(std::pair<Default, std::string>(Default::EnableNetServer, "true"));
         m_table.insert(std::pair<Default, std::string>(Default::NetServerAddress, "localhost"));

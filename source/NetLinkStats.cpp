@@ -190,7 +190,7 @@ NetLinkStats::NetLinkStats(std::shared_ptr<Options> &options)
             if ((err = nl_recvmsgs_default(m_nlSock)) < 0) {
                 if ((err != -NLE_AGAIN) && (err != -NLE_BUSY) && (err != NLE_OBJ_NOTFOUND)) {
                     logError() << "Error receiving message: " << nl_geterror(err);
-                    return true;
+                    return false;
                 }
             }
 

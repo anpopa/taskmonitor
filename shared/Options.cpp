@@ -36,6 +36,13 @@ auto Options::getFor(Key key) -> string const
             return prop.value_or(tkmDefaults.getFor(Defaults::Default::StatPollInterval));
         }
         return tkmDefaults.getFor(Defaults::Default::StatPollInterval);
+    case Key::SysStatsPrintToLog:
+        if (hasConfigFile()) {
+            const optional<string> prop
+                = m_configFile->getPropertyValue("systats", -1, "PrintToLog");
+            return prop.value_or(tkmDefaults.getFor(Defaults::Default::SysStatsPrintToLog));
+        }
+        return tkmDefaults.getFor(Defaults::Default::SysStatsPrintToLog);
     case Key::ProcPollInterval:
         if (hasConfigFile()) {
             const optional<string> prop
@@ -78,6 +85,13 @@ auto Options::getFor(Key key) -> string const
             return prop.value_or(tkmDefaults.getFor(Defaults::Default::ReadProcAtInit));
         }
         return tkmDefaults.getFor(Defaults::Default::ReadProcAtInit);
+    case Key::SkipIfNoClients:
+        if (hasConfigFile()) {
+            const optional<string> prop
+                = m_configFile->getPropertyValue("process", -1, "SkipIfNoClients");
+            return prop.value_or(tkmDefaults.getFor(Defaults::Default::SkipIfNoClients));
+        }
+        return tkmDefaults.getFor(Defaults::Default::SkipIfNoClients);
     case Key::EnableSysStat:
         if (hasConfigFile()) {
             const optional<string> prop

@@ -32,6 +32,7 @@ public:
         TxBufferSize,
         MsgBufferSize,
         ReadProcAtInit,
+        SkipIfNoClients,
         EnableNetServer,
         NetServerAddress,
         NetServerPort,
@@ -39,6 +40,7 @@ public:
         NetServerStartOnSignal,
         EnableSysPressure,
         EnableSysStat,
+        SysStatsPrintToLog,
         PressureWithCPU,
         PressureWithMemory,
         PressureWithIO

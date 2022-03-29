@@ -9,6 +9,7 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 # BaseSoftwareInfrastructure
 set(BSWINFRA_DIR ${CMAKE_CURRENT_SOURCE_DIR}/bswinfra)
+# TaskMonitorInterfaces
 set(INTERFACES_DIR ${CMAKE_CURRENT_SOURCE_DIR}/interfaces)
 set(CMAKE_MODULE_PATH "${BSWINFRA_DIR}/cmake" "${INTERFACES_DIR}/cmake")
 
@@ -17,8 +18,6 @@ message (STATUS "Module paths: ${CMAKE_MODULE_PATH}")
 option(WITH_SYSTEMD "Build with systemd watchdog support" Y)
 option(WITH_TESTS "Build test suite" N)
 option(WITH_TIDY "Build with clang-tidy" N)
-option(WITH_LXC "Enable LXC support" Y)
-option(WITH_LOG_OUTPUT "Print output stream to Logger" N)
 
 include(BSWInfra)
 include(TaskMonitorInterfaces)
@@ -68,8 +67,8 @@ configure_file(
     ${CMAKE_SOURCE_DIR}/config/taskmonitor.service.in
     ${CMAKE_BINARY_DIR}/config/taskmonitor.service)
     
-if(WITH_WATCHDOG)
-    add_compile_options("-DWITH_WATCHDOG")
+if(WITH_SYSTEMD)
+    add_compile_options("-DWITH_SYSTEMD")
 endif()
 
 if(WITH_TIDY)

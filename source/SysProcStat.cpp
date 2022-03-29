@@ -53,6 +53,14 @@ void CPUStat::updateStats(uint64_t newUserJiffies, uint64_t newSystemJiffies)
     m_data.set_sys(m_sysPercent);
 }
 
+void CPUStat::printStats(void)
+{
+    logInfo() << "SysProcStat[" << m_name << "] "
+              << "Total=" << m_totalPercent << "% "
+              << "User=" << m_userPercent << "% "
+              << "System=" << m_sysPercent << "%";
+}
+
 SysProcStat::SysProcStat(std::shared_ptr<Options> &options)
 : m_options(options)
 {
@@ -65,6 +73,10 @@ SysProcStat::SysProcStat(std::shared_ptr<Options> &options)
     m_file = std::make_unique<std::ifstream>("/proc/stat");
     if (!m_file->is_open()) {
         throw std::runtime_error("Fail to open stat file");
+    }
+
+    if (options->getFor(Options::Key::SysStatsPrintToLog) == "false") {
+        m_printToLog = false;
     }
 
     m_timer = std::make_shared<Timer>("SysProcStat", [this]() { return processOnTick(); });
@@ -126,6 +138,10 @@ bool SysProcStat::processOnTick(void)
 
                   entry->updateStats(newUserJiffies, newSysJiffies);
                   statEvent.mutable_cpu()->CopyFrom(entry->getData());
+
+                  if (m_printToLog) {
+                      entry->printStats();
+                  }
               };
 
         auto found = false;
@@ -147,6 +163,10 @@ bool SysProcStat::processOnTick(void)
             statEvent.mutable_cpu()->CopyFrom(entry->getData());
             m_cpus.append(entry);
             m_cpus.commit();
+
+            if (m_printToLog) {
+                entry->printStats();
+            }
         }
     }
 

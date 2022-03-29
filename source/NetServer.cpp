@@ -128,14 +128,17 @@ void NetServer::bindAndListen()
         return;
     }
 
+    // Enable event source
     enableEvents();
-
-    string serverAddress = TaskMonitor()->getOptions()->getFor(Options::Key::NetServerAddress);
-    struct hostent *server = gethostbyname(serverAddress.c_str());
 
     m_addr.sin_family = AF_INET;
     m_addr.sin_addr.s_addr = INADDR_ANY;
-    bcopy(server->h_addr, (char *) &m_addr.sin_addr.s_addr, (size_t) server->h_length);
+
+    if (TaskMonitor()->getOptions()->getFor(Options::Key::NetServerAddress) != "any") {
+        string serverAddress = TaskMonitor()->getOptions()->getFor(Options::Key::NetServerAddress);
+        struct hostent *server = gethostbyname(serverAddress.c_str());
+        bcopy(server->h_addr, (char *) &m_addr.sin_addr.s_addr, (size_t) server->h_length);
+    }
 
     auto port = std::stoi(tkmDefaults.getFor(Defaults::Default::NetServerPort));
     try {

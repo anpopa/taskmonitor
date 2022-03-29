@@ -18,9 +18,12 @@ namespace tkm::monitor
 ProcEntry::ProcEntry(int pid)
 : m_pid(pid)
 {
+    if (TaskMonitor()->getOptions()->getFor(Options::Key::SkipIfNoClients) == "true") {
+        m_skipIfNoClients = true;
+    }
+
     m_timer = std::make_shared<Timer>("ProcEntry", [this]() {
-        // We only read task acct if we have clients
-        if (!TaskMonitor()->getNetServer()->hasClients()) {
+        if (!TaskMonitor()->getNetServer()->hasClients() && m_skipIfNoClients) {
             return true;
         }
         return (TaskMonitor()->getManager()->getNetLinkStats()->requestTaskAcct(m_pid) != -1)

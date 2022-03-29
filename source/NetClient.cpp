@@ -108,7 +108,7 @@ static auto doCreateSession(const shared_ptr<NetClient> &client, tkm::msg::clien
     sessionInfo.set_id(client->id);
 
     // TODO: Don't know how to get LC ID yet
-    sessionInfo.set_lifecycleid("NA");
+    sessionInfo.set_lifecycleid("na");
 
     message.set_type(tkm::msg::server::Message::Type::Message_Type_SetSession);
     message.mutable_payload()->PackFrom(sessionInfo);

@@ -42,6 +42,7 @@ private:
     std::shared_ptr<Timer> m_timer = nullptr;
     uint64_t m_lastUserCPUTime = 0;
     uint64_t m_lastSystemCPUTime = 0;
+    bool m_skipIfNoClients = false;
     int m_pollInterval = 0;
     int m_pid = 0;
 };

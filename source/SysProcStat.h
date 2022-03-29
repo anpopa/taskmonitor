@@ -44,6 +44,7 @@ public:
 
     void updateStats(uint64_t newUserJiffies, uint64_t newSystemJiffies);
     auto getData(void) -> tkm::msg::server::CPUStat & { return m_data; }
+    void printStats(void);
 
     auto getPollInterval(void) -> int { return m_usecInterval; }
     auto getLastUserCPUTime(void) -> uint64_t { return (m_lastUserJiffies * 1000000 / m_sysHZ); }
@@ -96,6 +97,7 @@ private:
     std::unique_ptr<std::ifstream> m_file = nullptr;
     std::shared_ptr<Options> m_options = nullptr;
     std::shared_ptr<Timer> m_timer = nullptr;
+    bool m_printToLog = true;
     size_t m_usecInterval = 0;
 };
 
