@@ -58,16 +58,28 @@ void PressureStat::updateStats(void)
                 tokens.push_back(buf);
             }
 
-            Json::Value data;
+            tkm::msg::server::PSIData data;
             for (size_t i = 1; i < tokens.size(); i++) {
                 std::vector<std::string> keyVal = tokenize(tokens[i], '=');
 
                 if (keyVal.size() == 2) {
-                    data[keyVal[0]] = keyVal[1];
+                    if (keyVal[0] == "avg10") {
+                        data.set_avg10(keyVal[1]);
+                    } else if (keyVal[0] == "avg60") {
+                        data.set_avg60(keyVal[1]);
+                    } else if (keyVal[0] == "avg300") {
+                        data.set_avg300(keyVal[1]);
+                    } else if (keyVal[0] == "total") {
+                        data.set_total(keyVal[1]);
+                    }
                 }
             }
 
-            m_jsonData[tokens[0]] = data;
+            if (tokens[0] == "some") {
+                m_dataSome = data;
+            } else {
+                m_dataFull = data;
+            }
         }
     } else {
         logError() << "Cannot open pressure file: "
@@ -115,16 +127,28 @@ void SysProcPressure::disable(void)
 
 bool SysProcPressure::processOnTick(void)
 {
-    Json::Value head;
-    head["type"] = "psi";
-    head["time"] = time(NULL);
+    tkm::msg::server::Data data;
+    tkm::msg::server::SysProcPressure psiEvent;
 
-    m_entries.foreach ([this, &head](const std::shared_ptr<PressureStat> &entry) {
+    data.set_what(tkm::msg::server::Data_What_SysProcPressure);
+    data.set_timestamp(time(NULL));
+
+    m_entries.foreach ([this, &psiEvent](const std::shared_ptr<PressureStat> &entry) {
         entry->updateStats();
-        head[entry->getName()] = entry->getJsonData();
+        if (entry->getName() == "cpu") {
+            psiEvent.mutable_cpu_some()->CopyFrom(entry->getDataSome());
+            psiEvent.mutable_cpu_full()->CopyFrom(entry->getDataFull());
+        } else if (entry->getName() == "memory") {
+            psiEvent.mutable_mem_some()->CopyFrom(entry->getDataSome());
+            psiEvent.mutable_mem_full()->CopyFrom(entry->getDataFull());
+        } else if (entry->getName() == "io") {
+            psiEvent.mutable_io_some()->CopyFrom(entry->getDataSome());
+            psiEvent.mutable_io_full()->CopyFrom(entry->getDataFull());
+        }
     });
 
-    writeJsonStream() << head;
+    data.mutable_payload()->PackFrom(psiEvent);
+    TaskMonitor()->getNetServer()->sendData(data);
 
     return true;
 }

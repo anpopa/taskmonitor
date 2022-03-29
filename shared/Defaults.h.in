@@ -35,13 +35,8 @@ public:
         EnableNetServer,
         NetServerAddress,
         NetServerPort,
-        WithCPU, 
-        WithMemory, 
-        WithContext,
-        WithIO,
-        WithSwap,
-        WithReclaim,
-        WithTrashing,
+        NetServerStartIfPath,
+        NetServerStartOnSignal,
         PressureWithCPU,
         PressureWithMemory,
         PressureWithIO
@@ -63,13 +58,8 @@ public:
         m_table.insert(std::pair<Default, std::string>(Default::EnableNetServer, "true"));
         m_table.insert(std::pair<Default, std::string>(Default::NetServerAddress, "localhost"));
         m_table.insert(std::pair<Default, std::string>(Default::NetServerPort, "3357"));
-        m_table.insert(std::pair<Default, std::string>(Default::WithCPU, "true"));
-        m_table.insert(std::pair<Default, std::string>(Default::WithMemory, "true"));
-        m_table.insert(std::pair<Default, std::string>(Default::WithContext, "true"));
-        m_table.insert(std::pair<Default, std::string>(Default::WithIO, "true"));
-        m_table.insert(std::pair<Default, std::string>(Default::WithSwap, "false"));
-        m_table.insert(std::pair<Default, std::string>(Default::WithReclaim, "false"));
-        m_table.insert(std::pair<Default, std::string>(Default::WithTrashing, "false"));
+        m_table.insert(std::pair<Default, std::string>(Default::NetServerStartIfPath, "none"));
+        m_table.insert(std::pair<Default, std::string>(Default::NetServerStartOnSignal, "true"));
         m_table.insert(std::pair<Default, std::string>(Default::PressureWithCPU, "true"));
         m_table.insert(std::pair<Default, std::string>(Default::PressureWithMemory, "true"));
         m_table.insert(std::pair<Default, std::string>(Default::PressureWithIO, "true"));

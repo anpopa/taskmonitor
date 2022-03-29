@@ -19,6 +19,8 @@ EnableNetServer=true
 [netserver]
 ServerAddress=localhost
 ServerPort=3357
+StartIfPath=none
+StartOnSignal=true
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Process statistics configuration options
@@ -26,13 +28,6 @@ ServerPort=3357
 [process]
 ReadProcAtInit=true
 PollInterval=3000000
-WithCPU=true
-WithMemory=true
-WithContext=false
-WithIO=true
-WithSwap=false
-WithReclaim=false
-WithTrashing=false
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; System statistics configuration options

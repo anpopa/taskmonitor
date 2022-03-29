@@ -27,21 +27,12 @@
 
 #include "Application.h"
 #include "Defaults.h"
-#include "JsonWriter.h"
 #include "NetLinkStats.h"
 
 using std::shared_ptr;
 using std::string;
 
 #define average_ms(t, c) (t / 1000000ULL / (c ? c : 1))
-
-static bool withCPU = false;
-static bool withMemory = false;
-static bool withContext = false;
-static bool withIO = false;
-static bool withSwap = false;
-static bool withReclaim = false;
-static bool withTrashing = false;
 
 static void processDelayAcct(struct taskstats *t)
 {
@@ -52,90 +43,62 @@ static void processDelayAcct(struct taskstats *t)
         return;
     }
 
-    Json::Value head;
-    head["type"] = "acct";
-    head["time"] = time(NULL);
+    tkm::msg::server::Data data;
+    tkm::msg::server::ProcAcct acct;
 
-    Json::Value common;
-    common["ac_comm"] = t->ac_comm;
-    common["ac_uid"] = t->ac_uid;
-    common["ac_gid"] = t->ac_gid;
-    common["ac_pid"] = t->ac_pid;
-    common["ac_ppid"] = t->ac_ppid;
-    common["ac_utime"] = static_cast<unsigned long>(t->ac_utime);
-    common["ac_stime"] = static_cast<unsigned long>(t->ac_stime);
-    common["user_cpu_percent"] = entry->getUserCPUPercent(t->ac_utime);
-    common["sys_cpu_percent"] = entry->getSystemCPUPercent(t->ac_stime);
-    head["common"] = common;
+    data.set_what(tkm::msg::server::Data_What_ProcAcct);
+    data.set_timestamp(time(NULL));
 
-    if (withCPU) {
-        Json::Value cpu;
-        cpu["cpu_count"] = static_cast<unsigned long>(t->cpu_count);
-        cpu["cpu_run_real_total"] = static_cast<unsigned long>(t->cpu_run_real_total);
-        cpu["cpu_run_virtual_total"] = static_cast<unsigned long>(t->cpu_run_virtual_total);
-        cpu["cpu_delay_total"] = static_cast<unsigned long>(t->cpu_delay_total);
-        cpu["cpu_delay_average"] = average_ms((double) t->cpu_delay_total, t->cpu_count);
-        head["cpu"] = cpu;
-    }
+    acct.set_ac_comm(t->ac_comm);
+    acct.set_ac_uid(t->ac_uid);
+    acct.set_ac_gid(t->ac_gid);
+    acct.set_ac_pid(t->ac_pid);
+    acct.set_ac_ppid(t->ac_ppid);
+    acct.set_ac_utime(t->ac_utime);
+    acct.set_ac_stime(t->ac_stime);
+    acct.set_user_cpu_percent(entry->getUserCPUPercent(t->ac_utime));
+    acct.set_sys_cpu_percent(entry->getSystemCPUPercent(t->ac_stime));
 
-    if (withMemory) {
-        Json::Value memory;
-        memory["coremem"] = static_cast<unsigned long>(t->coremem);
-        memory["virtmem"] = static_cast<unsigned long>(t->virtmem);
-        memory["hiwater_rss"] = static_cast<unsigned long>(t->hiwater_rss);
-        memory["hiwater_vm"] = static_cast<unsigned long>(t->hiwater_vm);
-        head["memory"] = memory;
-    }
+    acct.mutable_cpu()->set_cpu_count(t->cpu_count);
+    acct.mutable_cpu()->set_cpu_run_real_total(t->cpu_run_real_total);
+    acct.mutable_cpu()->set_cpu_run_virtual_total(t->cpu_run_virtual_total);
+    acct.mutable_cpu()->set_cpu_delay_total(t->cpu_run_virtual_total);
+    acct.mutable_cpu()->set_cpu_delay_average(
+        average_ms((double) t->cpu_delay_total, t->cpu_count));
 
-    if (withContext) {
-        Json::Value context;
-        context["nvcsw"] = static_cast<unsigned long>(t->nvcsw);
-        context["nivcsw"] = static_cast<unsigned long>(t->nivcsw);
-        head["context"] = context;
-    }
+    acct.mutable_mem()->set_coremem(t->coremem);
+    acct.mutable_mem()->set_virtmem(t->virtmem);
+    acct.mutable_mem()->set_hiwater_rss(t->hiwater_rss);
+    acct.mutable_mem()->set_hiwater_vm(t->hiwater_vm);
 
-    if (withIO) {
-        Json::Value io;
-        io["blkio_count"] = static_cast<unsigned long>(t->blkio_count);
-        io["blkio_delay_total"] = static_cast<unsigned long>(t->blkio_delay_total);
-        io["blkio_delay_average"]
-            = static_cast<unsigned long>(average_ms(t->blkio_delay_total, t->blkio_count));
-        head["io"] = io;
-    }
+    acct.mutable_ctx()->set_nvcsw(t->nvcsw);
+    acct.mutable_ctx()->set_nivcsw(t->nivcsw);
 
-    if (withSwap) {
-        Json::Value swap;
-        swap["swapin_count"] = static_cast<unsigned long>(t->swapin_count);
-        swap["swapin_delay_total"] = static_cast<unsigned long>(t->swapin_delay_total);
-        swap["swapin_delay_average"]
-            = static_cast<unsigned long>(average_ms(t->swapin_delay_total, t->swapin_count));
-        head["swap"] = swap;
-    }
+    acct.mutable_io()->set_blkio_count(t->blkio_count);
+    acct.mutable_io()->set_blkio_delay_total(t->blkio_delay_total);
+    acct.mutable_io()->set_blkio_delay_average(average_ms(t->blkio_delay_total, t->blkio_count));
 
-    if (withReclaim) {
-        Json::Value reclaim;
-        reclaim["freepages_count"] = static_cast<unsigned long>(t->freepages_count);
-        reclaim["freepages_delay_total"] = static_cast<unsigned long>(t->freepages_delay_total);
-        reclaim["freepages_delay_average"]
-            = static_cast<unsigned long>(average_ms(t->freepages_delay_total, t->freepages_count));
-        head["reclaim"] = reclaim;
-    }
+    acct.mutable_swp()->set_swapin_count(t->swapin_count);
+    acct.mutable_swp()->set_swapin_delay_total(t->swapin_delay_total);
+    acct.mutable_swp()->set_swapin_delay_average(
+        average_ms(t->swapin_delay_total, t->swapin_count));
 
-    if (withTrashing) {
-        Json::Value trashing;
-        trashing["thrashing_count"] = static_cast<unsigned long>(t->thrashing_count);
-        trashing["thrashing_delay_total"] = static_cast<unsigned long>(t->thrashing_delay_total);
-        trashing["thrashing_delay_average"]
-            = static_cast<unsigned long>(average_ms(t->thrashing_delay_total, t->thrashing_count));
-        head["trashing"] = trashing;
-    }
+    acct.mutable_reclaim()->set_freepages_count(t->freepages_count);
+    acct.mutable_reclaim()->set_freepages_delay_total(t->freepages_delay_total);
+    acct.mutable_reclaim()->set_freepages_delay_average(
+        average_ms(t->freepages_delay_total, t->freepages_count));
 
-    writeJsonStream() << head;
+    acct.mutable_thrashing()->set_thrashing_count(t->thrashing_count);
+    acct.mutable_thrashing()->set_thrashing_delay_total(t->thrashing_delay_total);
+    acct.mutable_thrashing()->set_thrashing_delay_average(
+        average_ms(t->thrashing_delay_total, t->thrashing_count));
+
+    data.mutable_payload()->PackFrom(acct);
+    TaskMonitor()->getNetServer()->sendData(data);
 }
 
 int callbackStatisticsMessage(struct nl_msg *nlmsg, void *arg)
 {
-
     struct nlmsghdr *nlhdr;
     struct nlattr *nlattrs[TASKSTATS_TYPE_MAX + 1];
     struct nlattr *nlattr;
@@ -179,34 +142,6 @@ NetLinkStats::NetLinkStats(std::shared_ptr<Options> &options)
         msgBufferSize = 1048576;
         txBufferSize = 1048576;
         rxBufferSize = 1048576;
-    }
-
-    if (m_options->getFor(Options::Key::WithCPU) == "true") {
-        withCPU = true;
-    }
-
-    if (m_options->getFor(Options::Key::WithMemory) == "true") {
-        withMemory = true;
-    }
-
-    if (m_options->getFor(Options::Key::WithContext) == "true") {
-        withContext = true;
-    }
-
-    if (m_options->getFor(Options::Key::WithIO) == "true") {
-        withIO = true;
-    }
-
-    if (m_options->getFor(Options::Key::WithSwap) == "true") {
-        withSwap = true;
-    }
-
-    if (m_options->getFor(Options::Key::WithReclaim) == "true") {
-        withReclaim = true;
-    }
-
-    if (m_options->getFor(Options::Key::WithTrashing) == "true") {
-        withTrashing = true;
     }
 
     if ((m_nlSock = nl_socket_alloc()) == nullptr) {
@@ -253,9 +188,9 @@ NetLinkStats::NetLinkStats(std::shared_ptr<Options> &options)
             int err = NLE_SUCCESS;
 
             if ((err = nl_recvmsgs_default(m_nlSock)) < 0) {
-                if ((err != -NLE_AGAIN) && (err != -NLE_BUSY)) {
+                if ((err != -NLE_AGAIN) && (err != -NLE_BUSY) && (err != NLE_OBJ_NOTFOUND)) {
                     logError() << "Error receiving message: " << nl_geterror(err);
-                    return false;
+                    return true;
                 }
             }
 

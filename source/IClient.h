@@ -11,10 +11,15 @@
 
 #pragma once
 
+#include "EnvelopeReader.h"
+#include "EnvelopeWriter.h"
+
 #include <fcntl.h>
 #include <memory>
 #include <mutex>
 #include <unistd.h>
+
+#include "Client.pb.h"
 
 #include "../bswinfra/source/Pollable.h"
 
@@ -30,6 +35,8 @@ public:
     : Pollable(name)
     , m_clientFd(fd)
     {
+        m_reader = std::make_unique<EnvelopeReader>(fd);
+        m_writer = std::make_unique<EnvelopeWriter>(fd);
     }
 
     ~IClient() { disconnect(); }
@@ -42,7 +49,20 @@ public:
         }
     }
 
-    virtual void writePayloadString(const std::string &str) = 0;
+    auto readEnvelope(tkm::msg::Envelope &envelope) -> IAsyncEnvelope::Status
+    {
+        return m_reader->next(envelope);
+    }
+    auto writeEnvelope(const tkm::msg::Envelope &envelope) -> bool
+    {
+        if (m_writer->send(envelope) == IAsyncEnvelope::Status::Ok) {
+            return m_writer->flush();
+        }
+        return true;
+    }
+
+    void setStreamEnabled(bool state) { m_streamEnabled = state; }
+    bool getStreamEnabled(void) { return m_streamEnabled; }
 
 public:
     IClient(IClient const &) = delete;
@@ -50,8 +70,14 @@ public:
 
     [[nodiscard]] int getFD() const { return m_clientFd; }
 
+public:
+    tkm::msg::client::Descriptor descriptor {};
+    std::string id {};
+
 private:
-    std::string m_ownerName {};
+    bool m_streamEnabled = false;
+    std::unique_ptr<EnvelopeReader> m_reader = nullptr;
+    std::unique_ptr<EnvelopeWriter> m_writer = nullptr;
 
 protected:
     int m_clientFd = -1;

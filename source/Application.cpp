@@ -10,9 +10,12 @@
  */
 
 #include "Application.h"
-#ifdef WITH_WATCHDOG
+#ifdef WITH_SYSTEMD
 #include <systemd/sd-daemon.h>
 #endif
+#include <filesystem>
+
+namespace fs = std::filesystem;
 
 using std::shared_ptr;
 using std::string;
@@ -21,6 +24,8 @@ using std::string;
 
 namespace tkm::monitor
 {
+
+static bool shouldStartNetServer(const std::shared_ptr<tkm::monitor::Options> &opts);
 
 Application *Application::appInstance = nullptr;
 
@@ -36,13 +41,13 @@ Application::Application(const string &name, const string &description, const st
 
     if (m_options->getFor(Options::Key::EnableNetServer) == "true") {
         m_netServer = std::make_shared<NetServer>();
-        m_netServer->enableEvents();
 
-        // Start server interfaces
-        try {
-            m_netServer->start();
-        } catch (std::exception &e) {
-            logError() << "Fail to start server. Exception: " << e.what();
+        if (shouldStartNetServer(m_options)) {
+            try {
+                m_netServer->bindAndListen();
+            } catch (std::exception &e) {
+                logError() << "Fail to start server. Exception: " << e.what();
+            }
         }
     }
 
@@ -64,7 +69,7 @@ Application::Application(const string &name, const string &description, const st
 
 void Application::startWatchdog(void)
 {
-#ifdef WITH_WATCHDOG
+#ifdef WITH_SYSTEMD
     ulong usec = 0;
     int status;
 
@@ -94,6 +99,23 @@ void Application::startWatchdog(void)
 #else
     logInfo() << "Watchdog build time disabled";
 #endif
+}
+
+static bool shouldStartNetServer(const std::shared_ptr<tkm::monitor::Options> &opts)
+{
+    if (opts->getFor(Options::Key::NetServerStartIfPath) != "none") {
+        fs::path condPath(opts->getFor(Options::Key::NetServerStartIfPath));
+        if (fs::exists(condPath)) {
+            return true;
+        }
+        return false;
+    }
+
+    if (opts->getFor(Options::Key::NetServerStartOnSignal) == "true") {
+        return false;
+    }
+
+    return true;
 }
 
 } // namespace tkm::monitor

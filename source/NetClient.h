@@ -29,7 +29,6 @@ public:
     ~NetClient();
 
     void enableEvents();
-    void writePayloadString(const std::string &str) final;
     auto getShared() -> std::shared_ptr<NetClient> { return shared_from_this(); }
 
 public:

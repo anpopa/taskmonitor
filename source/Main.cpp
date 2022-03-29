@@ -24,10 +24,26 @@ using namespace std;
 using namespace tkm::monitor;
 namespace fs = std::filesystem;
 
+std::unique_ptr<tkm::monitor::Application> app = nullptr;
+
 static void terminate(int signum)
 {
     logInfo() << "Received signal " << signum;
     exit(EXIT_SUCCESS);
+}
+
+static void delayStart(int signum)
+{
+    if (signum != SIGUSR1)
+        return;
+
+    if (app == nullptr)
+        return;
+
+    if (app->getOptions()->getFor(Options::Key::NetServerStartOnSignal) == "true") {
+        logInfo() << "Start NetServer module";
+        app->getNetServer()->bindAndListen();
+    }
 }
 
 auto main(int argc, char **argv) -> int
@@ -69,6 +85,7 @@ auto main(int argc, char **argv) -> int
     signal(SIGPIPE, SIG_IGN);
     signal(SIGINT, terminate);
     signal(SIGTERM, terminate);
+    signal(SIGUSR1, delayStart);
 
     fs::path configPath(tkmDefaults.getFor(Defaults::Default::ConfPath));
     if (config_path != nullptr) {
@@ -79,14 +96,13 @@ auto main(int argc, char **argv) -> int
         configPath = string(config_path);
     }
 
-    Application app {"TaskMonitor", "TaskMonitor", configPath};
-
     ActionManager::Request registerEvents {
         .action = ActionManager::Action::RegisterEvents,
     };
-    app.getManager()->pushRequest(registerEvents);
 
-    app.run();
+    app = std::make_unique<tkm::monitor::Application>("TaskMonitor", "TaskMonitor", configPath);
+    app->getManager()->pushRequest(registerEvents);
+    app->run();
 
     return EXIT_SUCCESS;
 }

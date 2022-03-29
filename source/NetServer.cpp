@@ -15,8 +15,12 @@
 
 #include "Application.h"
 #include "Defaults.h"
+#include "EnvelopeReader.h"
+#include "Helpers.h"
 #include "NetClient.h"
 #include "NetServer.h"
+
+#include "Client.pb.h"
 
 using std::shared_ptr;
 using std::string;
@@ -47,12 +51,26 @@ NetServer::NetServer()
                 return false;
             }
 
-            logInfo() << "New NetClient with FD: " << clientFd;
+            // The client has 3 seconds to send the descriptor or will be disconnected
+            struct timeval tv;
+            tv.tv_sec = 3;
+            tv.tv_usec = 0;
+            setsockopt(clientFd, SOL_SOCKET, SO_RCVTIMEO, (const char *) &tv, sizeof(tv));
+
+            tkm::msg::client::Descriptor descriptor {};
+            if (!readClientDescriptor(clientFd, descriptor)) {
+                logWarn() << "Client " << clientFd << " read descriptor failed";
+                close(clientFd);
+                return true; // this is a client issue, process next client
+            }
+
+            logInfo() << "New Client with FD: " << clientFd;
             std::shared_ptr<NetClient> client = std::make_shared<NetClient>(clientFd);
 
             m_clients.append(client);
             m_clients.commit();
 
+            client->descriptor = descriptor;
             client->enableEvents();
 
             return true;
@@ -69,15 +87,27 @@ void NetServer::enableEvents()
 
 NetServer::~NetServer()
 {
-    static_cast<void>(stop());
+    static_cast<void>(invalidate());
     m_clients.foreach ([this](const std::shared_ptr<IClient> &entry) { m_clients.remove(entry); });
     m_clients.commit();
 }
 
-void NetServer::broadcastPayloadString(const std::string &str)
+void NetServer::sendData(const tkm::msg::server::Data &data)
 {
-    m_clients.foreach (
-        [this, &str](const std::shared_ptr<IClient> &entry) { entry->writePayloadString(str); });
+    tkm::msg::Envelope envelope;
+    tkm::msg::server::Message message;
+
+    message.set_type(tkm::msg::server::Message_Type_Data);
+    message.mutable_payload()->PackFrom(data);
+    envelope.mutable_mesg()->PackFrom(message);
+    envelope.set_target(tkm::msg::Envelope_Recipient_Client);
+    envelope.set_origin(tkm::msg::Envelope_Recipient_Server);
+
+    m_clients.foreach ([this, &envelope](const std::shared_ptr<IClient> &entry) {
+        if (entry->getStreamEnabled()) {
+            entry->writeEnvelope(envelope);
+        }
+    });
 }
 
 void NetServer::notifyClientTerminated(int id)
@@ -91,8 +121,15 @@ void NetServer::notifyClientTerminated(int id)
     m_clients.commit();
 }
 
-void NetServer::start()
+void NetServer::bindAndListen()
 {
+    if (m_bound) {
+        logWarn() << "NetServer already listening";
+        return;
+    }
+
+    enableEvents();
+
     string serverAddress = TaskMonitor()->getOptions()->getFor(Options::Key::NetServerAddress);
     struct hostent *server = gethostbyname(serverAddress.c_str());
 
@@ -119,9 +156,11 @@ void NetServer::start()
         logError() << "NetServer bind failed on port: " << port << ". Error: " << strerror(errno);
         throw std::runtime_error("NetServer bind failed");
     }
+
+    m_bound = true;
 }
 
-void NetServer::stop()
+void NetServer::invalidate()
 {
     if (m_sockFd > 0) {
         ::close(m_sockFd);
