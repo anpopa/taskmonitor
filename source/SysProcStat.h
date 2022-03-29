@@ -14,8 +14,8 @@
 #include <time.h>
 #include <unistd.h>
 
-#include "JsonWriter.h"
 #include "Options.h"
+#include "Server.pb.h"
 
 #include "../bswinfra/source/Exceptions.h"
 #include "../bswinfra/source/SafeList.h"
@@ -43,7 +43,7 @@ public:
     auto getName(void) -> const std::string & { return m_name; }
 
     void updateStats(uint64_t newUserJiffies, uint64_t newSystemJiffies);
-    auto getJsonData(void) -> Json::Value & { return m_jsonData; }
+    auto getData(void) -> tkm::msg::server::CPUStat & { return m_data; }
 
     auto getPollInterval(void) -> int { return m_usecInterval; }
     auto getLastUserCPUTime(void) -> uint64_t { return (m_lastUserJiffies * 1000000 / m_sysHZ); }
@@ -66,7 +66,7 @@ private:
     int m_sysPercent = 0;
     int m_sysHZ = 0;
     size_t m_usecInterval = 0;
-    Json::Value m_jsonData;
+    tkm::msg::server::CPUStat m_data;
     std::string m_name;
 };
 

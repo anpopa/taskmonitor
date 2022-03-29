@@ -113,55 +113,20 @@ auto Options::getFor(Key key) -> string const
             return prop.value_or(tkmDefaults.getFor(Defaults::Default::NetServerPort));
         }
         return tkmDefaults.getFor(Defaults::Default::NetServerPort);
-    case Key::WithCPU:
+    case Key::NetServerStartIfPath:
         if (hasConfigFile()) {
             const optional<string> prop
-                = m_configFile->getPropertyValue("process", -1, "WithCPU");
-            return prop.value_or(tkmDefaults.getFor(Defaults::Default::WithCPU));
+                = m_configFile->getPropertyValue("netserver", -1, "StartIfPath");
+            return prop.value_or(tkmDefaults.getFor(Defaults::Default::NetServerStartIfPath));
         }
-        return tkmDefaults.getFor(Defaults::Default::WithCPU);
-    case Key::WithMemory:
+        return tkmDefaults.getFor(Defaults::Default::NetServerStartIfPath);
+    case Key::NetServerStartOnSignal:
         if (hasConfigFile()) {
             const optional<string> prop
-                = m_configFile->getPropertyValue("process", -1, "WithMemory");
-            return prop.value_or(tkmDefaults.getFor(Defaults::Default::WithMemory));
+                = m_configFile->getPropertyValue("netserver", -1, "StartOnSignal");
+            return prop.value_or(tkmDefaults.getFor(Defaults::Default::NetServerStartOnSignal));
         }
-        return tkmDefaults.getFor(Defaults::Default::WithMemory);
-    case Key::WithContext:
-        if (hasConfigFile()) {
-            const optional<string> prop
-                = m_configFile->getPropertyValue("process", -1, "WithContext");
-            return prop.value_or(tkmDefaults.getFor(Defaults::Default::WithContext));
-        }
-        return tkmDefaults.getFor(Defaults::Default::WithContext);
-    case Key::WithIO:
-        if (hasConfigFile()) {
-            const optional<string> prop
-                = m_configFile->getPropertyValue("process", -1, "WithIO");
-            return prop.value_or(tkmDefaults.getFor(Defaults::Default::WithIO));
-        }
-        return tkmDefaults.getFor(Defaults::Default::WithIO);
-    case Key::WithSwap:
-        if (hasConfigFile()) {
-            const optional<string> prop
-                = m_configFile->getPropertyValue("process", -1, "WithSwap");
-            return prop.value_or(tkmDefaults.getFor(Defaults::Default::WithSwap));
-        }
-        return tkmDefaults.getFor(Defaults::Default::WithSwap);
-    case Key::WithReclaim:
-        if (hasConfigFile()) {
-            const optional<string> prop
-                = m_configFile->getPropertyValue("process", -1, "WithReclaim");
-            return prop.value_or(tkmDefaults.getFor(Defaults::Default::WithReclaim));
-        }
-        return tkmDefaults.getFor(Defaults::Default::WithReclaim);
-    case Key::WithTrashing:
-        if (hasConfigFile()) {
-            const optional<string> prop
-                = m_configFile->getPropertyValue("process", -1, "WithTrashing");
-            return prop.value_or(tkmDefaults.getFor(Defaults::Default::WithTrashing));
-        }
-        return tkmDefaults.getFor(Defaults::Default::WithTrashing);
+        return tkmDefaults.getFor(Defaults::Default::NetServerStartOnSignal);
     case Key::PressureWithCPU:
         if (hasConfigFile()) {
             const optional<string> prop

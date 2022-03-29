@@ -16,7 +16,6 @@
 #include <string.h>
 #include <unistd.h>
 
-#include <json/json.h>
 #include <linux/cn_proc.h>
 #include <linux/connector.h>
 #include <linux/netlink.h>
@@ -24,7 +23,6 @@
 
 #include "Application.h"
 #include "Defaults.h"
-#include "JsonWriter.h"
 #include "NetLinkProc.h"
 
 using std::shared_ptr;
@@ -68,57 +66,92 @@ NetLinkProc::NetLinkProc(std::shared_ptr<Options> &options)
                 return false;
             }
 
-            Json::Value head;
-            Json::Value body;
-
-            head["type"] = "proc";
-            head["time"] = time(NULL);
+            // Fill common data
+            tkm::msg::server::Data data;
+            tkm::msg::server::ProcEvent procEvent;
+            data.set_what(tkm::msg::server::Data_What_ProcEvent);
+            data.set_timestamp(time(NULL));
 
             switch (nlcn_msg.proc_ev.what) {
             case proc_event::what::PROC_EVENT_NONE:
                 logDebug() << "NetLinkProc Set mcast listen OK";
                 break;
-            case proc_event::what::PROC_EVENT_FORK:
-                body["parent_id"] = nlcn_msg.proc_ev.event_data.fork.parent_pid;
-                body["parent_tgid"] = nlcn_msg.proc_ev.event_data.fork.parent_tgid;
-                body["child_pid"] = nlcn_msg.proc_ev.event_data.fork.child_pid;
-                body["child_tgid"] = nlcn_msg.proc_ev.event_data.fork.child_tgid;
-                head["fork"] = body;
-                writeJsonStream() << head;
+            case proc_event::what::PROC_EVENT_FORK: {
+                tkm::msg::server::ProcEventFork forkData;
+
+                forkData.set_parent_pid(nlcn_msg.proc_ev.event_data.fork.parent_pid);
+                forkData.set_parent_tgid(nlcn_msg.proc_ev.event_data.fork.parent_tgid);
+                forkData.set_child_pid(nlcn_msg.proc_ev.event_data.fork.child_pid);
+                forkData.set_child_tgid(nlcn_msg.proc_ev.event_data.fork.child_tgid);
+
+                procEvent.set_what(tkm::msg::server::ProcEvent_What_Fork);
+                procEvent.mutable_data()->PackFrom(forkData);
+                data.mutable_payload()->PackFrom(procEvent);
+
+                TaskMonitor()->getNetServer()->sendData(data);
                 break;
-            case proc_event::what::PROC_EVENT_EXEC:
-                body["process_pid"] = nlcn_msg.proc_ev.event_data.exec.process_pid;
-                body["process_tgid"] = nlcn_msg.proc_ev.event_data.exec.process_tgid;
-                head["exec"] = body;
-                writeJsonStream() << head;
+            }
+            case proc_event::what::PROC_EVENT_EXEC: {
+                tkm::msg::server::ProcEventExec execData;
+
+                execData.set_process_pid(nlcn_msg.proc_ev.event_data.exec.process_pid);
+                execData.set_process_tgid(nlcn_msg.proc_ev.event_data.exec.process_tgid);
+
+                procEvent.set_what(tkm::msg::server::ProcEvent_What_Exec);
+                procEvent.mutable_data()->PackFrom(execData);
+                data.mutable_payload()->PackFrom(procEvent);
+
+                TaskMonitor()->getNetServer()->sendData(data);
                 TaskMonitor()->getRegistry()->addEntry(
                     nlcn_msg.proc_ev.event_data.exec.process_pid);
                 break;
-            case proc_event::what::PROC_EVENT_UID:
-                body["process_pid"] = nlcn_msg.proc_ev.event_data.id.process_pid;
-                body["process_tgid"] = nlcn_msg.proc_ev.event_data.id.process_tgid;
-                body["ruid"] = nlcn_msg.proc_ev.event_data.id.r.ruid;
-                body["euid"] = nlcn_msg.proc_ev.event_data.id.e.euid;
-                head["uid"] = body;
-                writeJsonStream() << head;
+            }
+            case proc_event::what::PROC_EVENT_UID: {
+                tkm::msg::server::ProcEventUID uidData;
+
+                uidData.set_process_pid(nlcn_msg.proc_ev.event_data.id.process_pid);
+                uidData.set_process_tgid(nlcn_msg.proc_ev.event_data.id.process_tgid);
+                uidData.set_ruid(nlcn_msg.proc_ev.event_data.id.r.ruid);
+                uidData.set_euid(nlcn_msg.proc_ev.event_data.id.e.euid);
+
+                procEvent.set_what(tkm::msg::server::ProcEvent_What_UID);
+                procEvent.mutable_data()->PackFrom(uidData);
+                data.mutable_payload()->PackFrom(procEvent);
+
+                TaskMonitor()->getNetServer()->sendData(data);
                 break;
-            case proc_event::what::PROC_EVENT_GID:
-                body["process_pid"] = nlcn_msg.proc_ev.event_data.id.process_pid;
-                body["process_tgid"] = nlcn_msg.proc_ev.event_data.id.process_tgid;
-                body["rgid"] = nlcn_msg.proc_ev.event_data.id.r.rgid;
-                body["egid"] = nlcn_msg.proc_ev.event_data.id.e.egid;
-                head["gid"] = body;
-                writeJsonStream() << head;
+            }
+            case proc_event::what::PROC_EVENT_GID: {
+                tkm::msg::server::ProcEventGID gidData;
+
+                gidData.set_process_pid(nlcn_msg.proc_ev.event_data.id.process_pid);
+                gidData.set_process_tgid(nlcn_msg.proc_ev.event_data.id.process_tgid);
+                gidData.set_rgid(nlcn_msg.proc_ev.event_data.id.r.rgid);
+                gidData.set_egid(nlcn_msg.proc_ev.event_data.id.e.egid);
+
+                procEvent.set_what(tkm::msg::server::ProcEvent_What_GID);
+                procEvent.mutable_data()->PackFrom(gidData);
+                data.mutable_payload()->PackFrom(procEvent);
+
+                TaskMonitor()->getNetServer()->sendData(data);
                 break;
-            case proc_event::what::PROC_EVENT_EXIT:
-                body["process_pid"] = nlcn_msg.proc_ev.event_data.exit.process_pid;
-                body["process_tgid"] = nlcn_msg.proc_ev.event_data.exit.process_tgid;
-                body["exit_code"] = nlcn_msg.proc_ev.event_data.exit.exit_code;
-                head["exit"] = body;
-                writeJsonStream() << head;
+            }
+            case proc_event::what::PROC_EVENT_EXIT: {
+                tkm::msg::server::ProcEventExit exitData;
+
+                exitData.set_process_pid(nlcn_msg.proc_ev.event_data.id.process_pid);
+                exitData.set_process_tgid(nlcn_msg.proc_ev.event_data.id.process_tgid);
+                exitData.set_exit_code(nlcn_msg.proc_ev.event_data.exit.exit_code);
+
+                procEvent.set_what(tkm::msg::server::ProcEvent_What_Exit);
+                procEvent.mutable_data()->PackFrom(exitData);
+                data.mutable_payload()->PackFrom(procEvent);
+
+                TaskMonitor()->getNetServer()->sendData(data);
                 TaskMonitor()->getRegistry()->remEntry(
-                    nlcn_msg.proc_ev.event_data.exec.process_pid);
+                    nlcn_msg.proc_ev.event_data.exit.process_pid);
                 break;
+            }
             default:
                 break;
             }

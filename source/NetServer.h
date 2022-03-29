@@ -22,6 +22,8 @@
 #include "../bswinfra/source/Pollable.h"
 #include "../bswinfra/source/SafeList.h"
 
+#include "Server.pb.h"
+
 using namespace bswi::log;
 using namespace bswi::event;
 
@@ -38,11 +40,11 @@ public:
     NetServer(NetServer const &) = delete;
     void operator=(NetServer const &) = delete;
 
-    void start();
-    void stop();
+    void bindAndListen();
+    void invalidate();
     void enableEvents();
     auto getShared() -> std::shared_ptr<NetServer> { return shared_from_this(); }
-    void broadcastPayloadString(const std::string &str);
+    void sendData(const tkm::msg::server::Data &data);
     void notifyClientTerminated(int id);
 
 private:
@@ -50,6 +52,7 @@ private:
     };
     bswi::util::SafeList<std::shared_ptr<IClient>> m_clients {"ClientList"};
     int m_sockFd = -1;
+    bool m_bound = false;
 };
 
 } // namespace tkm::monitor

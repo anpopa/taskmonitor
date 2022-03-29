@@ -14,8 +14,8 @@
 #include <time.h>
 #include <unistd.h>
 
-#include "JsonWriter.h"
 #include "Options.h"
+#include "Server.pb.h"
 
 #include "../bswinfra/source/Exceptions.h"
 #include "../bswinfra/source/SafeList.h"
@@ -37,10 +37,12 @@ public:
 
     void updateStats(void);
     auto getName(void) -> const std::string & { return m_name; }
-    auto getJsonData(void) -> Json::Value & { return m_jsonData; }
+    auto getDataSome(void) -> tkm::msg::server::PSIData & { return m_dataSome; }
+    auto getDataFull(void) -> tkm::msg::server::PSIData & { return m_dataFull; }
 
 private:
-    Json::Value m_jsonData;
+    tkm::msg::server::PSIData m_dataSome;
+    tkm::msg::server::PSIData m_dataFull;
     std::string m_name;
 };
 

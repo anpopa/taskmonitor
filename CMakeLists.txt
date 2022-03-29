@@ -9,17 +9,19 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 # BaseSoftwareInfrastructure
 set(BSWINFRA_DIR ${CMAKE_CURRENT_SOURCE_DIR}/bswinfra)
+set(INTERFACES_DIR ${CMAKE_CURRENT_SOURCE_DIR}/interfaces)
 set(CMAKE_MODULE_PATH "${BSWINFRA_DIR}/cmake" "${INTERFACES_DIR}/cmake")
 
 message (STATUS "Module paths: ${CMAKE_MODULE_PATH}")
 
-option(WITH_WATCHDOG "Build with systemd watchdog support" Y)
+option(WITH_SYSTEMD "Build with systemd watchdog support" Y)
 option(WITH_TESTS "Build test suite" N)
 option(WITH_TIDY "Build with clang-tidy" N)
 option(WITH_LXC "Enable LXC support" Y)
 option(WITH_LOG_OUTPUT "Print output stream to Logger" N)
 
 include(BSWInfra)
+include(TaskMonitorInterfaces)
 
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "RelWithDebInfo" CACHE STRING
@@ -93,22 +95,7 @@ pkg_check_modules     (LIBNLGENL libnl-genl-3.0 REQUIRED)
 include_directories   (${LIBNLGENL_INCLUDE_DIRS})
 set                   (LIBS ${LIBS} ${LIBNLGENL_LIBRARIES})
 
-# Use jsoncpp
-pkg_check_modules     (JSONCPP jsoncpp REQUIRED)
-include_directories   (${JSONCPP_INCLUDE_DIRS})
-set                   (LIBS ${LIBS} ${JSONCPP_LIBRARIES})
-
-if(WITH_LXC)
-    pkg_check_modules   (LXC REQUIRED lxc)
-    include_directories (${LXC_INCLUDE_DIR})
-    add_compile_options ("-DWITH_LXC")
-endif()
-
-if(WITH_LOG_OUTPUT)
-    add_compile_options ("-DWITH_LOG_OUTPUT")
-endif()
-
-if(WITH_WATCHDOG)
+if(WITH_SYSTEMD)
     pkg_check_modules     (LIBSYSTEMD libsystemd REQUIRED)
     include_directories   (${LIBSYSTEMD_INCLUDE_DIRS})
     set                   (LIBS ${LIBS} ${LIBSYSTEMD_LIBRARIES})
@@ -158,8 +145,6 @@ add_compile_options (
 # Status reporting
 message (STATUS "SYSTEM_TYPE: "          ${CMAKE_SYSTEM_NAME})
 message (STATUS "CMAKE_BUILD_TYPE: "     ${CMAKE_BUILD_TYPE})
-message (STATUS "WITH_WATCHDOG: "        ${WITH_WATCHDOG})
+message (STATUS "WITH_SYSTEMD: "         ${WITH_SYSTEMD})
 message (STATUS "WITH_TESTS: "           ${WITH_TESTS})
 message (STATUS "WITH_TIDY: "            ${WITH_TIDY})
-message (STATUS "WITH_LXC: "             ${WITH_LXC})
-message (STATUS "WITH_LOG_OUTPUT: "      ${WITH_LOG_OUTPUT})

@@ -48,9 +48,9 @@ void CPUStat::updateStats(uint64_t newUserJiffies, uint64_t newSystemJiffies)
     m_sysPercent = jiffiesToPercent(sysJiffiesDiff);
     m_totalPercent = jiffiesToPercent(userJiffiesDiff + sysJiffiesDiff);
 
-    m_jsonData["all"] = m_totalPercent;
-    m_jsonData["usr"] = m_userPercent;
-    m_jsonData["sys"] = m_sysPercent;
+    m_data.set_all(m_totalPercent);
+    m_data.set_usr(m_userPercent);
+    m_data.set_sys(m_sysPercent);
 }
 
 SysProcStat::SysProcStat(std::shared_ptr<Options> &options)
@@ -86,9 +86,11 @@ bool SysProcStat::processOnTick(void)
 {
     m_file->seekg(0, std::ios::beg);
 
-    Json::Value head;
-    head["type"] = "stat";
-    head["time"] = time(NULL);
+    tkm::msg::server::Data data;
+    tkm::msg::server::SysProcStat statEvent;
+
+    data.set_what(tkm::msg::server::Data_What_SysProcStat);
+    data.set_timestamp(time(NULL));
 
     std::string line;
     while (std::getline(*m_file, line)) {
@@ -109,21 +111,22 @@ bool SysProcStat::processOnTick(void)
             return false;
         }
 
-        auto updateCpuStatEntry = [this, &head, tokens](const std::shared_ptr<CPUStat> &entry) {
-            uint64_t newUserJiffies = 0;
-            uint64_t newSysJiffies = 0;
+        auto updateCpuStatEntry
+            = [this, &statEvent, tokens](const std::shared_ptr<CPUStat> &entry) {
+                  uint64_t newUserJiffies = 0;
+                  uint64_t newSysJiffies = 0;
 
-            try {
-                newUserJiffies = std::stoul(tokens[statUserJiffiesPos].c_str());
-                newSysJiffies = std::stoul(tokens[statSystemJiffiesPos].c_str());
-            } catch (...) {
-                logError() << "Cannot convert stat data to Jiffies";
-                return;
-            }
+                  try {
+                      newUserJiffies = std::stoul(tokens[statUserJiffiesPos].c_str());
+                      newSysJiffies = std::stoul(tokens[statSystemJiffiesPos].c_str());
+                  } catch (...) {
+                      logError() << "Cannot convert stat data to Jiffies";
+                      return;
+                  }
 
-            entry->updateStats(newUserJiffies, newSysJiffies);
-            head[entry->getName()] = entry->getJsonData();
-        };
+                  entry->updateStats(newUserJiffies, newSysJiffies);
+                  statEvent.mutable_cpu()->CopyFrom(entry->getData());
+              };
 
         auto found = false;
         m_cpus.foreach (
@@ -141,13 +144,14 @@ bool SysProcStat::processOnTick(void)
                 = std::make_shared<CPUStat>(tokens[statCpuNamePos].c_str(), m_usecInterval);
 
             updateCpuStatEntry(entry);
-            head[entry->getName()] = entry->getJsonData();
+            statEvent.mutable_cpu()->CopyFrom(entry->getData());
             m_cpus.append(entry);
             m_cpus.commit();
         }
     }
 
-    writeJsonStream() << head;
+    data.mutable_payload()->PackFrom(statEvent);
+    TaskMonitor()->getNetServer()->sendData(data);
 
     return true;
 }
