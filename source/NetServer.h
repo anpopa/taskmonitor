@@ -47,6 +47,8 @@ public:
     void sendData(const tkm::msg::server::Data &data);
     void notifyClientTerminated(int id);
 
+    bool hasClients(void) { return (m_clients.getSize() > 0); }
+
 private:
     struct sockaddr_in m_addr {
     };

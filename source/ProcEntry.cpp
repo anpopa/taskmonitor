@@ -19,6 +19,10 @@ ProcEntry::ProcEntry(int pid)
 : m_pid(pid)
 {
     m_timer = std::make_shared<Timer>("ProcEntry", [this]() {
+        // We only read task acct if we have clients
+        if (!TaskMonitor()->getNetServer()->hasClients()) {
+            return true;
+        }
         return (TaskMonitor()->getManager()->getNetLinkStats()->requestTaskAcct(m_pid) != -1)
                    ? true
                    : false;
