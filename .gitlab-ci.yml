@@ -20,9 +20,11 @@ include:
 
 build:
   stage: build
+  variables:
+    GIT_SUBMODULE_STRATEGY: recursive
   before_script:
     - apt update
-    - apt -y install build-essential cmake pkgconf libprotobuf-dev protobuf-compiler libsystemd-dev
+    - apt -y install build-essential cmake pkgconf libnl-3-dev libnl-gnl-3-dev libprotobuf-dev protobuf-compiler libsystemd-dev
   script:
     - mkdir build && cd build && cmake -DWITH_SYSTEMD=ON .. && make
 
