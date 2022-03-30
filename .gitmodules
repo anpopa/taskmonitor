@@ -3,4 +3,4 @@
 	url = https://gitlab.com/anpopa/bswinfra.git
 [submodule "interfaces"]
 	path = interfaces
-	url = https://gitlab.com/anpopa/taskmonitor-interfaces.git
+	url = https://gitlab.com/taskmonitor/taskmonitor-interfaces.git
