@@ -64,13 +64,13 @@ void PressureStat::updateStats(void)
 
                 if (keyVal.size() == 2) {
                     if (keyVal[0] == "avg10") {
-                        data.set_avg10(keyVal[1]);
+                        data.set_avg10(std::stof(keyVal[1]));
                     } else if (keyVal[0] == "avg60") {
-                        data.set_avg60(keyVal[1]);
+                        data.set_avg60(std::stof(keyVal[1]));
                     } else if (keyVal[0] == "avg300") {
-                        data.set_avg300(keyVal[1]);
+                        data.set_avg300(std::stof(keyVal[1]));
                     } else if (keyVal[0] == "total") {
-                        data.set_total(keyVal[1]);
+                        data.set_total(std::stoul(keyVal[1]));
                     }
                 }
             }

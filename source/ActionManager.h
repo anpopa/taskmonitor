@@ -44,8 +44,8 @@ public:
     auto getShared() -> std::shared_ptr<ActionManager> { return shared_from_this(); }
     void enableEvents();
     auto pushRequest(Request &request) -> int;
-    auto getNetLinkStats() -> std::shared_ptr<NetLinkStats> { return m_nlStats; }
-    auto getNetLinkProc() -> std::shared_ptr<NetLinkProc> { return m_nlProc; }
+    auto getNetLinkStats() -> std::shared_ptr<NetLinkStats>& { return m_nlStats; }
+    auto getNetLinkProc() -> std::shared_ptr<NetLinkProc>& { return m_nlProc; }
 
 private:
     auto requestHandler(const Request &request) -> bool;

@@ -54,14 +54,14 @@ public:
             m_mainEventLoop.reset();
         }
     }
-    auto getOptions() -> std::shared_ptr<Options> { return m_options; }
-    auto getNetServer() -> std::shared_ptr<NetServer> { return m_netServer; }
-    auto getManager() -> std::shared_ptr<ActionManager> { return m_manager; }
-    auto getRegistry() -> std::shared_ptr<Registry> { return m_registry; }
-    auto getSysProcStat() -> std::shared_ptr<SysProcStat> { return m_sysProcStat; }
-    auto getSysProcPressure() -> std::shared_ptr<SysProcPressure> { return m_sysProcPressure; }
+    auto getOptions() -> std::shared_ptr<Options>& { return m_options; }
+    auto getNetServer() -> std::shared_ptr<NetServer>& { return m_netServer; }
+    auto getManager() -> std::shared_ptr<ActionManager>& { return m_manager; }
+    auto getRegistry() -> std::shared_ptr<Registry>& { return m_registry; }
+    auto getSysProcStat() -> std::shared_ptr<SysProcStat>& { return m_sysProcStat; }
+    auto getSysProcPressure() -> std::shared_ptr<SysProcPressure>& { return m_sysProcPressure; }
     auto hasConfigFile() -> bool { return m_options->hasConfigFile(); }
-    auto getConfigFile() -> std::shared_ptr<bswi::kf::KeyFile>
+    auto getConfigFile() -> std::shared_ptr<bswi::kf::KeyFile>&
     {
         return m_options->getConfigFile();
     }
