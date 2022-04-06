@@ -96,21 +96,33 @@ void Registry::remEntry(int pid)
     m_list.commit();
 }
 
+// If reading /proc/<pid>/stat fails or the proc name is in the blacklist
+// we mark the pid as blacklisted by returning true
 bool Registry::isBlacklisted(int pid)
 {
     fs::path exePath {};
 
     try {
         exePath = fs::path("/proc") / fs::path(std::to_string(pid)) / fs::path("stat");
-    } catch (...) {
-        return false;
+    } catch (const std::exception &e) {
+        logError() << "Reading stat file for pid " << pid << " fails with exception " << e.what();
+        return true;
     }
 
     if (fs::exists(exePath)) {
-        std::ifstream statFile(exePath.string());
-        std::stringstream buffer;
+        std::unique_ptr<std::ifstream> statFile = nullptr;
 
-        buffer << statFile.rdbuf();
+        try {
+            statFile = std::make_unique<std::ifstream>(exePath.string());
+        } catch (const std::exception &e) {
+            logError() << "Reading stat file for pid " << pid << " fails with exception "
+                       << e.what();
+            return true;
+        }
+
+        std::stringstream buffer;
+        buffer << statFile->rdbuf();
+
         if (m_options->hasConfigFile()) {
             const std::vector<Property> props
                 = m_options->getConfigFile()->getProperties("blacklist", -1);
