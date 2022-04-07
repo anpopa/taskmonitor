@@ -25,47 +25,47 @@ constexpr size_t GAsyncBufferSize = 8192;
 class IAsyncEnvelope
 {
 public:
-    enum class Status { Ok, Error, Again, EndOfFile };
+  enum class Status { Ok, Error, Again, EndOfFile };
 
 public:
-    explicit IAsyncEnvelope(const std::string &name, int fd)
-    : m_name(name)
-    , m_fd(fd)
-    {
-        fcntl(fd, F_SETFL, O_NONBLOCK);
-    }
+  explicit IAsyncEnvelope(const std::string &name, int fd)
+  : m_name(name)
+  , m_fd(fd)
+  {
+    fcntl(fd, F_SETFL, O_NONBLOCK);
+  }
 
-    ~IAsyncEnvelope()
-    {
-        if (m_closeFdOnDelete) {
-            if (m_fd > 0) {
-                ::close(m_fd);
-            }
-        }
+  ~IAsyncEnvelope()
+  {
+    if (m_closeFdOnDelete) {
+      if (m_fd > 0) {
+        ::close(m_fd);
+      }
     }
+  }
 
 public:
-    IAsyncEnvelope(IAsyncEnvelope const &) = delete;
-    void operator=(IAsyncEnvelope const &) = delete;
+  IAsyncEnvelope(IAsyncEnvelope const &) = delete;
+  void operator=(IAsyncEnvelope const &) = delete;
 
-    [[nodiscard]] int getFD() const { return m_fd; }
+  [[nodiscard]] int getFD() const { return m_fd; }
 
-    void setCloseOnDelete(bool state) { m_closeFdOnDelete = state; }
-
-protected:
-    void bufferReset()
-    {
-        memset(&m_buffer, 0, sizeof(m_buffer));
-        m_bufferOffset = 0;
-    }
+  void setCloseOnDelete(bool state) { m_closeFdOnDelete = state; }
 
 protected:
-    std::string m_name {};
-    int m_fd = -1;
-    std::mutex m_mutex;
-    size_t m_bufferOffset = 0;
-    bool m_closeFdOnDelete = false;
-    unsigned char m_buffer[GAsyncBufferSize] {};
+  void bufferReset()
+  {
+    memset(&m_buffer, 0, sizeof(m_buffer));
+    m_bufferOffset = 0;
+  }
+
+protected:
+  std::string m_name{};
+  int m_fd = -1;
+  std::mutex m_mutex;
+  size_t m_bufferOffset = 0;
+  bool m_closeFdOnDelete = false;
+  unsigned char m_buffer[GAsyncBufferSize]{};
 };
 
 } // namespace tkm

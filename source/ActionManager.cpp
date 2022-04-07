@@ -8,6 +8,7 @@
  * @details   Application action manager
  *-
  */
+
 #include <filesystem>
 #include <unistd.h>
 
@@ -21,9 +22,8 @@ using std::string;
 
 namespace tkm::monitor
 {
-
-static auto doActionRegisterEvents(ActionManager *manager, const ActionManager::Request &request)
-    -> bool;
+  
+static bool doActionRegisterEvents(ActionManager *manager, const ActionManager::Request &request);
 
 ActionManager::ActionManager(shared_ptr<Options> &options,
                              shared_ptr<NetLinkStats> &nlStats,
@@ -32,55 +32,55 @@ ActionManager::ActionManager(shared_ptr<Options> &options,
 , m_nlStats(nlStats)
 , m_nlProc(nlProc)
 {
-    m_queue = std::make_shared<AsyncQueue<Request>>(
-        "ActionManagerQueue", [this](const Request &request) { return requestHandler(request); });
+  m_queue = std::make_shared<AsyncQueue<Request>>(
+      "ActionManagerQueue", [this](const Request &request) { return requestHandler(request); });
 }
 
 auto ActionManager::pushRequest(Request &request) -> int
 {
-    return m_queue->push(request);
+  return m_queue->push(request);
 }
 
 void ActionManager::enableEvents()
 {
-    TaskMonitor()->addEventSource(m_queue);
+  TaskMonitor()->addEventSource(m_queue);
 }
 
 auto ActionManager::requestHandler(const Request &request) -> bool
 {
-    switch (request.action) {
-    case ActionManager::Action::RegisterEvents:
-        return doActionRegisterEvents(this, request);
-    default:
-        break;
-    }
+  switch (request.action) {
+  case ActionManager::Action::RegisterEvents:
+    return doActionRegisterEvents(this, request);
+  default:
+    break;
+  }
 
-    logError() << "Unknown action request";
-    return false;
+  logError() << "Unknown action request";
+  return false;
 }
 
 static auto doActionRegisterEvents(ActionManager *manager, const ActionManager::Request &) -> bool
 {
-    logDebug() << "Opt proc at init "
-               << TaskMonitor()->getOptions()->getFor(Options::Key::ReadProcAtInit);
-    if (TaskMonitor()->getOptions()->getFor(Options::Key::ReadProcAtInit) == "true") {
-        TaskMonitor()->getRegistry()->initFromProc();
-    } else {
-        TaskMonitor()->getRegistry()->addEntry(getpid());
-    }
+  logDebug() << "Opt proc at init "
+             << TaskMonitor()->getOptions()->getFor(Options::Key::ReadProcAtInit);
+  if (TaskMonitor()->getOptions()->getFor(Options::Key::ReadProcAtInit) == "true") {
+    TaskMonitor()->getRegistry()->initFromProc();
+  } else {
+    TaskMonitor()->getRegistry()->addEntry(getpid());
+  }
 
-    if (TaskMonitor()->getOptions()->getFor(Options::Key::EnableSysStat) == "true") {
-        TaskMonitor()->getSysProcStat()->startMonitoring();
-    }
+  if (TaskMonitor()->getOptions()->getFor(Options::Key::EnableSysStat) == "true") {
+    TaskMonitor()->getSysProcStat()->startMonitoring();
+  }
 
-    if (TaskMonitor()->getOptions()->getFor(Options::Key::EnableSysPressure) == "true") {
-        TaskMonitor()->getSysProcPressure()->startMonitoring();
-    }
+  if (TaskMonitor()->getOptions()->getFor(Options::Key::EnableSysPressure) == "true") {
+    TaskMonitor()->getSysProcPressure()->startMonitoring();
+  }
 
-    // Start process monitoring
-    manager->getNetLinkProc()->startProcMonitoring();
+  // Start process monitoring
+  manager->getNetLinkProc()->startProcMonitoring();
 
-    return true;
+  return true;
 }
 
 } // namespace tkm::monitor

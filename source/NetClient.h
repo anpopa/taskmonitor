@@ -21,19 +21,19 @@ using namespace bswi::event;
 
 namespace tkm::monitor
 {
-
+  
 class NetClient : public IClient, public std::enable_shared_from_this<NetClient>
 {
 public:
-    explicit NetClient(int fd);
-    ~NetClient();
+  explicit NetClient(int fd);
+  ~NetClient();
 
-    void enableEvents();
-    auto getShared() -> std::shared_ptr<NetClient> { return shared_from_this(); }
+  void enableEvents();
+  auto getShared() -> std::shared_ptr<NetClient> { return shared_from_this(); }
 
 public:
-    NetClient(NetClient const &) = delete;
-    void operator=(NetClient const &) = delete;
+  NetClient(NetClient const &) = delete;
+  void operator=(NetClient const &) = delete;
 };
 
 } // namespace tkm::monitor

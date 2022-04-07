@@ -29,23 +29,23 @@ namespace tkm::monitor
 class NetLinkProc : public Pollable, public std::enable_shared_from_this<NetLinkProc>
 {
 public:
-    explicit NetLinkProc(std::shared_ptr<Options> &options);
-    ~NetLinkProc();
+  explicit NetLinkProc(std::shared_ptr<Options> &options);
+  ~NetLinkProc();
 
 public:
-    NetLinkProc(NetLinkProc const &) = delete;
-    void operator=(NetLinkProc const &) = delete;
+  NetLinkProc(NetLinkProc const &) = delete;
+  void operator=(NetLinkProc const &) = delete;
 
 public:
-    auto getShared() -> std::shared_ptr<NetLinkProc> { return shared_from_this(); }
-    void enableEvents();
-    auto startProcMonitoring(void) -> int;
-    [[nodiscard]] int getFD() const { return m_sockFd; }
+  auto getShared() -> std::shared_ptr<NetLinkProc> { return shared_from_this(); }
+  void enableEvents();
+  auto startProcMonitoring(void) -> int;
+  [[nodiscard]] int getFD() const { return m_sockFd; }
 
 private:
-    std::shared_ptr<Options> m_options = nullptr;
-    struct sockaddr_nl m_addr = {};
-    int m_sockFd = -1;
+  std::shared_ptr<Options> m_options = nullptr;
+  struct sockaddr_nl m_addr = {};
+  int m_sockFd = -1;
 };
 
 } // namespace tkm::monitor

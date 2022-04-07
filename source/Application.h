@@ -31,60 +31,60 @@ using namespace bswi::event;
 
 namespace tkm::monitor
 {
-
+  
 class Application final : public bswi::app::IApplication
 {
 public:
-    explicit Application(const std::string &name,
-                         const std::string &description,
-                         const std::string &configFile);
+  explicit Application(const std::string &name,
+                       const std::string &description,
+                       const std::string &configFile);
 
-    static Application *getInstance()
-    {
-        return appInstance == nullptr
-                   ? appInstance = new Application("TKM",
-                                                   "TaskMonitor Application",
-                                                   tkmDefaults.getFor(Defaults::Default::ConfPath))
-                   : appInstance;
-    }
+  static Application *getInstance()
+  {
+    return appInstance == nullptr
+               ? appInstance = new Application("TKM",
+                                               "TaskMonitor Application",
+                                               tkmDefaults.getFor(Defaults::Default::ConfPath))
+               : appInstance;
+  }
 
-    void stop() final
-    {
-        if (m_running) {
-            m_mainEventLoop.reset();
-        }
+  void stop() final
+  {
+    if (m_running) {
+      m_mainEventLoop.reset();
     }
-    auto getOptions() -> std::shared_ptr<Options> & { return m_options; }
-    auto getNetServer() -> std::shared_ptr<NetServer> & { return m_netServer; }
-    auto getManager() -> std::shared_ptr<ActionManager> & { return m_manager; }
-    auto getRegistry() -> std::shared_ptr<Registry> & { return m_registry; }
-    auto getSysProcStat() -> std::shared_ptr<SysProcStat> & { return m_sysProcStat; }
-    auto getSysProcPressure() -> std::shared_ptr<SysProcPressure> & { return m_sysProcPressure; }
-    auto hasConfigFile() -> bool { return m_options->hasConfigFile(); }
-    auto getConfigFile() -> std::shared_ptr<bswi::kf::KeyFile> &
-    {
-        return m_options->getConfigFile();
-    }
+  }
+  auto getOptions() -> std::shared_ptr<Options> & { return m_options; }
+  auto getNetServer() -> std::shared_ptr<NetServer> & { return m_netServer; }
+  auto getManager() -> std::shared_ptr<ActionManager> & { return m_manager; }
+  auto getRegistry() -> std::shared_ptr<Registry> & { return m_registry; }
+  auto getSysProcStat() -> std::shared_ptr<SysProcStat> & { return m_sysProcStat; }
+  auto getSysProcPressure() -> std::shared_ptr<SysProcPressure> & { return m_sysProcPressure; }
+  auto hasConfigFile() -> bool { return m_options->hasConfigFile(); }
+  auto getConfigFile() -> std::shared_ptr<bswi::kf::KeyFile> &
+  {
+    return m_options->getConfigFile();
+  }
 
 public:
-    Application(Application const &) = delete;
-    void operator=(Application const &) = delete;
+  Application(Application const &) = delete;
+  void operator=(Application const &) = delete;
 
 private:
-    void startWatchdog(void);
+  void startWatchdog(void);
 
 private:
-    std::shared_ptr<Options> m_options = nullptr;
-    std::shared_ptr<NetServer> m_netServer = nullptr;
-    std::shared_ptr<NetLinkStats> m_nlStats = nullptr;
-    std::shared_ptr<NetLinkProc> m_nlProc = nullptr;
-    std::shared_ptr<ActionManager> m_manager = nullptr;
-    std::shared_ptr<Registry> m_registry = nullptr;
-    std::shared_ptr<SysProcStat> m_sysProcStat = nullptr;
-    std::shared_ptr<SysProcPressure> m_sysProcPressure = nullptr;
+  std::shared_ptr<Options> m_options = nullptr;
+  std::shared_ptr<NetServer> m_netServer = nullptr;
+  std::shared_ptr<NetLinkStats> m_nlStats = nullptr;
+  std::shared_ptr<NetLinkProc> m_nlProc = nullptr;
+  std::shared_ptr<ActionManager> m_manager = nullptr;
+  std::shared_ptr<Registry> m_registry = nullptr;
+  std::shared_ptr<SysProcStat> m_sysProcStat = nullptr;
+  std::shared_ptr<SysProcPressure> m_sysProcPressure = nullptr;
 
 private:
-    static Application *appInstance;
+  static Application *appInstance;
 };
 
 } // namespace tkm::monitor

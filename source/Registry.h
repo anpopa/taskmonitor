@@ -28,41 +28,41 @@ namespace tkm::monitor
 class Registry
 {
 public:
-    explicit Registry(std::shared_ptr<Options> &options)
-    : m_options(options)
-    {
-        long pollInterval = -1;
+  explicit Registry(std::shared_ptr<Options> &options)
+  : m_options(options)
+  {
+    long pollInterval = -1;
 
-        try {
-            pollInterval = std::stol(m_options->getFor(Options::Key::ProcPollInterval));
-        } catch (...) {
-            // Discard non pid entries
-        }
+    try {
+      pollInterval = std::stol(m_options->getFor(Options::Key::ProcPollInterval));
+    } catch (...) {
+      // Discard non pid entries
+    }
 
-        if (pollInterval != -1) {
-            m_pollInterval = pollInterval;
-        }
-    };
-    ~Registry() = default;
-
-public:
-    Registry(Registry const &) = delete;
-    void operator=(Registry const &) = delete;
+    if (pollInterval != -1) {
+      m_pollInterval = pollInterval;
+    }
+  };
+  ~Registry() = default;
 
 public:
-    void initFromProc(void);
-    long getPollInterval(void) { return m_pollInterval; }
-    void addEntry(int pid);
-    void remEntry(int pid);
-    auto getEntry(int pid) -> const std::shared_ptr<ProcEntry>;
+  Registry(Registry const &) = delete;
+  void operator=(Registry const &) = delete;
+
+public:
+  void initFromProc(void);
+  long getPollInterval(void) { return m_pollInterval; }
+  void addEntry(int pid);
+  void remEntry(int pid);
+  auto getEntry(int pid) -> const std::shared_ptr<ProcEntry>;
 
 private:
-    bool isBlacklisted(int pid);
+  bool isBlacklisted(int pid);
 
 private:
-    std::shared_ptr<Options> m_options = nullptr;
-    bswi::util::SafeList<std::shared_ptr<ProcEntry>> m_list {"RegistryList"};
-    long m_pollInterval = 3000000;
+  std::shared_ptr<Options> m_options = nullptr;
+  bswi::util::SafeList<std::shared_ptr<ProcEntry>> m_list{"RegistryList"};
+  long m_pollInterval = 3000000;
 };
 
 } // namespace tkm::monitor

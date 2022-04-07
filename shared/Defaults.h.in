@@ -20,61 +20,61 @@ namespace tkm::monitor
 class Defaults
 {
 public:
-    enum class Default {
-        Version,
-        ConfPath,
-        StatPollInterval,
-        ProcPollInterval,
-        PressurePollInterval,
-        RxBufferSize,
-        TxBufferSize,
-        MsgBufferSize,
-        ReadProcAtInit,
-        SkipIfNoClients,
-        EnableSysStat,
-        SysStatsPrintToLog,
-        EnableSysPressure,
-        EnableNetServer,
-        NetServerAddress,
-        NetServerPort,
-        NetServerStartIfPath,
-        NetServerStartOnSignal,
-        PressureWithCPU,
-        PressureWithMemory,
-        PressureWithIO
-    };
+  enum class Default {
+    Version,
+    ConfPath,
+    StatPollInterval,
+    ProcPollInterval,
+    PressurePollInterval,
+    RxBufferSize,
+    TxBufferSize,
+    MsgBufferSize,
+    ReadProcAtInit,
+    SkipIfNoClients,
+    EnableSysStat,
+    SysStatsPrintToLog,
+    EnableSysPressure,
+    EnableNetServer,
+    NetServerAddress,
+    NetServerPort,
+    NetServerStartIfPath,
+    NetServerStartOnSignal,
+    PressureWithCPU,
+    PressureWithMemory,
+    PressureWithIO
+  };
 
-    Defaults()
-    {
-        m_table.insert(std::pair<Default, std::string>(Default::Version, "@GIT_SHA1@"));
-        m_table.insert(std::pair<Default, std::string>(Default::ConfPath, "@TKM_CONFIG_FILE@"));
-        m_table.insert(std::pair<Default, std::string>(Default::StatPollInterval, "1000000"));
-        m_table.insert(std::pair<Default, std::string>(Default::ProcPollInterval, "3000000"));
-        m_table.insert(std::pair<Default, std::string>(Default::PressurePollInterval, "5000000"));
-        m_table.insert(std::pair<Default, std::string>(Default::RxBufferSize, "1048576"));
-        m_table.insert(std::pair<Default, std::string>(Default::TxBufferSize, "1048576"));
-        m_table.insert(std::pair<Default, std::string>(Default::MsgBufferSize, "1048576"));
-        m_table.insert(std::pair<Default, std::string>(Default::ReadProcAtInit, "true"));
-        m_table.insert(std::pair<Default, std::string>(Default::SkipIfNoClients, "false"));
-        m_table.insert(std::pair<Default, std::string>(Default::EnableSysStat, "true"));
-        m_table.insert(std::pair<Default, std::string>(Default::SysStatsPrintToLog, "true"));
-        m_table.insert(std::pair<Default, std::string>(Default::EnableSysPressure, "true"));
-        m_table.insert(std::pair<Default, std::string>(Default::EnableNetServer, "true"));
-        m_table.insert(std::pair<Default, std::string>(Default::NetServerAddress, "localhost"));
-        m_table.insert(std::pair<Default, std::string>(Default::NetServerPort, "3357"));
-        m_table.insert(std::pair<Default, std::string>(Default::NetServerStartIfPath, "none"));
-        m_table.insert(std::pair<Default, std::string>(Default::NetServerStartOnSignal, "true"));
-        m_table.insert(std::pair<Default, std::string>(Default::PressureWithCPU, "true"));
-        m_table.insert(std::pair<Default, std::string>(Default::PressureWithMemory, "true"));
-        m_table.insert(std::pair<Default, std::string>(Default::PressureWithIO, "true"));
-    }
+  Defaults()
+  {
+    m_table.insert(std::pair<Default, std::string>(Default::Version, "@GIT_SHA1@"));
+    m_table.insert(std::pair<Default, std::string>(Default::ConfPath, "@TKM_CONFIG_FILE@"));
+    m_table.insert(std::pair<Default, std::string>(Default::StatPollInterval, "1000000"));
+    m_table.insert(std::pair<Default, std::string>(Default::ProcPollInterval, "3000000"));
+    m_table.insert(std::pair<Default, std::string>(Default::PressurePollInterval, "5000000"));
+    m_table.insert(std::pair<Default, std::string>(Default::RxBufferSize, "1048576"));
+    m_table.insert(std::pair<Default, std::string>(Default::TxBufferSize, "1048576"));
+    m_table.insert(std::pair<Default, std::string>(Default::MsgBufferSize, "1048576"));
+    m_table.insert(std::pair<Default, std::string>(Default::ReadProcAtInit, "true"));
+    m_table.insert(std::pair<Default, std::string>(Default::SkipIfNoClients, "false"));
+    m_table.insert(std::pair<Default, std::string>(Default::EnableSysStat, "true"));
+    m_table.insert(std::pair<Default, std::string>(Default::SysStatsPrintToLog, "true"));
+    m_table.insert(std::pair<Default, std::string>(Default::EnableSysPressure, "true"));
+    m_table.insert(std::pair<Default, std::string>(Default::EnableNetServer, "true"));
+    m_table.insert(std::pair<Default, std::string>(Default::NetServerAddress, "localhost"));
+    m_table.insert(std::pair<Default, std::string>(Default::NetServerPort, "3357"));
+    m_table.insert(std::pair<Default, std::string>(Default::NetServerStartIfPath, "none"));
+    m_table.insert(std::pair<Default, std::string>(Default::NetServerStartOnSignal, "true"));
+    m_table.insert(std::pair<Default, std::string>(Default::PressureWithCPU, "true"));
+    m_table.insert(std::pair<Default, std::string>(Default::PressureWithMemory, "true"));
+    m_table.insert(std::pair<Default, std::string>(Default::PressureWithIO, "true"));
+  }
 
-    auto getFor(Default key) -> std::string & { return m_table.at(key); }
+  auto getFor(Default key) -> std::string & { return m_table.at(key); }
 
 private:
-    std::map<Default, std::string> m_table;
+  std::map<Default, std::string> m_table;
 };
 
-static Defaults tkmDefaults {};
+static Defaults tkmDefaults{};
 
 } // namespace tkm::monitor

@@ -30,53 +30,53 @@ EnvelopeReader::EnvelopeReader(int fd)
 
 auto EnvelopeReader::next(tkm::msg::Envelope &envelope) -> IAsyncEnvelope::Status
 {
-    std::scoped_lock lk(m_mutex);
+  std::scoped_lock lk(m_mutex);
 
-    auto retVal = read(m_fd, m_buffer + m_bufferOffset, sizeof(m_buffer) - m_bufferOffset);
-    if (retVal < 0) {
-        if (errno == EWOULDBLOCK || (EWOULDBLOCK != EAGAIN && errno == EAGAIN)) {
-            if (m_bufferOffset == 0) {
-                return Status::Again;
-            }
-        } else {
-            logDebug() << "Read error[ " << errno << "]: " << strerror(errno);
-            return Status::Error;
-        }
-    } else if (retVal == 0) {
-        if (m_bufferOffset == 0) {
-            return Status::EndOfFile;
-        }
-    } else {
-        m_bufferOffset += retVal;
-    }
-
-    // Check if we have a complete envelope
-    pbio::ArrayInputStream inputArray(m_buffer, m_bufferOffset);
-    pbio::CodedInputStream codedInput(&inputArray);
-    uint32_t messageSize;
-
-    codedInput.ReadVarint32(&messageSize);
-    if ((messageSize + sizeof(uint64_t)) > m_bufferOffset) {
-        // We don't have the complete message
+  auto retVal = read(m_fd, m_buffer + m_bufferOffset, sizeof(m_buffer) - m_bufferOffset);
+  if (retVal < 0) {
+    if (errno == EWOULDBLOCK || (EWOULDBLOCK != EAGAIN && errno == EAGAIN)) {
+      if (m_bufferOffset == 0) {
         return Status::Again;
-    }
-
-    codedInput.PushLimit(messageSize);
-    if (!envelope.ParseFromCodedStream(&codedInput)) {
-        bufferReset();
-        return Status::Error;
-    }
-
-    if ((messageSize + sizeof(uint64_t)) < m_bufferOffset) {
-        memmove(m_buffer,
-                m_buffer + (sizeof(uint64_t) + messageSize),
-                (m_bufferOffset - (sizeof(uint64_t) + messageSize)));
-        m_bufferOffset -= messageSize + sizeof(uint64_t);
+      }
     } else {
-        bufferReset();
+      logDebug() << "Read error[ " << errno << "]: " << strerror(errno);
+      return Status::Error;
     }
+  } else if (retVal == 0) {
+    if (m_bufferOffset == 0) {
+      return Status::EndOfFile;
+    }
+  } else {
+    m_bufferOffset += retVal;
+  }
 
-    return Status::Ok;
+  // Check if we have a complete envelope
+  pbio::ArrayInputStream inputArray(m_buffer, m_bufferOffset);
+  pbio::CodedInputStream codedInput(&inputArray);
+  uint32_t messageSize;
+
+  codedInput.ReadVarint32(&messageSize);
+  if ((messageSize + sizeof(uint64_t)) > m_bufferOffset) {
+    // We don't have the complete message
+    return Status::Again;
+  }
+
+  codedInput.PushLimit(messageSize);
+  if (!envelope.ParseFromCodedStream(&codedInput)) {
+    bufferReset();
+    return Status::Error;
+  }
+
+  if ((messageSize + sizeof(uint64_t)) < m_bufferOffset) {
+    memmove(m_buffer,
+            m_buffer + (sizeof(uint64_t) + messageSize),
+            (m_bufferOffset - (sizeof(uint64_t) + messageSize)));
+    m_bufferOffset -= messageSize + sizeof(uint64_t);
+  } else {
+    bufferReset();
+  }
+
+  return Status::Ok;
 }
 
 } // namespace tkm

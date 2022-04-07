@@ -1,23 +1,8 @@
-#http://clang.llvm.org/docs/ClangFormatStyleOptions.html
-
-# The style used for all options not specifically set in the configuration.
-# This option is supported only in the clang-format configuration (both within -style='{...}' and the .clang-format file).
-# LLVM A style complying with the LLVM coding standards
-# Google A style complying with Google’s C++ style guide
-# Chromium A style complying with Chromium’s style guide
-# Mozilla A style complying with Mozilla’s style guide
-# WebKit A style complying with WebKit’s style guide
-BasedOnStyle: Webkit
-
-# The extra indent or outdent of access modifiers, e.g. public:.
-AccessModifierOffset: -4
+BasedOnStyle: LLVM
 
 # If true, horizontally aligns arguments after an open bracket.
 # This applies to round brackets (parentheses), angle brackets and square brackets. This will result in formattings like code someLongFunction(argument1, argument2); endcode
 AlignAfterOpenBracket: true
-
-# If true, aligns escaped newlines as far left as possible. Otherwise puts them into the right-most column.
-#AlignEscapedNewlinesLeft
 
 # If true, horizontally align operands of binary and ternary expressions.
 AlignOperands: true
@@ -26,7 +11,7 @@ AlignOperands: true
 AlignTrailingComments: true
 
 # Allow putting all parameters of a function declaration onto the next line even if BinPackParameters is false.
-AllowAllParametersOfDeclarationOnNextLine: false
+AllowAllParametersOfDeclarationOnNextLine: true
 
 # Allows contracting simple braced statements to a single line.
 # E.g., this allows if (a) { return; } to be put on a single line.
@@ -65,12 +50,6 @@ BinPackArguments: false
 # on the same line or will have one line each.
 BinPackParameters: false
 
-# The way to wrap binary operators.
-# BOS_None (in configuration: None) Break after operators.
-# BOS_NonAssignment (in configuration: NonAssignment) Break before operators that aren’t assignments.
-# BOS_All (in configuration: All) Break before operators.
-#BreakBeforeBinaryOperators: None
-
 # The brace breaking style to use.
 # BS_Attach (in configuration: Attach) Always attach braces to surrounding context.
 # BS_Linux (in configuration: Linux) Like Attach, but break before braces on function, namespace and class definitions.
@@ -95,14 +74,8 @@ ColumnLimit: 100
 # A regular expression that describes comments with special meaning, which should not be split into lines or otherwise changed.
 CommentPragmas: "\/*(.*)*\/"
 
-# If the constructor initializers don’t fit on a line, put each initializer on its own line.
-#ConstructorInitializerAllOnOneLineOrOnePerLine: false
-
 # The number of characters to use for indentation of constructor initializer lists.
 ConstructorInitializerIndentWidth: 0
-
-# Indent width for line continuations.
-ContinuationIndentWidth: 4
 
 # If true, format braced lists as best suited for C++11 braced lists.
 # Important differences: - No spaces inside the braced list. - No line break before the closing brace. - Indentation with the continuation indent, not with the block indent.
@@ -112,39 +85,9 @@ Cpp11BracedListStyle: true
 # If true, analyze the formatted file for the most common alignment of & and *. Point
 DerivePointerAlignment: false
 
-# Disables formatting at all.
-#DisableFormat: false
-
-# If true, clang-format detects whether function calls and definitions are formatted with one parameter per line.
-# Each call can be bin-packed, one-per-line or inconclusive. If it is inconclusive, e.g. completely on one line, but a decision needs to be made, clang-format analyzes whether there are other bin-packed cases in the input file and act accordingly.
-# NOTE: This is an experimental flag, that might go away or be renamed. Do not use this in config files, etc. Use at your own risk.
-#ExperimentalAutoDetectBinPacking: false
-
-# A vector of macros that should be interpreted as foreach loops instead of as function calls.
-# These are expected to be macros of the form: code FOREACH(<variable-declaration>, ...) <loop-body> endcode
-# For example: BOOST_FOREACH.
-#ForEachMacros (std::vector<std::string>)
-
 # Indent case labels one level from the switch statement.
 # When false, use the same indentation level as for the switch statement. Switch statement body is always indented one level more than case labels.
 IndentCaseLabels: false
-
-# The number of columns to use for indentation.
-IndentWidth: 4
-
-# Indent if a function definition or declaration is wrapped after the type.
-#IndentWrappedFunctionNames: false
-
-# If true, empty lines at the start of blocks are kept.
-#KeepEmptyLinesAtTheStartOfBlocks: false
-
-# Language, this format style is targeted at.
-# LK_None (in configuration: None) Do not use.
-# LK_Cpp (in configuration: Cpp) Should be used for C, C++, ObjectiveC, ObjectiveC++.
-# LK_Java (in configuration: Java) Should be used for Java.
-# LK_JavaScript (in configuration: JavaScript) Should be used for JavaScript.
-# LK_Proto (in configuration: Proto) Should be used for Protocol Buffers (https://developers.google.com/protocol-buffers/).
-Language: Cpp
 
 # The maximum number of consecutive empty lines to keep.
 MaxEmptyLinesToKeep: 1
@@ -154,33 +97,6 @@ MaxEmptyLinesToKeep: 1
 # NI_Inner (in configuration: Inner) Indent only in inner namespaces (nested in other namespaces).
 # NI_All (in configuration: All) Indent in all namespaces.
 NamespaceIndentation: None
-
-# The number of characters to use for indentation of ObjC blocks.
-#ObjCBlockIndentWidth: 4
-
-# Add a space after @property in Objective-C, i.e. use \@property (readonly) instead of \@property(readonly).
-#ObjCSpaceAfterProperty: false
-
-# Add a space in front of an Objective-C protocol list, i.e. use Foo <Protocol> instead of Foo<Protocol>.
-#ObjCSpaceBeforeProtocolList: false
-
-# The penalty for breaking a function call after “call(”.
-#PenaltyBreakBeforeFirstCallParameter (unsigned)
-
-# The penalty for each line break introduced inside a comment.
-#PenaltyBreakComment (unsigned)
-
-# The penalty for breaking before the first <<.
-#PenaltyBreakFirstLessLess (unsigned)
-
-# The penalty for each line break introduced inside a string literal.
-#PenaltyBreakString (unsigned)
-
-# The penalty for each character outside of the column limit.
-#PenaltyExcessCharacter (unsigned)
-
-# Penalty for putting the return type of a function onto its own line.
-#PenaltyReturnTypeOnItsOwnLine (unsigned)
 
 # If true, analyze the formatted file for the most common alignment of & and *. PointerAlignment is then used only as fallback.
 PointerAlignment: Right
@@ -224,12 +140,3 @@ SpacesInSquareBrackets: false
 # LS_Cpp11 (in configuration: Cpp11) Use features of C++11 (e.g. A<A<int>> instead of A<A<int> >).
 # LS_Auto (in configuration: Auto) Automatic detection based on the input.
 Standard: Cpp11
-
-# The number of columns used for tab stops.
-#TabWidth: 4
-
-# The way to use tab characters in the resulting file.
-# UT_Never (in configuration: Never) Never use tab.
-# UT_ForIndentation (in configuration: ForIndentation) Use tabs only for indentation.
-# UT_Always (in configuration: Always) Use tabs whenever we need to fill whitespace that spans at least from one tab stop to the next one.
-UseTab: Never

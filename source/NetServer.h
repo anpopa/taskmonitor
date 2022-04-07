@@ -33,28 +33,28 @@ namespace tkm::monitor
 class NetServer : public Pollable, public std::enable_shared_from_this<NetServer>
 {
 public:
-    NetServer();
-    ~NetServer();
+  NetServer();
+  ~NetServer();
 
 public:
-    NetServer(NetServer const &) = delete;
-    void operator=(NetServer const &) = delete;
+  NetServer(NetServer const &) = delete;
+  void operator=(NetServer const &) = delete;
 
-    void bindAndListen();
-    void invalidate();
-    void enableEvents();
-    auto getShared() -> std::shared_ptr<NetServer> { return shared_from_this(); }
-    void sendData(const tkm::msg::server::Data &data);
-    void notifyClientTerminated(int id);
+  void bindAndListen();
+  void invalidate();
+  void enableEvents();
+  auto getShared() -> std::shared_ptr<NetServer> { return shared_from_this(); }
+  void sendData(const tkm::msg::server::Data &data);
+  void notifyClientTerminated(int id);
 
-    bool hasClients(void) { return (m_clients.getSize() > 0); }
+  bool hasClients(void) { return (m_clients.getSize() > 0); }
 
 private:
-    struct sockaddr_in m_addr {
-    };
-    bswi::util::SafeList<std::shared_ptr<IClient>> m_clients {"ClientList"};
-    int m_sockFd = -1;
-    bool m_bound = false;
+  struct sockaddr_in m_addr {
+  };
+  bswi::util::SafeList<std::shared_ptr<IClient>> m_clients{"ClientList"};
+  int m_sockFd = -1;
+  bool m_bound = false;
 };
 
 } // namespace tkm::monitor

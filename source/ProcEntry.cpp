@@ -18,55 +18,54 @@ namespace tkm::monitor
 ProcEntry::ProcEntry(int pid)
 : m_pid(pid)
 {
-    if (TaskMonitor()->getOptions()->getFor(Options::Key::SkipIfNoClients) == "true") {
-        m_skipIfNoClients = true;
-    }
+  if (TaskMonitor()->getOptions()->getFor(Options::Key::SkipIfNoClients) == "true") {
+    m_skipIfNoClients = true;
+  }
 
-    m_timer = std::make_shared<Timer>("ProcEntry", [this]() {
-        if (!TaskMonitor()->getNetServer()->hasClients() && m_skipIfNoClients) {
-            return true;
-        }
-        return (TaskMonitor()->getManager()->getNetLinkStats()->requestTaskAcct(m_pid) != -1)
-                   ? true
-                   : false;
-    });
+  m_timer = std::make_shared<Timer>("ProcEntry", [this]() {
+    if (!TaskMonitor()->getNetServer()->hasClients() && m_skipIfNoClients) {
+      return true;
+    }
+    return (TaskMonitor()->getManager()->getNetLinkStats()->requestTaskAcct(m_pid) != -1) ? true
+                                                                                          : false;
+  });
 };
 
 void ProcEntry::startMonitoring(int interval)
 {
-    m_pollInterval = interval;
-    m_timer->start(interval, true);
-    TaskMonitor()->addEventSource(m_timer);
+  m_pollInterval = interval;
+  m_timer->start(interval, true);
+  TaskMonitor()->addEventSource(m_timer);
 }
 
 void ProcEntry::disable(void)
 {
-    m_timer->stop();
-    TaskMonitor()->remEventSource(m_timer);
+  m_timer->stop();
+  TaskMonitor()->remEventSource(m_timer);
 }
 
 auto ProcEntry::getUserCPUPercent(uint64_t cpuTime) -> int
 {
-    if (m_lastUserCPUTime == 0) {
-        m_lastUserCPUTime = cpuTime;
-    }
-
-    auto userCPUPercent = ((cpuTime - m_lastUserCPUTime) * 100) / m_pollInterval;
+  if (m_lastUserCPUTime == 0) {
     m_lastUserCPUTime = cpuTime;
+  }
 
-    return userCPUPercent;
+  auto userCPUPercent = ((cpuTime - m_lastUserCPUTime) * 100) / m_pollInterval;
+  m_lastUserCPUTime = cpuTime;
+
+  return userCPUPercent;
 }
 
 auto ProcEntry::getSystemCPUPercent(uint64_t cpuTime) -> int
 {
-    if (m_lastSystemCPUTime == 0) {
-        m_lastSystemCPUTime = cpuTime;
-    }
-
-    auto sysCPUPercent = ((cpuTime - m_lastSystemCPUTime) * 100) / m_pollInterval;
+  if (m_lastSystemCPUTime == 0) {
     m_lastSystemCPUTime = cpuTime;
+  }
 
-    return sysCPUPercent;
+  auto sysCPUPercent = ((cpuTime - m_lastSystemCPUTime) * 100) / m_pollInterval;
+  m_lastSystemCPUTime = cpuTime;
+
+  return sysCPUPercent;
 }
 
 } // namespace tkm::monitor

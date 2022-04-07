@@ -24,37 +24,37 @@ namespace tkm::monitor
 class Options
 {
 public:
-    enum class Key { 
-        StatPollInterval,
-        ProcPollInterval,
-        PressurePollInterval,
-        RxBufferSize,
-        TxBufferSize,
-        MsgBufferSize,
-        ReadProcAtInit,
-        SkipIfNoClients,
-        EnableNetServer,
-        NetServerAddress,
-        NetServerPort,
-        NetServerStartIfPath,
-        NetServerStartOnSignal,
-        EnableSysPressure,
-        EnableSysStat,
-        SysStatsPrintToLog,
-        PressureWithCPU,
-        PressureWithMemory,
-        PressureWithIO
-    };
+  enum class Key {
+    StatPollInterval,
+    ProcPollInterval,
+    PressurePollInterval,
+    RxBufferSize,
+    TxBufferSize,
+    MsgBufferSize,
+    ReadProcAtInit,
+    SkipIfNoClients,
+    EnableNetServer,
+    NetServerAddress,
+    NetServerPort,
+    NetServerStartIfPath,
+    NetServerStartOnSignal,
+    EnableSysPressure,
+    EnableSysStat,
+    SysStatsPrintToLog,
+    PressureWithCPU,
+    PressureWithMemory,
+    PressureWithIO
+  };
 
 public:
-    Options(const std::string &configFile);
+  Options(const std::string &configFile);
 
-    auto getFor(Key key) -> std::string const;
-    auto hasConfigFile() -> bool { return m_configFile != nullptr; }
-    auto getConfigFile() -> std::shared_ptr<bswi::kf::KeyFile>& { return m_configFile; }
+  auto getFor(Key key) -> std::string const;
+  auto hasConfigFile() -> bool { return m_configFile != nullptr; }
+  auto getConfigFile() -> std::shared_ptr<bswi::kf::KeyFile> & { return m_configFile; }
 
 private:
-    std::shared_ptr<bswi::kf::KeyFile> m_configFile = nullptr;
+  std::shared_ptr<bswi::kf::KeyFile> m_configFile = nullptr;
 };
 
 } // namespace tkm::monitor
