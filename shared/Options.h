@@ -50,7 +50,7 @@ public:
   Options(const std::string &configFile);
 
   auto getFor(Key key) -> std::string const;
-  auto hasConfigFile() -> bool { return m_configFile != nullptr; }
+  bool hasConfigFile() { return m_configFile != nullptr; }
   auto getConfigFile() -> std::shared_ptr<bswi::kf::KeyFile> & { return m_configFile; }
 
 private:

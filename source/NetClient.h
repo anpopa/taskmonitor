@@ -21,7 +21,7 @@ using namespace bswi::event;
 
 namespace tkm::monitor
 {
-  
+
 class NetClient : public IClient, public std::enable_shared_from_this<NetClient>
 {
 public:

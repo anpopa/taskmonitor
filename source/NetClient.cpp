@@ -23,7 +23,7 @@ using std::string;
 
 namespace tkm::monitor
 {
-  
+
 static bool doCreateSession(const shared_ptr<NetClient> &client, tkm::msg::client::Request &rq);
 static bool doStreamState(const shared_ptr<NetClient> &client, tkm::msg::client::Request &rq);
 

@@ -24,7 +24,7 @@ using std::string;
 
 namespace tkm::monitor
 {
-  
+
 static bool shouldStartNetServer(const std::shared_ptr<tkm::monitor::Options> &opts);
 
 Application *Application::appInstance = nullptr;

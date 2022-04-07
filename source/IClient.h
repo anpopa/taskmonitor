@@ -27,7 +27,7 @@ using namespace bswi::event;
 
 namespace tkm::monitor
 {
-  
+
 class IClient : public Pollable
 {
 public:
@@ -53,7 +53,7 @@ public:
   {
     return m_reader->next(envelope);
   }
-  auto writeEnvelope(const tkm::msg::Envelope &envelope) -> bool
+  bool writeEnvelope(const tkm::msg::Envelope &envelope)
   {
     if (m_writer->send(envelope) == IAsyncEnvelope::Status::Ok) {
       return m_writer->flush();

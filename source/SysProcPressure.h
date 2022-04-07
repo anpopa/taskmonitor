@@ -25,7 +25,7 @@ using namespace bswi::event;
 
 namespace tkm::monitor
 {
-  
+
 struct PressureStat : public std::enable_shared_from_this<PressureStat> {
 public:
   explicit PressureStat(const std::string &name)

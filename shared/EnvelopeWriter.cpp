@@ -61,13 +61,13 @@ auto EnvelopeWriter::send(const tkm::msg::Envelope &envelope) -> IAsyncEnvelope:
   return Status::Ok;
 }
 
-auto EnvelopeWriter::flush() -> bool
+bool EnvelopeWriter::flush()
 {
   std::scoped_lock lk(m_mutex);
   return flushInternal();
 }
 
-auto EnvelopeWriter::flushInternal() -> bool
+bool EnvelopeWriter::flushInternal()
 {
   const auto maxRetry = 4;
   const auto sleepTimeMs = 250;

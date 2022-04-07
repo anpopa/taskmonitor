@@ -25,14 +25,14 @@ public:
   explicit EnvelopeWriter(int fd);
 
   auto send(const tkm::msg::Envelope &envelope) -> IAsyncEnvelope::Status;
-  auto flush() -> bool;
+  bool flush();
 
 public:
   EnvelopeWriter(EnvelopeWriter const &) = delete;
   void operator=(EnvelopeWriter const &) = delete;
 
 private:
-  auto flushInternal() -> bool;
+  bool flushInternal();
 };
 
 } // namespace tkm

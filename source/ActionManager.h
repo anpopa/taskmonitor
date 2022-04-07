@@ -48,7 +48,7 @@ public:
   auto getNetLinkProc() -> std::shared_ptr<NetLinkProc> & { return m_nlProc; }
 
 private:
-  auto requestHandler(const Request &request) -> bool;
+  bool requestHandler(const Request &request);
 
 private:
   std::shared_ptr<Options> m_options = nullptr;

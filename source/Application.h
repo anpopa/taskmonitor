@@ -31,7 +31,7 @@ using namespace bswi::event;
 
 namespace tkm::monitor
 {
-  
+
 class Application final : public bswi::app::IApplication
 {
 public:
@@ -60,7 +60,7 @@ public:
   auto getRegistry() -> std::shared_ptr<Registry> & { return m_registry; }
   auto getSysProcStat() -> std::shared_ptr<SysProcStat> & { return m_sysProcStat; }
   auto getSysProcPressure() -> std::shared_ptr<SysProcPressure> & { return m_sysProcPressure; }
-  auto hasConfigFile() -> bool { return m_options->hasConfigFile(); }
+  bool hasConfigFile() { return m_options->hasConfigFile(); }
   auto getConfigFile() -> std::shared_ptr<bswi::kf::KeyFile> &
   {
     return m_options->getConfigFile();

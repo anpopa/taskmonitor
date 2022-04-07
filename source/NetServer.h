@@ -46,7 +46,6 @@ public:
   auto getShared() -> std::shared_ptr<NetServer> { return shared_from_this(); }
   void sendData(const tkm::msg::server::Data &data);
   void notifyClientTerminated(int id);
-
   bool hasClients(void) { return (m_clients.getSize() > 0); }
 
 private:

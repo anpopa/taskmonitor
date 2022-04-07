@@ -22,7 +22,7 @@ using std::string;
 
 namespace tkm::monitor
 {
-  
+
 static bool doActionRegisterEvents(ActionManager *manager, const ActionManager::Request &request);
 
 ActionManager::ActionManager(shared_ptr<Options> &options,

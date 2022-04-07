@@ -55,8 +55,9 @@ auto main(int argc, char **argv) -> int
   bool help = false;
   int c;
 
-  struct option longopts[] = {
-      {"config", required_argument, nullptr, 'c'}, {"help", no_argument, nullptr, 'h'}, {nullptr, 0, nullptr, 0}};
+  struct option longopts[] = {{"config", required_argument, nullptr, 'c'},
+                              {"help", no_argument, nullptr, 'h'},
+                              {nullptr, 0, nullptr, 0}};
 
   while ((c = getopt_long(argc, argv, "c:h", longopts, &long_index)) != -1) {
     switch (c) {
@@ -72,7 +73,8 @@ auto main(int argc, char **argv) -> int
   }
 
   if (help) {
-    cout << "TaskMonitor: Monitor system resources" << tkmDefaults.getFor(Defaults::Default::Version) << "\n\n";
+    cout << "TaskMonitor: Monitor system resources"
+         << tkmDefaults.getFor(Defaults::Default::Version) << "\n\n";
     cout << "Usage: taskmonitor [OPTIONS] \n\n";
     cout << "  General:\n";
     cout << "     --config, -c      <string> Configuration file path\n";
