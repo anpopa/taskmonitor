@@ -59,7 +59,7 @@ auto ActionManager::requestHandler(const Request &request) -> bool
   return false;
 }
 
-static auto doActionRegisterEvents(ActionManager *manager, const ActionManager::Request &) -> bool
+static bool doActionRegisterEvents(ActionManager *manager, const ActionManager::Request &)
 {
   logDebug() << "Opt proc at init "
              << TaskMonitor()->getOptions()->getFor(Options::Key::ReadProcAtInit);
