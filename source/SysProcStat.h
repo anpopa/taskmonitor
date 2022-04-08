@@ -29,10 +29,10 @@ namespace tkm::monitor
 struct CPUStat : public std::enable_shared_from_this<CPUStat> {
 public:
   explicit CPUStat(const std::string &name, size_t usecInterval)
-  : m_name(name)
-  , m_usecInterval(usecInterval)
+  : m_usecInterval(usecInterval)
   {
     m_sysHZ = sysconf(_SC_CLK_TCK);
+    m_data.set_name(name);
   };
   ~CPUStat() = default;
 
@@ -40,7 +40,7 @@ public:
   CPUStat(CPUStat const &) = delete;
   void operator=(CPUStat const &) = delete;
 
-  auto getName(void) -> const std::string & { return m_name; }
+  auto getName(void) -> const std::string & { return m_data.name(); }
 
   void updateStats(uint64_t newUserJiffies, uint64_t newSystemJiffies);
   auto getData(void) -> tkm::msg::server::CPUStat & { return m_data; }
@@ -65,7 +65,6 @@ private:
   int m_sysHZ = 0;
   size_t m_usecInterval = 0;
   tkm::msg::server::CPUStat m_data;
-  std::string m_name;
 };
 
 class SysProcStat : public std::enable_shared_from_this<SysProcStat>

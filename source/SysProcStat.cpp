@@ -54,7 +54,7 @@ void CPUStat::updateStats(uint64_t newUserJiffies, uint64_t newSystemJiffies)
 
 void CPUStat::printStats(void)
 {
-  logInfo() << "SysProcStat[" << m_name << "] "
+  logInfo() << "SysProcStat[" << getName() << "] "
             << "Total=" << m_totalPercent << "% "
             << "User=" << m_userPercent << "% "
             << "System=" << m_sysPercent << "%";
