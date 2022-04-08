@@ -122,7 +122,7 @@ bool SysProcStat::processOnTick(void)
       return false;
     }
 
-    auto updateCpuStatEntry = [this, &statEvent, tokens](const std::shared_ptr<CPUStat> &entry) {
+    auto updateCpuStatEntry = [this, &statEvent, &data, tokens](const std::shared_ptr<CPUStat> &entry) {
       uint64_t newUserJiffies = 0;
       uint64_t newSysJiffies = 0;
 
@@ -140,6 +140,9 @@ bool SysProcStat::processOnTick(void)
       if (m_printToLog) {
         entry->printStats();
       }
+
+      data.mutable_payload()->PackFrom(statEvent);
+      TaskMonitor()->getNetServer()->sendData(data);
     };
 
     auto found = false;
@@ -153,23 +156,14 @@ bool SysProcStat::processOnTick(void)
 
     if (!found) {
       logInfo() << "Adding new cpu core for statistics";
-
       std::shared_ptr<CPUStat> entry =
           std::make_shared<CPUStat>(tokens[statCpuNamePos].c_str(), m_usecInterval);
 
-      updateCpuStatEntry(entry);
-      statEvent.mutable_cpu()->CopyFrom(entry->getData());
       m_cpus.append(entry);
       m_cpus.commit();
-
-      if (m_printToLog) {
-        entry->printStats();
-      }
+      updateCpuStatEntry(entry);
     }
   }
-
-  data.mutable_payload()->PackFrom(statEvent);
-  TaskMonitor()->getNetServer()->sendData(data);
 
   return true;
 }
