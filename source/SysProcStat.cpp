@@ -122,28 +122,29 @@ bool SysProcStat::processOnTick(void)
       return false;
     }
 
-    auto updateCpuStatEntry = [this, &statEvent, &data, tokens](const std::shared_ptr<CPUStat> &entry) {
-      uint64_t newUserJiffies = 0;
-      uint64_t newSysJiffies = 0;
+    auto updateCpuStatEntry =
+        [this, &statEvent, &data, tokens](const std::shared_ptr<CPUStat> &entry) {
+          uint64_t newUserJiffies = 0;
+          uint64_t newSysJiffies = 0;
 
-      try {
-        newUserJiffies = std::stoul(tokens[statUserJiffiesPos].c_str());
-        newSysJiffies = std::stoul(tokens[statSystemJiffiesPos].c_str());
-      } catch (...) {
-        logError() << "Cannot convert stat data to Jiffies";
-        return;
-      }
+          try {
+            newUserJiffies = std::stoul(tokens[statUserJiffiesPos].c_str());
+            newSysJiffies = std::stoul(tokens[statSystemJiffiesPos].c_str());
+          } catch (...) {
+            logError() << "Cannot convert stat data to Jiffies";
+            return;
+          }
 
-      entry->updateStats(newUserJiffies, newSysJiffies);
-      statEvent.mutable_cpu()->CopyFrom(entry->getData());
+          entry->updateStats(newUserJiffies, newSysJiffies);
+          statEvent.mutable_cpu()->CopyFrom(entry->getData());
 
-      if (m_printToLog) {
-        entry->printStats();
-      }
+          if (m_printToLog) {
+            entry->printStats();
+          }
 
-      data.mutable_payload()->PackFrom(statEvent);
-      TaskMonitor()->getNetServer()->sendData(data);
-    };
+          data.mutable_payload()->PackFrom(statEvent);
+          TaskMonitor()->getNetServer()->sendData(data);
+        };
 
     auto found = false;
     m_cpus.foreach (
