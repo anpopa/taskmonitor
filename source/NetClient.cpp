@@ -101,7 +101,9 @@ static bool doCreateSession(const shared_ptr<NetClient> &client, tkm::msg::clien
   tkm::msg::server::SessionInfo sessionInfo;
   std::string idContent(client->descriptor.id());
 
-  idContent += client->getFD();
+  char randData[64] = {0};
+  snprintf(randData, sizeof(randData), "%0lX", random());
+  idContent += randData;
 
   client->id = std::to_string(tkm::jnkHsh(idContent.c_str()));
   sessionInfo.set_id(client->id);
