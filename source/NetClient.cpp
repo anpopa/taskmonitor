@@ -105,11 +105,15 @@ static bool doCreateSession(const shared_ptr<NetClient> &client, tkm::msg::clien
   std::string idContent(client->descriptor.id());
 
   char randData[64] = {0};
+  srandom(time(0));
   snprintf(randData, sizeof(randData), "%0lX", random());
   idContent += randData;
 
+  logInfo() << "Session hash content: " << idContent
+            << " jenkinsHash: " << tkm::jnkHsh(idContent.c_str());
   client->id = std::to_string(tkm::jnkHsh(idContent.c_str()));
   sessionInfo.set_id(client->id);
+  logInfo() << "Send new sessionID=" << sessionInfo.id();
 
   // TODO: Don't know how to get LC ID yet
   sessionInfo.set_lifecycleid("na");
