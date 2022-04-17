@@ -78,7 +78,10 @@ NetClient::NetClient(int clientFd)
       bswi::event::IPollable::Events::Level,
       bswi::event::IEventSource::Priority::Normal);
 
-  setFinalize([this]() { logInfo() << "Ended connection with client: " << getFD(); });
+  setFinalize([this]() {
+    logInfo() << "Ended connection with client: " << getFD();
+    TaskMonitor()->getNetServer()->notifyClientTerminated(getFD());
+  });
 }
 
 void NetClient::enableEvents()
