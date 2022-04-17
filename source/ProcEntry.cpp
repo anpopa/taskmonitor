@@ -26,8 +26,8 @@ ProcEntry::ProcEntry(int pid)
     if (!TaskMonitor()->getNetServer()->hasClients() && m_skipIfNoClients) {
       return true;
     }
-    return (TaskMonitor()->getManager()->getNetLinkStats()->requestTaskAcct(m_pid) != -1) ? true
-                                                                                          : false;
+    return (TaskMonitor()->getManager()->getProcAcct()->requestTaskAcct(m_pid) != -1) ? true
+                                                                                      : false;
   });
 };
 

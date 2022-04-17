@@ -5,14 +5,15 @@ set(BINARY_SRC
     ${CMAKE_SOURCE_DIR}/shared/EnvelopeWriter.cpp
     ${CMAKE_SOURCE_DIR}/shared/Helpers.cpp
     ActionManager.cpp
-    NetLinkStats.cpp
-    NetLinkProc.cpp
+    ProcAcct.cpp
+    ProcEvent.cpp
     Application.cpp
     ProcEntry.cpp
     Registry.cpp
     NetClient.cpp
     NetServer.cpp
     SysProcStat.cpp
+    SysProcMeminfo.cpp
     SysProcPressure.cpp
     Main.cpp
     )

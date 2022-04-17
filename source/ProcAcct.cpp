@@ -4,7 +4,7 @@
  * @date      2021-2022
  * @author    Alin Popa <alin.popa@fxdata.ro>
  * @copyright MIT
- * @brief     NetLinkStats Class
+ * @brief     ProcAcct Class
  * @details   Collect process statistics for each ProcEntry
  *-
  */
@@ -27,7 +27,7 @@
 
 #include "Application.h"
 #include "Defaults.h"
-#include "NetLinkStats.h"
+#include "ProcAcct.h"
 
 using std::shared_ptr;
 using std::string;
@@ -124,8 +124,8 @@ int callbackStatisticsMessage(struct nl_msg *nlmsg, void *arg)
 namespace tkm::monitor
 {
 
-NetLinkStats::NetLinkStats(std::shared_ptr<Options> &options)
-: Pollable("NetLinkStats")
+ProcAcct::ProcAcct(std::shared_ptr<Options> &options)
+: Pollable("ProcAcct")
 , m_options(options)
 {
   long msgBufferSize, txBufferSize, rxBufferSize;
@@ -204,12 +204,12 @@ NetLinkStats::NetLinkStats(std::shared_ptr<Options> &options)
   });
 }
 
-void NetLinkStats::enableEvents()
+void ProcAcct::enableEvents()
 {
   TaskMonitor()->addEventSource(getShared());
 }
 
-NetLinkStats::~NetLinkStats()
+ProcAcct::~ProcAcct()
 {
   if (m_nlSock != nullptr) {
     nl_close(m_nlSock);
@@ -217,7 +217,7 @@ NetLinkStats::~NetLinkStats()
   }
 }
 
-auto NetLinkStats::requestTaskAcct(int pid) -> int
+auto ProcAcct::requestTaskAcct(int pid) -> int
 {
   struct nlmsghdr *hdr = nullptr;
   struct nl_msg *msg = nullptr;

@@ -4,14 +4,15 @@
  * @date      2021-2022
  * @author    Alin Popa <alin.popa@fxdata.ro>
  * @copyright MIT
- * @brief     NetLinkProc Class
- * @details   Monitor system process events using netlink interfaces
+ * @brief     ProcAcct Class
+ * @details   Collect process statistics for each ProcEntry
  *-
  */
 
 #pragma once
 
-#include <linux/netlink.h>
+#include <netinet/in.h>
+#include <netlink/netlink.h>
 #include <string>
 #include <sys/socket.h>
 
@@ -26,25 +27,27 @@ using namespace bswi::event;
 namespace tkm::monitor
 {
 
-class NetLinkProc : public Pollable, public std::enable_shared_from_this<NetLinkProc>
+class ProcAcct : public Pollable, public std::enable_shared_from_this<ProcAcct>
 {
 public:
-  explicit NetLinkProc(std::shared_ptr<Options> &options);
-  ~NetLinkProc();
+  explicit ProcAcct(std::shared_ptr<Options> &options);
+  ~ProcAcct();
 
 public:
-  NetLinkProc(NetLinkProc const &) = delete;
-  void operator=(NetLinkProc const &) = delete;
+  ProcAcct(ProcAcct const &) = delete;
+  void operator=(ProcAcct const &) = delete;
 
 public:
-  auto getShared() -> std::shared_ptr<NetLinkProc> { return shared_from_this(); }
+  auto getShared() -> std::shared_ptr<ProcAcct> { return shared_from_this(); }
   void enableEvents();
-  auto startProcMonitoring(void) -> int;
   [[nodiscard]] int getFD() const { return m_sockFd; }
+
+  auto requestTaskAcct(int pid) -> int;
 
 private:
   std::shared_ptr<Options> m_options = nullptr;
-  struct sockaddr_nl m_addr = {};
+  struct nl_sock *m_nlSock = nullptr;
+  int m_nlFamily = 0;
   int m_sockFd = -1;
 };
 

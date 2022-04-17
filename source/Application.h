@@ -17,11 +17,12 @@
 
 #include "ActionManager.h"
 #include "Defaults.h"
-#include "NetLinkProc.h"
-#include "NetLinkStats.h"
 #include "NetServer.h"
 #include "Options.h"
+#include "ProcAcct.h"
+#include "ProcEvent.h"
 #include "Registry.h"
+#include "SysProcMeminfo.h"
 #include "SysProcPressure.h"
 #include "SysProcStat.h"
 
@@ -59,6 +60,7 @@ public:
   auto getManager() -> std::shared_ptr<ActionManager> & { return m_manager; }
   auto getRegistry() -> std::shared_ptr<Registry> & { return m_registry; }
   auto getSysProcStat() -> std::shared_ptr<SysProcStat> & { return m_sysProcStat; }
+  auto getSysProcMeminfo() -> std::shared_ptr<SysProcMeminfo> & { return m_sysProcMeminfo; }
   auto getSysProcPressure() -> std::shared_ptr<SysProcPressure> & { return m_sysProcPressure; }
   bool hasConfigFile() { return m_options->hasConfigFile(); }
   auto getConfigFile() -> std::shared_ptr<bswi::kf::KeyFile> &
@@ -76,11 +78,12 @@ private:
 private:
   std::shared_ptr<Options> m_options = nullptr;
   std::shared_ptr<NetServer> m_netServer = nullptr;
-  std::shared_ptr<NetLinkStats> m_nlStats = nullptr;
-  std::shared_ptr<NetLinkProc> m_nlProc = nullptr;
+  std::shared_ptr<ProcAcct> m_procAcct = nullptr;
+  std::shared_ptr<ProcEvent> m_procEvent = nullptr;
   std::shared_ptr<ActionManager> m_manager = nullptr;
   std::shared_ptr<Registry> m_registry = nullptr;
   std::shared_ptr<SysProcStat> m_sysProcStat = nullptr;
+  std::shared_ptr<SysProcMeminfo> m_sysProcMeminfo = nullptr;
   std::shared_ptr<SysProcPressure> m_sysProcPressure = nullptr;
 
 private:

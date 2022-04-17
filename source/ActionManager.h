@@ -14,9 +14,9 @@
 #include <map>
 #include <string>
 
-#include "NetLinkProc.h"
-#include "NetLinkStats.h"
 #include "Options.h"
+#include "ProcAcct.h"
+#include "ProcEvent.h"
 
 #include "../bswinfra/source/AsyncQueue.h"
 
@@ -37,23 +37,23 @@ public:
 
 public:
   explicit ActionManager(std::shared_ptr<Options> &options,
-                         std::shared_ptr<NetLinkStats> &nlStats,
-                         std::shared_ptr<NetLinkProc> &nlProc);
+                         std::shared_ptr<ProcAcct> &procAcct,
+                         std::shared_ptr<ProcEvent> &procEvent);
 
 public:
   auto getShared() -> std::shared_ptr<ActionManager> { return shared_from_this(); }
   void enableEvents();
   auto pushRequest(Request &request) -> int;
-  auto getNetLinkStats() -> std::shared_ptr<NetLinkStats> & { return m_nlStats; }
-  auto getNetLinkProc() -> std::shared_ptr<NetLinkProc> & { return m_nlProc; }
+  auto getProcAcct() -> std::shared_ptr<ProcAcct> & { return m_procAcct; }
+  auto getProcEvent() -> std::shared_ptr<ProcEvent> & { return m_procEvent; }
 
 private:
   bool requestHandler(const Request &request);
 
 private:
   std::shared_ptr<Options> m_options = nullptr;
-  std::shared_ptr<NetLinkStats> m_nlStats = nullptr;
-  std::shared_ptr<NetLinkProc> m_nlProc = nullptr;
+  std::shared_ptr<ProcAcct> m_procAcct = nullptr;
+  std::shared_ptr<ProcEvent> m_procEvent = nullptr;
   std::shared_ptr<AsyncQueue<Request>> m_queue = nullptr;
 };
 

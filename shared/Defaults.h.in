@@ -25,6 +25,7 @@ public:
     ConfPath,
     StatPollInterval,
     ProcPollInterval,
+    MemPollInterval,
     PressurePollInterval,
     RxBufferSize,
     TxBufferSize,
@@ -32,7 +33,9 @@ public:
     ReadProcAtInit,
     SkipIfNoClients,
     EnableSysStat,
+    EnableSysMeminfo,
     SysStatsPrintToLog,
+    SysMemPrintToLog,
     EnableSysPressure,
     EnableNetServer,
     NetServerAddress,
@@ -49,6 +52,7 @@ public:
     m_table.insert(std::pair<Default, std::string>(Default::Version, "@GIT_SHA1@"));
     m_table.insert(std::pair<Default, std::string>(Default::ConfPath, "@TKM_CONFIG_FILE@"));
     m_table.insert(std::pair<Default, std::string>(Default::StatPollInterval, "1000000"));
+    m_table.insert(std::pair<Default, std::string>(Default::MemPollInterval, "3000000"));
     m_table.insert(std::pair<Default, std::string>(Default::ProcPollInterval, "3000000"));
     m_table.insert(std::pair<Default, std::string>(Default::PressurePollInterval, "5000000"));
     m_table.insert(std::pair<Default, std::string>(Default::RxBufferSize, "1048576"));
@@ -57,7 +61,9 @@ public:
     m_table.insert(std::pair<Default, std::string>(Default::ReadProcAtInit, "true"));
     m_table.insert(std::pair<Default, std::string>(Default::SkipIfNoClients, "false"));
     m_table.insert(std::pair<Default, std::string>(Default::EnableSysStat, "true"));
-    m_table.insert(std::pair<Default, std::string>(Default::SysStatsPrintToLog, "true"));
+    m_table.insert(std::pair<Default, std::string>(Default::EnableSysMeminfo, "true"));
+    m_table.insert(std::pair<Default, std::string>(Default::SysStatsPrintToLog, "false"));
+    m_table.insert(std::pair<Default, std::string>(Default::SysMemPrintToLog, "false"));
     m_table.insert(std::pair<Default, std::string>(Default::EnableSysPressure, "true"));
     m_table.insert(std::pair<Default, std::string>(Default::EnableNetServer, "true"));
     m_table.insert(std::pair<Default, std::string>(Default::NetServerAddress, "localhost"));

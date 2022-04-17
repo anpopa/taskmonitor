@@ -11,6 +11,7 @@ TxBufferSize=1048576
 MsgBufferSize=1048576
 EnableSysPressure=true
 EnableSysStat=true
+EnableSysMeminfo=true
 EnableNetServer=true
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -23,7 +24,7 @@ StartIfPath=none
 StartOnSignal=false
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; Process statistics configuration options
+; Process accounting configuration options
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 [process]
 ReadProcAtInit=true
@@ -31,14 +32,21 @@ SkipIfNoClients=false
 PollInterval=3000000
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; System statistics configuration options
+; System statistics from /proc/stat configuration options
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-[systats]
-PollInterval=3000000
-PrintToLog=true
+[sysstat]
+PollInterval=1000000
+PrintToLog=false
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; Pressure statistics configuration options
+; Memory statistics from /proc/meminfo configuration options
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+[sysmeminfo]
+PollInterval=3000000
+PrintToLog=false
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Pressure statistics from /proc/pressure configuration options
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 [pressure]
 PollInterval=5000000
@@ -47,7 +55,7 @@ WithMemory=true
 WithIO=true
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; Monitoring blacklist
+; Monitoring blacklist for process accounting
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 [blacklist]
 kworker=ignore

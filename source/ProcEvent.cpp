@@ -4,7 +4,7 @@
  * @date      2021-2022
  * @author    Alin Popa <alin.popa@fxdata.ro>
  * @copyright MIT
- * @brief     NetLinkProc Class
+ * @brief     ProcEvent Class
  * @details   Monitor system process events using netlink interfaces
  *-
  */
@@ -23,7 +23,7 @@
 
 #include "Application.h"
 #include "Defaults.h"
-#include "NetLinkProc.h"
+#include "ProcEvent.h"
 
 using std::shared_ptr;
 using std::string;
@@ -31,8 +31,8 @@ using std::string;
 namespace tkm::monitor
 {
 
-NetLinkProc::NetLinkProc(std::shared_ptr<Options> &options)
-: Pollable("NetLinkProc")
+ProcEvent::ProcEvent(std::shared_ptr<Options> &options)
+: Pollable("ProcEvent")
 , m_options(options)
 {
   if ((m_sockFd = socket(PF_NETLINK, SOCK_DGRAM, NETLINK_CONNECTOR)) == -1) {
@@ -74,7 +74,7 @@ NetLinkProc::NetLinkProc(std::shared_ptr<Options> &options)
 
         switch (nlcn_msg.proc_ev.what) {
         case proc_event::what::PROC_EVENT_NONE:
-          logDebug() << "NetLinkProc Set mcast listen OK";
+          logDebug() << "ProcEvent Set mcast listen OK";
           break;
         case proc_event::what::PROC_EVENT_FORK: {
           tkm::msg::server::ProcEventFork forkData;
@@ -167,19 +167,19 @@ NetLinkProc::NetLinkProc(std::shared_ptr<Options> &options)
   });
 }
 
-void NetLinkProc::enableEvents()
+void ProcEvent::enableEvents()
 {
   TaskMonitor()->addEventSource(getShared());
 }
 
-NetLinkProc::~NetLinkProc()
+ProcEvent::~ProcEvent()
 {
   if (m_sockFd != -1) {
     ::close(m_sockFd);
   }
 }
 
-auto NetLinkProc::startProcMonitoring(void) -> int
+auto ProcEvent::startProcMonitoring(void) -> int
 {
   struct __attribute__((aligned(NLMSG_ALIGNTO))) {
     struct nlmsghdr nl_hdr;

@@ -26,11 +26,11 @@ namespace tkm::monitor
 static bool doActionRegisterEvents(ActionManager *manager, const ActionManager::Request &request);
 
 ActionManager::ActionManager(shared_ptr<Options> &options,
-                             shared_ptr<NetLinkStats> &nlStats,
-                             shared_ptr<NetLinkProc> &nlProc)
+                             shared_ptr<ProcAcct> &procAcct,
+                             shared_ptr<ProcEvent> &procEvent)
 : m_options(options)
-, m_nlStats(nlStats)
-, m_nlProc(nlProc)
+, m_procAcct(procAcct)
+, m_procEvent(procEvent)
 {
   m_queue = std::make_shared<AsyncQueue<Request>>(
       "ActionManagerQueue", [this](const Request &request) { return requestHandler(request); });
@@ -73,12 +73,16 @@ static bool doActionRegisterEvents(ActionManager *manager, const ActionManager::
     TaskMonitor()->getSysProcStat()->startMonitoring();
   }
 
+  if (TaskMonitor()->getOptions()->getFor(Options::Key::EnableSysMeminfo) == "true") {
+    TaskMonitor()->getSysProcMeminfo()->startMonitoring();
+  }
+
   if (TaskMonitor()->getOptions()->getFor(Options::Key::EnableSysPressure) == "true") {
     TaskMonitor()->getSysProcPressure()->startMonitoring();
   }
 
   // Start process monitoring
-  manager->getNetLinkProc()->startProcMonitoring();
+  manager->getProcEvent()->startProcMonitoring();
 
   return true;
 }

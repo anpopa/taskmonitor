@@ -27,6 +27,7 @@ public:
   enum class Key {
     StatPollInterval,
     ProcPollInterval,
+    MemPollInterval,
     PressurePollInterval,
     RxBufferSize,
     TxBufferSize,
@@ -39,8 +40,10 @@ public:
     NetServerStartIfPath,
     NetServerStartOnSignal,
     EnableSysPressure,
+    EnableSysMeminfo,
     EnableSysStat,
     SysStatsPrintToLog,
+    SysMemPrintToLog,
     PressureWithCPU,
     PressureWithMemory,
     PressureWithIO

@@ -77,9 +77,9 @@ auto main(int argc, char **argv) -> int
          << tkmDefaults.getFor(Defaults::Default::Version) << "\n\n";
     cout << "Usage: taskmonitor [OPTIONS] \n\n";
     cout << "  General:\n";
-    cout << "     --config, -c      <string> Configuration file path\n";
+    cout << "     --config, -c  <string> Configuration file path\n";
     cout << "  Help:\n";
-    cout << "     --help, -h                 Print this help\n\n";
+    cout << "     --help, -h             Print this help\n\n";
 
     exit(EXIT_SUCCESS);
   }

@@ -31,16 +31,29 @@ auto Options::getFor(Key key) -> string const
   switch (key) {
   case Key::StatPollInterval:
     if (hasConfigFile()) {
-      const optional<string> prop = m_configFile->getPropertyValue("systats", -1, "PollInterval");
+      const optional<string> prop = m_configFile->getPropertyValue("sysstat", -1, "PollInterval");
       return prop.value_or(tkmDefaults.getFor(Defaults::Default::StatPollInterval));
     }
     return tkmDefaults.getFor(Defaults::Default::StatPollInterval);
   case Key::SysStatsPrintToLog:
     if (hasConfigFile()) {
-      const optional<string> prop = m_configFile->getPropertyValue("systats", -1, "PrintToLog");
+      const optional<string> prop = m_configFile->getPropertyValue("sysstat", -1, "PrintToLog");
       return prop.value_or(tkmDefaults.getFor(Defaults::Default::SysStatsPrintToLog));
     }
     return tkmDefaults.getFor(Defaults::Default::SysStatsPrintToLog);
+  case Key::MemPollInterval:
+    if (hasConfigFile()) {
+      const optional<string> prop =
+          m_configFile->getPropertyValue("sysmeminfo", -1, "PollInterval");
+      return prop.value_or(tkmDefaults.getFor(Defaults::Default::MemPollInterval));
+    }
+    return tkmDefaults.getFor(Defaults::Default::MemPollInterval);
+  case Key::SysMemPrintToLog:
+    if (hasConfigFile()) {
+      const optional<string> prop = m_configFile->getPropertyValue("sysmeminfo", -1, "PrintToLog");
+      return prop.value_or(tkmDefaults.getFor(Defaults::Default::SysMemPrintToLog));
+    }
+    return tkmDefaults.getFor(Defaults::Default::SysMemPrintToLog);
   case Key::ProcPollInterval:
     if (hasConfigFile()) {
       const optional<string> prop = m_configFile->getPropertyValue("process", -1, "PollInterval");
@@ -91,6 +104,13 @@ auto Options::getFor(Key key) -> string const
       return prop.value_or(tkmDefaults.getFor(Defaults::Default::EnableSysStat));
     }
     return tkmDefaults.getFor(Defaults::Default::EnableSysStat);
+  case Key::EnableSysMeminfo:
+    if (hasConfigFile()) {
+      const optional<string> prop =
+          m_configFile->getPropertyValue("monitor", -1, "EnableSysMeminfo");
+      return prop.value_or(tkmDefaults.getFor(Defaults::Default::EnableSysMeminfo));
+    }
+    return tkmDefaults.getFor(Defaults::Default::EnableSysMeminfo);
   case Key::EnableNetServer:
     if (hasConfigFile()) {
       const optional<string> prop =

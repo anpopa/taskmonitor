@@ -51,17 +51,18 @@ Application::Application(const string &name, const string &description, const st
     }
   }
 
-  m_nlStats = std::make_shared<NetLinkStats>(m_options);
-  m_nlStats->enableEvents();
+  m_procAcct = std::make_shared<ProcAcct>(m_options);
+  m_procAcct->enableEvents();
 
-  m_nlProc = std::make_shared<NetLinkProc>(m_options);
-  m_nlProc->enableEvents();
+  m_procEvent = std::make_shared<ProcEvent>(m_options);
+  m_procEvent->enableEvents();
 
   m_registry = std::make_shared<Registry>(m_options);
   m_sysProcStat = std::make_shared<SysProcStat>(m_options);
+  m_sysProcMeminfo = std::make_shared<SysProcMeminfo>(m_options);
   m_sysProcPressure = std::make_shared<SysProcPressure>(m_options);
 
-  m_manager = std::make_unique<ActionManager>(m_options, m_nlStats, m_nlProc);
+  m_manager = std::make_unique<ActionManager>(m_options, m_procAcct, m_procEvent);
   m_manager->enableEvents();
 
   startWatchdog();
