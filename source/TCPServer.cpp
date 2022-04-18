@@ -4,8 +4,8 @@
  * @date      2021-2022
  * @author    Alin Popa <alin.popa@fxdata.ro>
  * @copyright MIT
- * @brief     NetServer Class
- * @details   Server listening to UDP NetClient connections
+ * @brief     TCPServer Class
+ * @details   Server listening to UDP TCPClient connections
  *-
  */
 
@@ -17,8 +17,8 @@
 #include "Defaults.h"
 #include "EnvelopeReader.h"
 #include "Helpers.h"
-#include "NetClient.h"
-#include "NetServer.h"
+#include "TCPClient.h"
+#include "TCPServer.h"
 
 #include "Client.pb.h"
 
@@ -28,11 +28,11 @@ using std::string;
 namespace tkm::monitor
 {
 
-NetServer::NetServer()
-: Pollable("NetServer")
+TCPServer::TCPServer()
+: Pollable("TCPServer")
 {
   if ((m_sockFd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
-    throw std::runtime_error("Fail to create NetServer socket");
+    throw std::runtime_error("Fail to create TCPServer socket");
   }
 
   int enable = 1;
@@ -47,7 +47,7 @@ NetServer::NetServer()
         int clientFd = accept(m_sockFd, (struct sockaddr *) nullptr, nullptr);
 
         if (clientFd < 0) {
-          logWarn() << "Fail to accept on NetServer socket";
+          logWarn() << "Fail to accept on TCPServer socket";
           return false;
         }
 
@@ -65,7 +65,7 @@ NetServer::NetServer()
         }
 
         logInfo() << "New Client with FD: " << clientFd;
-        std::shared_ptr<NetClient> client = std::make_shared<NetClient>(clientFd);
+        std::shared_ptr<TCPClient> client = std::make_shared<TCPClient>(clientFd);
 
         m_clients.append(client);
         m_clients.commit();
@@ -80,19 +80,19 @@ NetServer::NetServer()
       bswi::event::IEventSource::Priority::Normal);
 }
 
-void NetServer::enableEvents()
+void TCPServer::enableEvents()
 {
-  TaskMonitor()->addEventSource(getShared());
+  App()->addEventSource(getShared());
 }
 
-NetServer::~NetServer()
+TCPServer::~TCPServer()
 {
   static_cast<void>(invalidate());
   m_clients.foreach ([this](const std::shared_ptr<IClient> &entry) { m_clients.remove(entry); });
   m_clients.commit();
 }
 
-void NetServer::sendData(const tkm::msg::server::Data &data)
+void TCPServer::sendData(const tkm::msg::server::Data &data)
 {
   tkm::msg::Envelope envelope;
   tkm::msg::server::Message message;
@@ -110,7 +110,7 @@ void NetServer::sendData(const tkm::msg::server::Data &data)
   });
 }
 
-void NetServer::notifyClientTerminated(int id)
+void TCPServer::notifyClientTerminated(int id)
 {
   m_clients.foreach ([this, id](const std::shared_ptr<IClient> &entry) {
     if (entry->getFD() == id) {
@@ -121,10 +121,10 @@ void NetServer::notifyClientTerminated(int id)
   m_clients.commit();
 }
 
-void NetServer::bindAndListen()
+void TCPServer::bindAndListen()
 {
   if (m_bound) {
-    logWarn() << "NetServer already listening";
+    logWarn() << "TCPServer already listening";
     return;
   }
 
@@ -134,15 +134,15 @@ void NetServer::bindAndListen()
   m_addr.sin_family = AF_INET;
   m_addr.sin_addr.s_addr = INADDR_ANY;
 
-  if (TaskMonitor()->getOptions()->getFor(Options::Key::NetServerAddress) != "any") {
-    string serverAddress = TaskMonitor()->getOptions()->getFor(Options::Key::NetServerAddress);
+  if (App()->getOptions()->getFor(Options::Key::TCPServerAddress) != "any") {
+    string serverAddress = App()->getOptions()->getFor(Options::Key::TCPServerAddress);
     struct hostent *server = gethostbyname(serverAddress.c_str());
     bcopy(server->h_addr, (char *) &m_addr.sin_addr.s_addr, (size_t) server->h_length);
   }
 
-  auto port = std::stoi(tkmDefaults.getFor(Defaults::Default::NetServerPort));
+  auto port = std::stoi(tkmDefaults.getFor(Defaults::Default::TCPServerPort));
   try {
-    port = std::stoi(TaskMonitor()->getOptions()->getFor(Options::Key::NetServerPort));
+    port = std::stoi(App()->getOptions()->getFor(Options::Key::TCPServerPort));
   } catch (const std::exception &e) {
     logWarn() << "Cannot convert port number from config: " << e.what();
   }
@@ -150,20 +150,20 @@ void NetServer::bindAndListen()
 
   if (bind(m_sockFd, (struct sockaddr *) &m_addr, sizeof(struct sockaddr_in)) != -1) {
     if (listen(m_sockFd, 100) == -1) {
-      logError() << "NetServer listening failed on port: " << port
+      logError() << "TCPServer listening failed on port: " << port
                  << ". Error: " << strerror(errno);
-      throw std::runtime_error("NetServer listen failed");
+      throw std::runtime_error("TCPServer listen failed");
     }
-    logInfo() << "NetServer listening on port: " << port;
+    logInfo() << "TCPServer listening on port: " << port;
   } else {
-    logError() << "NetServer bind failed on port: " << port << ". Error: " << strerror(errno);
-    throw std::runtime_error("NetServer bind failed");
+    logError() << "TCPServer bind failed on port: " << port << ". Error: " << strerror(errno);
+    throw std::runtime_error("TCPServer bind failed");
   }
 
   m_bound = true;
 }
 
-void NetServer::invalidate()
+void TCPServer::invalidate()
 {
   if (m_sockFd > 0) {
     ::close(m_sockFd);

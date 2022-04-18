@@ -36,7 +36,7 @@ using std::string;
 
 static void processDelayAcct(struct taskstats *t)
 {
-  auto entry = TaskMonitor()->getRegistry()->getEntry(t->ac_pid);
+  auto entry = App()->getRegistry()->getEntry(t->ac_pid);
 
   if (entry == nullptr) {
     logError() << "Stat entry with PID " << t->ac_pid << " not in registry";
@@ -92,7 +92,7 @@ static void processDelayAcct(struct taskstats *t)
       average_ms(t->thrashing_delay_total, t->thrashing_count));
 
   data.mutable_payload()->PackFrom(acct);
-  TaskMonitor()->getNetServer()->sendData(data);
+  App()->getTCPServer()->sendData(data);
 }
 
 int callbackStatisticsMessage(struct nl_msg *nlmsg, void *arg)
@@ -206,7 +206,7 @@ ProcAcct::ProcAcct(std::shared_ptr<Options> &options)
 
 void ProcAcct::enableEvents()
 {
-  TaskMonitor()->addEventSource(getShared());
+  App()->addEventSource(getShared());
 }
 
 ProcAcct::~ProcAcct()

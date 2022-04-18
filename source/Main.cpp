@@ -42,9 +42,9 @@ static void delayStart(int signum)
     return;
   }
 
-  if (app->getOptions()->getFor(Options::Key::NetServerStartOnSignal) == "true") {
-    logInfo() << "Start NetServer module";
-    app->getNetServer()->bindAndListen();
+  if (app->getOptions()->getFor(Options::Key::TCPServerStartOnSignal) == "true") {
+    logInfo() << "Start TCPServer module";
+    app->getTCPServer()->bindAndListen();
   }
 }
 
@@ -98,12 +98,12 @@ auto main(int argc, char **argv) -> int
     configPath = string(config_path);
   }
 
-  ActionManager::Request registerEvents{
-      .action = ActionManager::Action::RegisterEvents,
+  Dispatcher::Request registerEvents{
+      .action = Dispatcher::Action::RegisterEvents,
   };
 
   app = std::make_unique<tkm::monitor::Application>("TaskMonitor", "TaskMonitor", configPath);
-  app->getManager()->pushRequest(registerEvents);
+  app->getDispatcher()->pushRequest(registerEvents);
   app->run();
 
   return EXIT_SUCCESS;

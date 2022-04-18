@@ -37,11 +37,11 @@ public:
     SysStatsPrintToLog,
     SysMemPrintToLog,
     EnableSysPressure,
-    EnableNetServer,
-    NetServerAddress,
-    NetServerPort,
-    NetServerStartIfPath,
-    NetServerStartOnSignal,
+    EnableTCPServer,
+    TCPServerAddress,
+    TCPServerPort,
+    TCPServerStartIfPath,
+    TCPServerStartOnSignal,
     PressureWithCPU,
     PressureWithMemory,
     PressureWithIO
@@ -65,11 +65,11 @@ public:
     m_table.insert(std::pair<Default, std::string>(Default::SysStatsPrintToLog, "false"));
     m_table.insert(std::pair<Default, std::string>(Default::SysMemPrintToLog, "false"));
     m_table.insert(std::pair<Default, std::string>(Default::EnableSysPressure, "true"));
-    m_table.insert(std::pair<Default, std::string>(Default::EnableNetServer, "true"));
-    m_table.insert(std::pair<Default, std::string>(Default::NetServerAddress, "localhost"));
-    m_table.insert(std::pair<Default, std::string>(Default::NetServerPort, "3357"));
-    m_table.insert(std::pair<Default, std::string>(Default::NetServerStartIfPath, "none"));
-    m_table.insert(std::pair<Default, std::string>(Default::NetServerStartOnSignal, "true"));
+    m_table.insert(std::pair<Default, std::string>(Default::EnableTCPServer, "true"));
+    m_table.insert(std::pair<Default, std::string>(Default::TCPServerAddress, "localhost"));
+    m_table.insert(std::pair<Default, std::string>(Default::TCPServerPort, "3357"));
+    m_table.insert(std::pair<Default, std::string>(Default::TCPServerStartIfPath, "none"));
+    m_table.insert(std::pair<Default, std::string>(Default::TCPServerStartOnSignal, "true"));
     m_table.insert(std::pair<Default, std::string>(Default::PressureWithCPU, "true"));
     m_table.insert(std::pair<Default, std::string>(Default::PressureWithMemory, "true"));
     m_table.insert(std::pair<Default, std::string>(Default::PressureWithIO, "true"));

@@ -62,7 +62,7 @@ ProcEvent::ProcEvent(std::shared_ptr<Options> &options)
         if (rc == 0) {
           return true;
         } else if (rc == -1) {
-          logError() << "Netlink process receive error";
+          logError() << "TCPlink process receive error";
           return false;
         }
 
@@ -88,7 +88,7 @@ ProcEvent::ProcEvent(std::shared_ptr<Options> &options)
           procEvent.mutable_data()->PackFrom(forkData);
           data.mutable_payload()->PackFrom(procEvent);
 
-          TaskMonitor()->getNetServer()->sendData(data);
+          App()->getTCPServer()->sendData(data);
           break;
         }
         case proc_event::what::PROC_EVENT_EXEC: {
@@ -101,8 +101,8 @@ ProcEvent::ProcEvent(std::shared_ptr<Options> &options)
           procEvent.mutable_data()->PackFrom(execData);
           data.mutable_payload()->PackFrom(procEvent);
 
-          TaskMonitor()->getNetServer()->sendData(data);
-          TaskMonitor()->getRegistry()->addEntry(nlcn_msg.proc_ev.event_data.exec.process_pid);
+          App()->getTCPServer()->sendData(data);
+          App()->getRegistry()->addEntry(nlcn_msg.proc_ev.event_data.exec.process_pid);
           break;
         }
         case proc_event::what::PROC_EVENT_UID: {
@@ -117,7 +117,7 @@ ProcEvent::ProcEvent(std::shared_ptr<Options> &options)
           procEvent.mutable_data()->PackFrom(uidData);
           data.mutable_payload()->PackFrom(procEvent);
 
-          TaskMonitor()->getNetServer()->sendData(data);
+          App()->getTCPServer()->sendData(data);
           break;
         }
         case proc_event::what::PROC_EVENT_GID: {
@@ -132,7 +132,7 @@ ProcEvent::ProcEvent(std::shared_ptr<Options> &options)
           procEvent.mutable_data()->PackFrom(gidData);
           data.mutable_payload()->PackFrom(procEvent);
 
-          TaskMonitor()->getNetServer()->sendData(data);
+          App()->getTCPServer()->sendData(data);
           break;
         }
         case proc_event::what::PROC_EVENT_EXIT: {
@@ -146,8 +146,8 @@ ProcEvent::ProcEvent(std::shared_ptr<Options> &options)
           procEvent.mutable_data()->PackFrom(exitData);
           data.mutable_payload()->PackFrom(procEvent);
 
-          TaskMonitor()->getNetServer()->sendData(data);
-          TaskMonitor()->getRegistry()->remEntry(nlcn_msg.proc_ev.event_data.exit.process_pid);
+          App()->getTCPServer()->sendData(data);
+          App()->getRegistry()->remEntry(nlcn_msg.proc_ev.event_data.exit.process_pid);
           break;
         }
         default:
@@ -169,7 +169,7 @@ ProcEvent::ProcEvent(std::shared_ptr<Options> &options)
 
 void ProcEvent::enableEvents()
 {
-  TaskMonitor()->addEventSource(getShared());
+  App()->addEventSource(getShared());
 }
 
 ProcEvent::~ProcEvent()
@@ -200,7 +200,7 @@ auto ProcEvent::startProcMonitoring(void) -> int
   nlcn_msg.cn_mcast = PROC_CN_MCAST_LISTEN;
 
   if (send(m_sockFd, &nlcn_msg, sizeof(nlcn_msg), 0) == -1) {
-    logError() << "Netlink send error";
+    logError() << "TCPlink send error";
     return -1;
   }
 

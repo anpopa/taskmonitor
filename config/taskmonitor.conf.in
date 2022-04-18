@@ -12,7 +12,7 @@ MsgBufferSize=1048576
 EnableSysPressure=true
 EnableSysStat=true
 EnableSysMeminfo=true
-EnableNetServer=true
+EnableTCPServer=true
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; NetServer options

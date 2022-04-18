@@ -25,7 +25,7 @@ using std::string;
 namespace tkm::monitor
 {
 
-static bool shouldStartNetServer(const std::shared_ptr<tkm::monitor::Options> &opts);
+static bool shouldStartTCPServer(const std::shared_ptr<tkm::monitor::Options> &opts);
 
 Application *Application::appInstance = nullptr;
 
@@ -39,10 +39,10 @@ Application::Application(const string &name, const string &description, const st
 
   m_options = std::make_shared<Options>(configFile);
 
-  if (m_options->getFor(Options::Key::EnableNetServer) == "true") {
-    m_netServer = std::make_shared<NetServer>();
+  if (m_options->getFor(Options::Key::EnableTCPServer) == "true") {
+    m_netServer = std::make_shared<TCPServer>();
 
-    if (shouldStartNetServer(m_options)) {
+    if (shouldStartTCPServer(m_options)) {
       try {
         m_netServer->bindAndListen();
       } catch (std::exception &e) {
@@ -62,8 +62,8 @@ Application::Application(const string &name, const string &description, const st
   m_sysProcMeminfo = std::make_shared<SysProcMeminfo>(m_options);
   m_sysProcPressure = std::make_shared<SysProcPressure>(m_options);
 
-  m_manager = std::make_unique<ActionManager>(m_options, m_procAcct, m_procEvent);
-  m_manager->enableEvents();
+  m_dispatcher = std::make_unique<Dispatcher>(m_options, m_procAcct, m_procEvent);
+  m_dispatcher->enableEvents();
 
   startWatchdog();
 }
@@ -89,7 +89,7 @@ void Application::startWatchdog(void)
     });
 
     timer->start((usec / 2), true);
-    TaskMonitor()->addEventSource(timer);
+    App()->addEventSource(timer);
   } else {
     if (status == 0) {
       logInfo() << "Systemd watchdog disabled";
@@ -102,17 +102,17 @@ void Application::startWatchdog(void)
 #endif
 }
 
-static bool shouldStartNetServer(const std::shared_ptr<tkm::monitor::Options> &opts)
+static bool shouldStartTCPServer(const std::shared_ptr<tkm::monitor::Options> &opts)
 {
-  if (opts->getFor(Options::Key::NetServerStartIfPath) != "none") {
-    fs::path condPath(opts->getFor(Options::Key::NetServerStartIfPath));
+  if (opts->getFor(Options::Key::TCPServerStartIfPath) != "none") {
+    fs::path condPath(opts->getFor(Options::Key::TCPServerStartIfPath));
     if (fs::exists(condPath)) {
       return true;
     }
     return false;
   }
 
-  if (opts->getFor(Options::Key::NetServerStartOnSignal) == "true") {
+  if (opts->getFor(Options::Key::TCPServerStartOnSignal) == "true") {
     return false;
   }
 

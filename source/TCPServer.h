@@ -4,8 +4,8 @@
  * @date      2021-2022
  * @author    Alin Popa <alin.popa@fxdata.ro>
  * @copyright MIT
- * @brief     NetServer Class
- * @details   Server listening to UDP NetClient connections
+ * @brief     TCPServer Class
+ * @details   Server listening to TCPClient connections
  *-
  */
 
@@ -30,20 +30,20 @@ using namespace bswi::event;
 namespace tkm::monitor
 {
 
-class NetServer : public Pollable, public std::enable_shared_from_this<NetServer>
+class TCPServer : public Pollable, public std::enable_shared_from_this<TCPServer>
 {
 public:
-  NetServer();
-  ~NetServer();
+  TCPServer();
+  ~TCPServer();
 
 public:
-  NetServer(NetServer const &) = delete;
-  void operator=(NetServer const &) = delete;
+  TCPServer(TCPServer const &) = delete;
+  void operator=(TCPServer const &) = delete;
 
   void bindAndListen();
   void invalidate();
   void enableEvents();
-  auto getShared() -> std::shared_ptr<NetServer> { return shared_from_this(); }
+  auto getShared() -> std::shared_ptr<TCPServer> { return shared_from_this(); }
   void sendData(const tkm::msg::server::Data &data);
   void notifyClientTerminated(int id);
   bool hasClients(void) { return (m_clients.getSize() > 0); }

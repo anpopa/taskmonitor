@@ -15,9 +15,8 @@
 #include <cstdlib>
 #include <string>
 
-#include "ActionManager.h"
 #include "Defaults.h"
-#include "NetServer.h"
+#include "Dispatcher.h"
 #include "Options.h"
 #include "ProcAcct.h"
 #include "ProcEvent.h"
@@ -25,6 +24,7 @@
 #include "SysProcMeminfo.h"
 #include "SysProcPressure.h"
 #include "SysProcStat.h"
+#include "TCPServer.h"
 
 #include "../bswinfra/source/IApplication.h"
 
@@ -56,8 +56,8 @@ public:
     }
   }
   auto getOptions() -> std::shared_ptr<Options> & { return m_options; }
-  auto getNetServer() -> std::shared_ptr<NetServer> & { return m_netServer; }
-  auto getManager() -> std::shared_ptr<ActionManager> & { return m_manager; }
+  auto getTCPServer() -> std::shared_ptr<TCPServer> & { return m_netServer; }
+  auto getDispatcher() -> std::shared_ptr<Dispatcher> & { return m_dispatcher; }
   auto getRegistry() -> std::shared_ptr<Registry> & { return m_registry; }
   auto getSysProcStat() -> std::shared_ptr<SysProcStat> & { return m_sysProcStat; }
   auto getSysProcMeminfo() -> std::shared_ptr<SysProcMeminfo> & { return m_sysProcMeminfo; }
@@ -77,10 +77,10 @@ private:
 
 private:
   std::shared_ptr<Options> m_options = nullptr;
-  std::shared_ptr<NetServer> m_netServer = nullptr;
+  std::shared_ptr<TCPServer> m_netServer = nullptr;
   std::shared_ptr<ProcAcct> m_procAcct = nullptr;
   std::shared_ptr<ProcEvent> m_procEvent = nullptr;
-  std::shared_ptr<ActionManager> m_manager = nullptr;
+  std::shared_ptr<Dispatcher> m_dispatcher = nullptr;
   std::shared_ptr<Registry> m_registry = nullptr;
   std::shared_ptr<SysProcStat> m_sysProcStat = nullptr;
   std::shared_ptr<SysProcMeminfo> m_sysProcMeminfo = nullptr;
@@ -92,4 +92,4 @@ private:
 
 } // namespace tkm::monitor
 
-#define TaskMonitor() tkm::monitor::Application::getInstance()
+#define App() tkm::monitor::Application::getInstance()

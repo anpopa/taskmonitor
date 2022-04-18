@@ -18,16 +18,15 @@ namespace tkm::monitor
 ProcEntry::ProcEntry(int pid)
 : m_pid(pid)
 {
-  if (TaskMonitor()->getOptions()->getFor(Options::Key::SkipIfNoClients) == "true") {
+  if (App()->getOptions()->getFor(Options::Key::SkipIfNoClients) == "true") {
     m_skipIfNoClients = true;
   }
 
   m_timer = std::make_shared<Timer>("ProcEntry", [this]() {
-    if (!TaskMonitor()->getNetServer()->hasClients() && m_skipIfNoClients) {
+    if (!App()->getTCPServer()->hasClients() && m_skipIfNoClients) {
       return true;
     }
-    return (TaskMonitor()->getManager()->getProcAcct()->requestTaskAcct(m_pid) != -1) ? true
-                                                                                      : false;
+    return (App()->getDispatcher()->getProcAcct()->requestTaskAcct(m_pid) != -1) ? true : false;
   });
 };
 
@@ -35,13 +34,13 @@ void ProcEntry::startMonitoring(int interval)
 {
   m_pollInterval = interval;
   m_timer->start(interval, true);
-  TaskMonitor()->addEventSource(m_timer);
+  App()->addEventSource(m_timer);
 }
 
 void ProcEntry::disable(void)
 {
   m_timer->stop();
-  TaskMonitor()->remEventSource(m_timer);
+  App()->remEventSource(m_timer);
 }
 
 auto ProcEntry::getUserCPUPercent(uint64_t cpuTime) -> int

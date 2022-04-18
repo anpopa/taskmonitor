@@ -4,8 +4,8 @@
  * @date      2021-2022
  * @author    Alin Popa <alin.popa@fxdata.ro>
  * @copyright MIT
- * @brief     ActionManager Class
- * @details   Application action manager
+ * @brief     Dispatcher Class
+ * @details   Application dispatcher manager
  *-
  */
 
@@ -25,7 +25,7 @@ using namespace bswi::event;
 namespace tkm::monitor
 {
 
-class ActionManager : public std::enable_shared_from_this<ActionManager>
+class Dispatcher : public std::enable_shared_from_this<Dispatcher>
 {
 public:
   enum class Action { RegisterEvents };
@@ -36,12 +36,12 @@ public:
   } Request;
 
 public:
-  explicit ActionManager(std::shared_ptr<Options> &options,
-                         std::shared_ptr<ProcAcct> &procAcct,
-                         std::shared_ptr<ProcEvent> &procEvent);
+  explicit Dispatcher(std::shared_ptr<Options> &options,
+                      std::shared_ptr<ProcAcct> &procAcct,
+                      std::shared_ptr<ProcEvent> &procEvent);
 
 public:
-  auto getShared() -> std::shared_ptr<ActionManager> { return shared_from_this(); }
+  auto getShared() -> std::shared_ptr<Dispatcher> { return shared_from_this(); }
   void enableEvents();
   auto pushRequest(Request &request) -> int;
   auto getProcAcct() -> std::shared_ptr<ProcAcct> & { return m_procAcct; }

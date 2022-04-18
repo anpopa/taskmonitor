@@ -4,14 +4,14 @@ set(BINARY_SRC
     ${CMAKE_SOURCE_DIR}/shared/EnvelopeReader.cpp
     ${CMAKE_SOURCE_DIR}/shared/EnvelopeWriter.cpp
     ${CMAKE_SOURCE_DIR}/shared/Helpers.cpp
-    ActionManager.cpp
+    Dispatcher.cpp
     ProcAcct.cpp
     ProcEvent.cpp
     Application.cpp
     ProcEntry.cpp
     Registry.cpp
-    NetClient.cpp
-    NetServer.cpp
+    TCPClient.cpp
+    TCPServer.cpp
     SysProcStat.cpp
     SysProcMeminfo.cpp
     SysProcPressure.cpp

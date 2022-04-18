@@ -54,13 +54,13 @@ SysProcMeminfo::SysProcMeminfo(std::shared_ptr<Options> &options)
 void SysProcMeminfo::startMonitoring(void)
 {
   m_timer->start(m_usecInterval, true);
-  TaskMonitor()->addEventSource(m_timer);
+  App()->addEventSource(m_timer);
 }
 
 void SysProcMeminfo::disable(void)
 {
   m_timer->stop();
-  TaskMonitor()->remEventSource(m_timer);
+  App()->remEventSource(m_timer);
 }
 
 bool SysProcMeminfo::processOnTick(void)
@@ -163,7 +163,7 @@ bool SysProcMeminfo::processOnTick(void)
   }
 
   data.mutable_payload()->PackFrom(m_memInfo);
-  TaskMonitor()->getNetServer()->sendData(data);
+  App()->getTCPServer()->sendData(data);
 
   return true;
 }

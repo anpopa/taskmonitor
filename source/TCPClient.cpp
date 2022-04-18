@@ -4,8 +4,8 @@
  * @date      2021-2022
  * @author    Alin Popa <alin.popa@fxdata.ro>
  * @copyright MIT
- * @brief     NetClient Class
- * @details   Network client implementation
+ * @brief     TCPClient Class
+ * @details   Network TCP client implementation
  *-
  */
 
@@ -14,7 +14,7 @@
 #include "Application.h"
 #include "Defaults.h"
 #include "Helpers.h"
-#include "NetClient.h"
+#include "TCPClient.h"
 
 #include "Client.pb.h"
 
@@ -24,11 +24,11 @@ using std::string;
 namespace tkm::monitor
 {
 
-static bool doCreateSession(const shared_ptr<NetClient> &client, tkm::msg::client::Request &rq);
-static bool doStreamState(const shared_ptr<NetClient> &client, tkm::msg::client::Request &rq);
+static bool doCreateSession(const shared_ptr<TCPClient> &client, tkm::msg::client::Request &rq);
+static bool doStreamState(const shared_ptr<TCPClient> &client, tkm::msg::client::Request &rq);
 
-NetClient::NetClient(int clientFd)
-: IClient("NetClient", clientFd)
+TCPClient::TCPClient(int clientFd)
+: IClient("TCPClient", clientFd)
 {
   bswi::event::Pollable::lateSetup(
       [this]() {
@@ -80,24 +80,24 @@ NetClient::NetClient(int clientFd)
 
   setFinalize([this]() {
     logInfo() << "Ended connection with client: " << getFD();
-    TaskMonitor()->getNetServer()->notifyClientTerminated(getFD());
+    App()->getTCPServer()->notifyClientTerminated(getFD());
   });
 }
 
-void NetClient::enableEvents()
+void TCPClient::enableEvents()
 {
-  TaskMonitor()->addEventSource(getShared());
+  App()->addEventSource(getShared());
 }
 
-NetClient::~NetClient()
+TCPClient::~TCPClient()
 {
-  logDebug() << "NetClient " << getFD() << " destructed";
+  logDebug() << "TCPClient " << getFD() << " destructed";
   if (getFD() > 0) {
     ::close(getFD());
   }
 }
 
-static bool doCreateSession(const shared_ptr<NetClient> &client, tkm::msg::client::Request &rq)
+static bool doCreateSession(const shared_ptr<TCPClient> &client, tkm::msg::client::Request &rq)
 {
   tkm::msg::Envelope envelope;
   tkm::msg::server::Message message;
@@ -129,7 +129,7 @@ static bool doCreateSession(const shared_ptr<NetClient> &client, tkm::msg::clien
   return client->writeEnvelope(envelope);
 }
 
-static bool doStreamState(const shared_ptr<NetClient> &client, tkm::msg::client::Request &rq)
+static bool doStreamState(const shared_ptr<TCPClient> &client, tkm::msg::client::Request &rq)
 {
   tkm::msg::client::StreamState streamState;
   rq.data().UnpackTo(&streamState);

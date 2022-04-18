@@ -116,13 +116,13 @@ SysProcPressure::SysProcPressure(std::shared_ptr<Options> &options)
 void SysProcPressure::startMonitoring(void)
 {
   m_timer->start(m_usecInterval, true);
-  TaskMonitor()->addEventSource(m_timer);
+  App()->addEventSource(m_timer);
 }
 
 void SysProcPressure::disable(void)
 {
   m_timer->stop();
-  TaskMonitor()->remEventSource(m_timer);
+  App()->remEventSource(m_timer);
 }
 
 bool SysProcPressure::processOnTick(void)
@@ -148,7 +148,7 @@ bool SysProcPressure::processOnTick(void)
   });
 
   data.mutable_payload()->PackFrom(psiEvent);
-  TaskMonitor()->getNetServer()->sendData(data);
+  App()->getTCPServer()->sendData(data);
 
   return true;
 }
