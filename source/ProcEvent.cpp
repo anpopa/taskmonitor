@@ -62,7 +62,7 @@ ProcEvent::ProcEvent(std::shared_ptr<Options> &options)
         if (rc == 0) {
           return true;
         } else if (rc == -1) {
-          logError() << "TCPlink process receive error";
+          logError() << "Netlink process receive error";
           return false;
         }
 
@@ -200,7 +200,7 @@ auto ProcEvent::startProcMonitoring(void) -> int
   nlcn_msg.cn_mcast = PROC_CN_MCAST_LISTEN;
 
   if (send(m_sockFd, &nlcn_msg, sizeof(nlcn_msg), 0) == -1) {
-    logError() << "TCPlink send error";
+    logError() << "Netlink send error";
     return -1;
   }
 

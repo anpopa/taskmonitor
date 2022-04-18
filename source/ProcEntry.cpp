@@ -11,6 +11,7 @@
 
 #include "ProcEntry.h"
 #include "Application.h"
+#include <cstdint>
 
 namespace tkm::monitor
 {
@@ -43,28 +44,16 @@ void ProcEntry::disable(void)
   App()->remEventSource(m_timer);
 }
 
-auto ProcEntry::getUserCPUPercent(uint64_t cpuTime) -> int
+auto ProcEntry::getCPUPercent(uint64_t utime, uint64_t stime) -> uint32_t
 {
-  if (m_lastUserCPUTime == 0) {
-    m_lastUserCPUTime = cpuTime;
+  if (m_lastCPUTime == 0) {
+    m_lastCPUTime = utime + stime;
   }
 
-  auto userCPUPercent = ((cpuTime - m_lastUserCPUTime) * 100) / m_pollInterval;
-  m_lastUserCPUTime = cpuTime;
+  uint32_t cpuPercent = (((utime + stime) - m_lastCPUTime) * 100) / m_pollInterval;
+  m_lastCPUTime = utime + stime;
 
-  return userCPUPercent;
-}
-
-auto ProcEntry::getSystemCPUPercent(uint64_t cpuTime) -> int
-{
-  if (m_lastSystemCPUTime == 0) {
-    m_lastSystemCPUTime = cpuTime;
-  }
-
-  auto sysCPUPercent = ((cpuTime - m_lastSystemCPUTime) * 100) / m_pollInterval;
-  m_lastSystemCPUTime = cpuTime;
-
-  return sysCPUPercent;
+  return cpuPercent;
 }
 
 } // namespace tkm::monitor

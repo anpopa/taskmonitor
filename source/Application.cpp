@@ -40,7 +40,7 @@ Application::Application(const string &name, const string &description, const st
   m_options = std::make_shared<Options>(configFile);
 
   if (m_options->getFor(Options::Key::EnableTCPServer) == "true") {
-    m_netServer = std::make_shared<TCPServer>();
+    m_netServer = std::make_shared<TCPServer>(m_options);
 
     if (shouldStartTCPServer(m_options)) {
       try {

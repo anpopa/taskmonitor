@@ -11,6 +11,7 @@
 
 #pragma once
 
+#include <cstdint>
 #include <memory>
 #include <string>
 
@@ -35,13 +36,11 @@ public:
   auto getPid() -> int { return m_pid; }
   void startMonitoring(int interval);
   void disable(void);
-  auto getUserCPUPercent(uint64_t cpuTime) -> int;
-  auto getSystemCPUPercent(uint64_t cpuTime) -> int;
+  auto getCPUPercent(uint64_t utime, uint64_t stime) -> uint32_t;
 
 private:
   std::shared_ptr<Timer> m_timer = nullptr;
-  uint64_t m_lastUserCPUTime = 0;
-  uint64_t m_lastSystemCPUTime = 0;
+  uint64_t m_lastCPUTime = 0;
   bool m_skipIfNoClients = false;
   int m_pollInterval = 0;
   int m_pid = 0;

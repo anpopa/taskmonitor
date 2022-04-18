@@ -56,8 +56,7 @@ static void processDelayAcct(struct taskstats *t)
   acct.set_ac_ppid(t->ac_ppid);
   acct.set_ac_utime(t->ac_utime);
   acct.set_ac_stime(t->ac_stime);
-  acct.set_user_cpu_percent(entry->getUserCPUPercent(t->ac_utime));
-  acct.set_sys_cpu_percent(entry->getSystemCPUPercent(t->ac_stime));
+  acct.set_cpu_percent(entry->getCPUPercent(t->ac_utime, t->ac_stime));
 
   acct.mutable_cpu()->set_cpu_count(t->cpu_count);
   acct.mutable_cpu()->set_cpu_run_real_total(t->cpu_run_real_total);
@@ -76,6 +75,12 @@ static void processDelayAcct(struct taskstats *t)
   acct.mutable_io()->set_blkio_count(t->blkio_count);
   acct.mutable_io()->set_blkio_delay_total(t->blkio_delay_total);
   acct.mutable_io()->set_blkio_delay_average(average_ms(t->blkio_delay_total, t->blkio_count));
+  acct.mutable_io()->set_read_bytes(t->read_bytes);
+  acct.mutable_io()->set_write_bytes(t->write_bytes);
+  acct.mutable_io()->set_read_char(t->read_char);
+  acct.mutable_io()->set_write_char(t->write_char);
+  acct.mutable_io()->set_read_syscalls(t->read_syscalls);
+  acct.mutable_io()->set_write_syscalls(t->write_syscalls);
 
   acct.mutable_swp()->set_swapin_count(t->swapin_count);
   acct.mutable_swp()->set_swapin_delay_total(t->swapin_delay_total);

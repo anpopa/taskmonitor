@@ -33,7 +33,7 @@ namespace tkm::monitor
 class TCPServer : public Pollable, public std::enable_shared_from_this<TCPServer>
 {
 public:
-  TCPServer();
+  TCPServer(std::shared_ptr<Options> &options);
   ~TCPServer();
 
 public:
@@ -49,6 +49,7 @@ public:
   bool hasClients(void) { return (m_clients.getSize() > 0); }
 
 private:
+  std::shared_ptr<Options> m_options = nullptr;
   struct sockaddr_in m_addr {
   };
   bswi::util::SafeList<std::shared_ptr<IClient>> m_clients{"ClientList"};

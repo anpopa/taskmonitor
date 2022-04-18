@@ -29,7 +29,7 @@ StartOnSignal=false
 [process]
 ReadProcAtInit=true
 SkipIfNoClients=false
-PollInterval=3000000
+PollInterval=5000000
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; System statistics from /proc/stat configuration options

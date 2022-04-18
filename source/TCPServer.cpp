@@ -28,8 +28,9 @@ using std::string;
 namespace tkm::monitor
 {
 
-TCPServer::TCPServer()
+TCPServer::TCPServer(std::shared_ptr<Options> &options)
 : Pollable("TCPServer")
+, m_options(options)
 {
   if ((m_sockFd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
     throw std::runtime_error("Fail to create TCPServer socket");
@@ -134,15 +135,15 @@ void TCPServer::bindAndListen()
   m_addr.sin_family = AF_INET;
   m_addr.sin_addr.s_addr = INADDR_ANY;
 
-  if (App()->getOptions()->getFor(Options::Key::TCPServerAddress) != "any") {
-    string serverAddress = App()->getOptions()->getFor(Options::Key::TCPServerAddress);
+  if (m_options->getFor(Options::Key::TCPServerAddress) != "any") {
+    string serverAddress = m_options->getFor(Options::Key::TCPServerAddress);
     struct hostent *server = gethostbyname(serverAddress.c_str());
     bcopy(server->h_addr, (char *) &m_addr.sin_addr.s_addr, (size_t) server->h_length);
   }
 
   auto port = std::stoi(tkmDefaults.getFor(Defaults::Default::TCPServerPort));
   try {
-    port = std::stoi(App()->getOptions()->getFor(Options::Key::TCPServerPort));
+    port = std::stoi(m_options->getFor(Options::Key::TCPServerPort));
   } catch (const std::exception &e) {
     logWarn() << "Cannot convert port number from config: " << e.what();
   }

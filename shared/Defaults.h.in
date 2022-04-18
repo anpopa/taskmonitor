@@ -53,7 +53,7 @@ public:
     m_table.insert(std::pair<Default, std::string>(Default::ConfPath, "@TKM_CONFIG_FILE@"));
     m_table.insert(std::pair<Default, std::string>(Default::StatPollInterval, "1000000"));
     m_table.insert(std::pair<Default, std::string>(Default::MemPollInterval, "3000000"));
-    m_table.insert(std::pair<Default, std::string>(Default::ProcPollInterval, "3000000"));
+    m_table.insert(std::pair<Default, std::string>(Default::ProcPollInterval, "5000000"));
     m_table.insert(std::pair<Default, std::string>(Default::PressurePollInterval, "5000000"));
     m_table.insert(std::pair<Default, std::string>(Default::RxBufferSize, "1048576"));
     m_table.insert(std::pair<Default, std::string>(Default::TxBufferSize, "1048576"));
