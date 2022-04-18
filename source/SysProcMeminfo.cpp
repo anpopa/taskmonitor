@@ -44,11 +44,6 @@ SysProcMeminfo::SysProcMeminfo(std::shared_ptr<Options> &options)
     throw std::runtime_error("Fail process MemPollInterval");
   }
 
-  m_file = std::make_unique<std::ifstream>("/proc/meminfo");
-  if (!m_file->is_open()) {
-    throw std::runtime_error("Fail to open meminfo file");
-  }
-
   if (options->getFor(Options::Key::SysMemPrintToLog) == "false") {
     m_printToLog = false;
   }
@@ -70,6 +65,8 @@ void SysProcMeminfo::disable(void)
 
 bool SysProcMeminfo::processOnTick(void)
 {
+  std::ifstream memInfoStream{"/proc/meminfo"};
+
   typedef enum _LineData {
     Unset,
     MemTotal,
@@ -81,14 +78,17 @@ bool SysProcMeminfo::processOnTick(void)
     SwapCached
   } LineData;
 
+  if (!memInfoStream.is_open()) {
+    throw std::runtime_error("Fail to open /proc/meminfo file");
+  }
+
   tkm::msg::server::Data data;
   std::string line;
 
   data.set_what(tkm::msg::server::Data_What_SysProcMeminfo);
   data.set_timestamp(time(NULL));
 
-  m_file->seekg(0, std::ios::beg);
-  while (std::getline(*m_file, line)) {
+  while (std::getline(memInfoStream, line)) {
     LineData lineData = LineData::Unset;
     std::vector<std::string> tokens;
     std::stringstream ss(line);

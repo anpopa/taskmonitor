@@ -90,7 +90,6 @@ private:
 
 private:
   bswi::util::SafeList<std::shared_ptr<CPUStat>> m_cpus{"StatCPUList"};
-  std::unique_ptr<std::ifstream> m_file = nullptr;
   std::shared_ptr<Options> m_options = nullptr;
   std::shared_ptr<Timer> m_timer = nullptr;
   bool m_printToLog = true;

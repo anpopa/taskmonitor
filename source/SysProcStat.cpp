@@ -69,11 +69,6 @@ SysProcStat::SysProcStat(std::shared_ptr<Options> &options)
     throw std::runtime_error("Fail process StatPollInterval");
   }
 
-  m_file = std::make_unique<std::ifstream>("/proc/stat");
-  if (!m_file->is_open()) {
-    throw std::runtime_error("Fail to open stat file");
-  }
-
   if (options->getFor(Options::Key::SysStatsPrintToLog) == "false") {
     m_printToLog = false;
   }
@@ -95,7 +90,11 @@ void SysProcStat::disable(void)
 
 bool SysProcStat::processOnTick(void)
 {
-  m_file->seekg(0, std::ios::beg);
+  std::ifstream statStream{"/proc/stat"};
+
+  if (!statStream.is_open()) {
+    throw std::runtime_error("Fail to open /proc/stat file");
+  }
 
   tkm::msg::server::Data data;
   tkm::msg::server::SysProcStat statEvent;
@@ -104,7 +103,7 @@ bool SysProcStat::processOnTick(void)
   data.set_timestamp(time(NULL));
 
   std::string line;
-  while (std::getline(*m_file, line)) {
+  while (std::getline(statStream, line)) {
     std::vector<std::string> tokens;
     std::stringstream ss(line);
     std::string buf;

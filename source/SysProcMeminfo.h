@@ -48,7 +48,6 @@ private:
 
 private:
   tkm::msg::server::SysProcMeminfo m_memInfo;
-  std::unique_ptr<std::ifstream> m_file = nullptr;
   std::shared_ptr<Options> m_options = nullptr;
   std::shared_ptr<Timer> m_timer = nullptr;
   bool m_printToLog = true;
