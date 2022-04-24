@@ -43,11 +43,7 @@ static void processDelayAcct(struct taskstats *t)
     return;
   }
 
-  tkm::msg::server::Data data;
-  tkm::msg::server::ProcAcct acct;
-
-  data.set_what(tkm::msg::server::Data_What_ProcAcct);
-  data.set_timestamp(time(NULL));
+  tkm::msg::monitor::ProcAcct acct;
 
   acct.set_ac_comm(t->ac_comm);
   acct.set_ac_uid(t->ac_uid);
@@ -96,8 +92,7 @@ static void processDelayAcct(struct taskstats *t)
   acct.mutable_thrashing()->set_thrashing_delay_average(
       average_ms(t->thrashing_delay_total, t->thrashing_count));
 
-  data.mutable_payload()->PackFrom(acct);
-  App()->getTCPServer()->sendData(data);
+  entry->setAcct(acct);
 }
 
 int callbackStatisticsMessage(struct nl_msg *nlmsg, void *arg)
@@ -222,39 +217,38 @@ ProcAcct::~ProcAcct()
   }
 }
 
-auto ProcAcct::requestTaskAcct(int pid) -> int
+bool ProcAcct::requestTaskAcct(ProcAcct::Request &request)
 {
-  struct nlmsghdr *hdr = nullptr;
   struct nl_msg *msg = nullptr;
   int err = NLE_SUCCESS;
 
   if (!(msg = nlmsg_alloc())) {
     logError() << "Failed to alloc message: " << nl_geterror(err);
-    return -1;
+    return false;
   }
 
-  if (!(hdr = static_cast<struct nlmsghdr *>(genlmsg_put(msg,
-                                                         NL_AUTO_PID,
-                                                         NL_AUTO_SEQ,
-                                                         m_nlFamily,
-                                                         0,
-                                                         NLM_F_REQUEST,
-                                                         TASKSTATS_CMD_GET,
-                                                         TASKSTATS_VERSION)))) {
+  if (genlmsg_put(msg,
+                  NL_AUTO_PID,
+                  NL_AUTO_SEQ,
+                  m_nlFamily,
+                  0,
+                  NLM_F_REQUEST,
+                  TASKSTATS_CMD_GET,
+                  TASKSTATS_VERSION) == nullptr) {
     logError() << "Error setting message header";
     nlmsg_free(msg);
-    return -1;
+    return false;
   }
 
-  if ((err = nla_put_u32(msg, TASKSTATS_CMD_ATTR_PID, pid)) < 0) {
+  if ((err = nla_put_u32(msg, TASKSTATS_CMD_ATTR_PID, request.procEntry->getPid())) < 0) {
     logError() << "Error setting attribute: " << nl_geterror(err);
     nlmsg_free(msg);
-    return -1;
+    return false;
   }
 
   if ((err = nl_send_sync(m_nlSock, msg)) < 0) {
     logError() << "Error sending message: " << nl_geterror(err);
-    return -1;
+    return false;
   } // nl_send_sync free the msg
 
   return 0;

@@ -29,45 +29,13 @@ Options::Options(const string &configFile)
 auto Options::getFor(Key key) -> string const
 {
   switch (key) {
-  case Key::StatPollInterval:
-    if (hasConfigFile()) {
-      const optional<string> prop = m_configFile->getPropertyValue("sysstat", -1, "PollInterval");
-      return prop.value_or(tkmDefaults.getFor(Defaults::Default::StatPollInterval));
-    }
-    return tkmDefaults.getFor(Defaults::Default::StatPollInterval);
-  case Key::SysStatsPrintToLog:
-    if (hasConfigFile()) {
-      const optional<string> prop = m_configFile->getPropertyValue("sysstat", -1, "PrintToLog");
-      return prop.value_or(tkmDefaults.getFor(Defaults::Default::SysStatsPrintToLog));
-    }
-    return tkmDefaults.getFor(Defaults::Default::SysStatsPrintToLog);
-  case Key::MemPollInterval:
-    if (hasConfigFile()) {
-      const optional<string> prop =
-          m_configFile->getPropertyValue("sysmeminfo", -1, "PollInterval");
-      return prop.value_or(tkmDefaults.getFor(Defaults::Default::MemPollInterval));
-    }
-    return tkmDefaults.getFor(Defaults::Default::MemPollInterval);
-  case Key::SysMemPrintToLog:
-    if (hasConfigFile()) {
-      const optional<string> prop = m_configFile->getPropertyValue("sysmeminfo", -1, "PrintToLog");
-      return prop.value_or(tkmDefaults.getFor(Defaults::Default::SysMemPrintToLog));
-    }
-    return tkmDefaults.getFor(Defaults::Default::SysMemPrintToLog);
-  case Key::ProcPollInterval:
-    if (hasConfigFile()) {
-      const optional<string> prop = m_configFile->getPropertyValue("process", -1, "PollInterval");
-      return prop.value_or(tkmDefaults.getFor(Defaults::Default::ProcPollInterval));
-    }
-    return tkmDefaults.getFor(Defaults::Default::ProcPollInterval);
-  case Key::PressurePollInterval:
-    if (hasConfigFile()) {
-      const optional<string> prop =
-          m_configFile->getPropertyValue("monitor", -1, "PressurePollInterval");
-      return prop.value_or(tkmDefaults.getFor(Defaults::Default::PressurePollInterval));
-    }
-    return tkmDefaults.getFor(Defaults::Default::PressurePollInterval);
   case Key::RxBufferSize:
+    if (hasConfigFile()) {
+      const optional<string> prop =
+          m_configFile->getPropertyValue("monitor", -1, "RuntimeDirectory");
+      return prop.value_or(tkmDefaults.getFor(Defaults::Default::RuntimeDirectory));
+    }
+    return tkmDefaults.getFor(Defaults::Default::RuntimeDirectory);
     if (hasConfigFile()) {
       const optional<string> prop = m_configFile->getPropertyValue("monitor", -1, "RxBufferSize");
       return prop.value_or(tkmDefaults.getFor(Defaults::Default::RxBufferSize));
@@ -85,32 +53,31 @@ auto Options::getFor(Key key) -> string const
       return prop.value_or(tkmDefaults.getFor(Defaults::Default::MsgBufferSize));
     }
     return tkmDefaults.getFor(Defaults::Default::MsgBufferSize);
-  case Key::ReadProcAtInit:
+  case Key::StatPollInterval:
     if (hasConfigFile()) {
-      const optional<string> prop = m_configFile->getPropertyValue("process", -1, "ReadProcAtInit");
-      return prop.value_or(tkmDefaults.getFor(Defaults::Default::ReadProcAtInit));
+      const optional<string> prop = m_configFile->getPropertyValue("sysstat", -1, "PollInterval");
+      return prop.value_or(tkmDefaults.getFor(Defaults::Default::StatPollInterval));
     }
-    return tkmDefaults.getFor(Defaults::Default::ReadProcAtInit);
-  case Key::SkipIfNoClients:
+    return tkmDefaults.getFor(Defaults::Default::StatPollInterval);
+  case Key::MemPollInterval:
+    if (hasConfigFile()) {
+      const optional<string> prop = m_configFile->getPropertyValue("meminfo", -1, "PollInterval");
+      return prop.value_or(tkmDefaults.getFor(Defaults::Default::MemPollInterval));
+    }
+    return tkmDefaults.getFor(Defaults::Default::MemPollInterval);
+  case Key::ProcPollInterval:
+    if (hasConfigFile()) {
+      const optional<string> prop = m_configFile->getPropertyValue("procacct", -1, "PollInterval");
+      return prop.value_or(tkmDefaults.getFor(Defaults::Default::ProcPollInterval));
+    }
+    return tkmDefaults.getFor(Defaults::Default::ProcPollInterval);
+  case Key::PressurePollInterval:
     if (hasConfigFile()) {
       const optional<string> prop =
-          m_configFile->getPropertyValue("process", -1, "SkipIfNoClients");
-      return prop.value_or(tkmDefaults.getFor(Defaults::Default::SkipIfNoClients));
+          m_configFile->getPropertyValue("presure", -1, "PressurePollInterval");
+      return prop.value_or(tkmDefaults.getFor(Defaults::Default::PressurePollInterval));
     }
-    return tkmDefaults.getFor(Defaults::Default::SkipIfNoClients);
-  case Key::EnableSysStat:
-    if (hasConfigFile()) {
-      const optional<string> prop = m_configFile->getPropertyValue("monitor", -1, "EnableSysStat");
-      return prop.value_or(tkmDefaults.getFor(Defaults::Default::EnableSysStat));
-    }
-    return tkmDefaults.getFor(Defaults::Default::EnableSysStat);
-  case Key::EnableSysMeminfo:
-    if (hasConfigFile()) {
-      const optional<string> prop =
-          m_configFile->getPropertyValue("monitor", -1, "EnableSysMeminfo");
-      return prop.value_or(tkmDefaults.getFor(Defaults::Default::EnableSysMeminfo));
-    }
-    return tkmDefaults.getFor(Defaults::Default::EnableSysMeminfo);
+    return tkmDefaults.getFor(Defaults::Default::PressurePollInterval);
   case Key::EnableTCPServer:
     if (hasConfigFile()) {
       const optional<string> prop =
@@ -118,57 +85,58 @@ auto Options::getFor(Key key) -> string const
       return prop.value_or(tkmDefaults.getFor(Defaults::Default::EnableTCPServer));
     }
     return tkmDefaults.getFor(Defaults::Default::EnableTCPServer);
-  case Key::EnableSysPressure:
+  case Key::EnableUDSServer:
     if (hasConfigFile()) {
       const optional<string> prop =
-          m_configFile->getPropertyValue("monitor", -1, "EnableSysPressure");
-      return prop.value_or(tkmDefaults.getFor(Defaults::Default::EnableSysPressure));
+          m_configFile->getPropertyValue("monitor", -1, "EnableUDSServer");
+      return prop.value_or(tkmDefaults.getFor(Defaults::Default::EnableUDSServer));
     }
-    return tkmDefaults.getFor(Defaults::Default::EnableSysPressure);
+    return tkmDefaults.getFor(Defaults::Default::EnableUDSServer);
   case Key::TCPServerAddress:
     if (hasConfigFile()) {
       const optional<string> prop =
-          m_configFile->getPropertyValue("netserver", -1, "ServerAddress");
+          m_configFile->getPropertyValue("tcpserver", -1, "ServerAddress");
       return prop.value_or(tkmDefaults.getFor(Defaults::Default::TCPServerAddress));
     }
     return tkmDefaults.getFor(Defaults::Default::TCPServerAddress);
   case Key::TCPServerPort:
     if (hasConfigFile()) {
-      const optional<string> prop = m_configFile->getPropertyValue("netserver", -1, "ServerPort");
+      const optional<string> prop = m_configFile->getPropertyValue("tcpserver", -1, "ServerPort");
       return prop.value_or(tkmDefaults.getFor(Defaults::Default::TCPServerPort));
     }
     return tkmDefaults.getFor(Defaults::Default::TCPServerPort);
   case Key::TCPServerStartIfPath:
     if (hasConfigFile()) {
-      const optional<string> prop = m_configFile->getPropertyValue("netserver", -1, "StartIfPath");
+      const optional<string> prop = m_configFile->getPropertyValue("tcpserver", -1, "StartIfPath");
       return prop.value_or(tkmDefaults.getFor(Defaults::Default::TCPServerStartIfPath));
     }
     return tkmDefaults.getFor(Defaults::Default::TCPServerStartIfPath);
   case Key::TCPServerStartOnSignal:
     if (hasConfigFile()) {
       const optional<string> prop =
-          m_configFile->getPropertyValue("netserver", -1, "StartOnSignal");
+          m_configFile->getPropertyValue("tcpserver", -1, "StartOnSignal");
       return prop.value_or(tkmDefaults.getFor(Defaults::Default::TCPServerStartOnSignal));
     }
     return tkmDefaults.getFor(Defaults::Default::TCPServerStartOnSignal);
-  case Key::PressureWithCPU:
+  case Key::UDSServerSocketPath:
     if (hasConfigFile()) {
-      const optional<string> prop = m_configFile->getPropertyValue("pressure", -1, "WithCPU");
-      return prop.value_or(tkmDefaults.getFor(Defaults::Default::PressureWithCPU));
+      const optional<string> prop = m_configFile->getPropertyValue("udsserver", -1, "SocketPath");
+      return prop.value_or(tkmDefaults.getFor(Defaults::Default::UDSServerSocketPath));
     }
-    return tkmDefaults.getFor(Defaults::Default::PressureWithCPU);
-  case Key::PressureWithMemory:
+    return tkmDefaults.getFor(Defaults::Default::UDSServerSocketPath);
+  case Key::UDSServerStartIfPath:
     if (hasConfigFile()) {
-      const optional<string> prop = m_configFile->getPropertyValue("pressure", -1, "WithMemory");
-      return prop.value_or(tkmDefaults.getFor(Defaults::Default::PressureWithMemory));
+      const optional<string> prop = m_configFile->getPropertyValue("udsserver", -1, "StartIfPath");
+      return prop.value_or(tkmDefaults.getFor(Defaults::Default::UDSServerStartIfPath));
     }
-    return tkmDefaults.getFor(Defaults::Default::PressureWithMemory);
-  case Key::PressureWithIO:
+    return tkmDefaults.getFor(Defaults::Default::UDSServerStartIfPath);
+  case Key::UDSServerStartOnSignal:
     if (hasConfigFile()) {
-      const optional<string> prop = m_configFile->getPropertyValue("pressure", -1, "WithIO");
-      return prop.value_or(tkmDefaults.getFor(Defaults::Default::PressureWithIO));
+      const optional<string> prop =
+          m_configFile->getPropertyValue("udsserver", -1, "StartOnSignal");
+      return prop.value_or(tkmDefaults.getFor(Defaults::Default::UDSServerStartOnSignal));
     }
-    return tkmDefaults.getFor(Defaults::Default::PressureWithIO);
+    return tkmDefaults.getFor(Defaults::Default::UDSServerStartOnSignal);
   default:
     logError() << "Unknown option key";
     break;

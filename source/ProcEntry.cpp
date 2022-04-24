@@ -11,27 +11,23 @@
 
 #include "ProcEntry.h"
 #include "Application.h"
+#include "ProcAcct.h"
 #include <cstdint>
 
 namespace tkm::monitor
 {
 
-ProcEntry::ProcEntry(int pid)
+ProcEntry::ProcEntry(int pid, const std::string &name)
 : m_pid(pid)
+, m_name(name)
 {
-  if (App()->getOptions()->getFor(Options::Key::SkipIfNoClients) == "true") {
-    m_skipIfNoClients = true;
-  }
-
-  m_timer = std::make_shared<Timer>("ProcEntry", [this]() {
-    if (!App()->getTCPServer()->hasClients() && m_skipIfNoClients) {
-      return true;
-    }
-    return (App()->getDispatcher()->getProcAcct()->requestTaskAcct(m_pid) != -1) ? true : false;
+  m_timer = std::make_shared<Timer>("ProcEntry", [this, pid]() {
+    ProcAcct::Request request = {.procEntry = getShared()};
+    return App()->getProcAcct()->requestTaskAcct(request);
   });
-};
+}
 
-void ProcEntry::startMonitoring(int interval)
+void ProcEntry::startMonitoring(unsigned int interval)
 {
   m_pollInterval = interval;
   m_timer->start(interval, true);

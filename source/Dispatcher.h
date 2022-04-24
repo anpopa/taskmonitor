@@ -18,6 +18,8 @@
 #include "ProcAcct.h"
 #include "ProcEvent.h"
 
+#include "ICollector.h"
+
 #include "../bswinfra/source/AsyncQueue.h"
 
 using namespace bswi::event;
@@ -28,32 +30,33 @@ namespace tkm::monitor
 class Dispatcher : public std::enable_shared_from_this<Dispatcher>
 {
 public:
-  enum class Action { RegisterEvents };
+  enum class Action {
+    GetProcAcct,
+    GetProcEventStats,
+    GetSysProcMeminfo,
+    GetSysProcStat,
+    GetSysProcPressure
+  };
 
   typedef struct Request {
     Action action;
+    std::shared_ptr<ICollector> collector;
     std::map<std::string, std::string> args;
   } Request;
 
 public:
-  explicit Dispatcher(std::shared_ptr<Options> &options,
-                      std::shared_ptr<ProcAcct> &procAcct,
-                      std::shared_ptr<ProcEvent> &procEvent);
+  explicit Dispatcher(std::shared_ptr<Options> &options);
 
 public:
   auto getShared() -> std::shared_ptr<Dispatcher> { return shared_from_this(); }
-  void enableEvents();
   auto pushRequest(Request &request) -> int;
-  auto getProcAcct() -> std::shared_ptr<ProcAcct> & { return m_procAcct; }
-  auto getProcEvent() -> std::shared_ptr<ProcEvent> & { return m_procEvent; }
+  void enableEvents();
 
 private:
   bool requestHandler(const Request &request);
 
 private:
   std::shared_ptr<Options> m_options = nullptr;
-  std::shared_ptr<ProcAcct> m_procAcct = nullptr;
-  std::shared_ptr<ProcEvent> m_procEvent = nullptr;
   std::shared_ptr<AsyncQueue<Request>> m_queue = nullptr;
 };
 

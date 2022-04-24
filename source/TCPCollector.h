@@ -4,7 +4,7 @@
  * @date      2021-2022
  * @author    Alin Popa <alin.popa@fxdata.ro>
  * @copyright MIT
- * @brief     TCPClient Class
+ * @brief     TCPCollector Class
  * @details   Network TCP client implementation
  *-
  */
@@ -13,7 +13,7 @@
 
 #include <string>
 
-#include "IClient.h"
+#include "ICollector.h"
 #include "Options.h"
 
 using namespace bswi::log;
@@ -22,18 +22,18 @@ using namespace bswi::event;
 namespace tkm::monitor
 {
 
-class TCPClient : public IClient, public std::enable_shared_from_this<TCPClient>
+class TCPCollector : public ICollector, public std::enable_shared_from_this<TCPCollector>
 {
 public:
-  explicit TCPClient(int fd);
-  ~TCPClient();
+  explicit TCPCollector(int fd);
+  ~TCPCollector();
 
+  auto getShared() -> std::shared_ptr<TCPCollector> { return shared_from_this(); }
   void enableEvents();
-  auto getShared() -> std::shared_ptr<TCPClient> { return shared_from_this(); }
 
 public:
-  TCPClient(TCPClient const &) = delete;
-  void operator=(TCPClient const &) = delete;
+  TCPCollector(TCPCollector const &) = delete;
+  void operator=(TCPCollector const &) = delete;
 };
 
 } // namespace tkm::monitor

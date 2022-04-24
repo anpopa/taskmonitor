@@ -17,6 +17,7 @@
 #include <sys/socket.h>
 
 #include "Options.h"
+#include "ProcEntry.h"
 
 #include "../bswinfra/source/Exceptions.h"
 #include "../bswinfra/source/IApplication.h"
@@ -30,6 +31,11 @@ namespace tkm::monitor
 class ProcAcct : public Pollable, public std::enable_shared_from_this<ProcAcct>
 {
 public:
+  typedef struct Request {
+    std::shared_ptr<ProcEntry> procEntry;
+  } Request;
+
+public:
   explicit ProcAcct(std::shared_ptr<Options> &options);
   ~ProcAcct();
 
@@ -40,9 +46,8 @@ public:
 public:
   auto getShared() -> std::shared_ptr<ProcAcct> { return shared_from_this(); }
   void enableEvents();
-  [[nodiscard]] int getFD() const { return m_sockFd; }
 
-  auto requestTaskAcct(int pid) -> int;
+  bool requestTaskAcct(ProcAcct::Request &request);
 
 private:
   std::shared_ptr<Options> m_options = nullptr;

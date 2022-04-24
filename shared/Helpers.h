@@ -17,7 +17,7 @@
 #include "../bswinfra/source/Exceptions.h"
 #include "../bswinfra/source/Logger.h"
 
-#include "Client.pb.h"
+#include "Collector.pb.h"
 
 namespace tkm
 {
@@ -25,7 +25,7 @@ namespace tkm
 auto jnkHsh(const char *key) -> uint64_t;
 auto base64Encode(unsigned char const *bytes_to_encode, unsigned int in_len) -> std::string;
 auto base64Decode(std::string const &encoded_string) -> std::string;
-bool sendClientDescriptor(int fd, tkm::msg::client::Descriptor &descriptor);
-bool readClientDescriptor(int fd, tkm::msg::client::Descriptor &descriptor);
+bool sendCollectorDescriptor(int fd, tkm::msg::collector::Descriptor &descriptor);
+bool readCollectorDescriptor(int fd, tkm::msg::collector::Descriptor &descriptor);
 
 } // namespace tkm

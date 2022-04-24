@@ -12,8 +12,10 @@
 #include "SysProcPressure.h"
 #include "Application.h"
 
+#include <filesystem>
 #include <fstream>
 #include <iostream>
+#include <memory>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -21,7 +23,12 @@
 namespace tkm::monitor
 {
 
-std::vector<std::string> tokenize(const std::string &str, const char &ch)
+static bool doUpdateStats(const std::shared_ptr<SysProcPressure> &mgr,
+                          const SysProcPressure::Request &request);
+static bool doCollectAndSend(const std::shared_ptr<SysProcPressure> &mgr,
+                             const SysProcPressure::Request &request);
+
+static auto tokenize(const std::string &str, const char &ch) -> std::vector<std::string>
 {
   std::string next;
   std::vector<std::string> result;
@@ -58,7 +65,7 @@ void PressureStat::updateStats(void)
         tokens.push_back(buf);
       }
 
-      tkm::msg::server::PSIData data;
+      tkm::msg::monitor::PSIData data;
       for (size_t i = 1; i < tokens.size(); i++) {
         std::vector<std::string> keyVal = tokenize(tokens[i], '=');
 
@@ -93,62 +100,91 @@ SysProcPressure::SysProcPressure(std::shared_ptr<Options> &options)
   try {
     m_usecInterval = std::stol(m_options->getFor(Options::Key::PressurePollInterval));
   } catch (...) {
-    throw std::runtime_error("Fail process pressure PollInterval");
+    throw std::runtime_error("Fail process PressurePollInterval");
   }
 
-  if (options->getFor(Options::Key::PressureWithCPU) == "true") {
+  if (std::filesystem::exists("/proc/pressure/cpu")) {
     std::shared_ptr<PressureStat> entry = std::make_shared<PressureStat>("cpu");
     m_entries.append(entry);
   }
-  if (options->getFor(Options::Key::PressureWithMemory) == "true") {
+  if (std::filesystem::exists("/proc/pressure/memory")) {
     std::shared_ptr<PressureStat> entry = std::make_shared<PressureStat>("memory");
     m_entries.append(entry);
   }
-  if (options->getFor(Options::Key::PressureWithIO) == "true") {
+  if (std::filesystem::exists("/proc/pressure/io")) {
     std::shared_ptr<PressureStat> entry = std::make_shared<PressureStat>("io");
     m_entries.append(entry);
   }
   m_entries.commit();
 
-  m_timer = std::make_shared<Timer>("SysProcPressure", [this]() { return processOnTick(); });
+  m_queue = std::make_shared<AsyncQueue<Request>>(
+      "SysProcPressureQueue", [this](const Request &request) { return requestHandler(request); });
+  m_timer = std::make_shared<Timer>("SysProcMeminfoTimer", [this]() {
+    SysProcPressure::Request request = {.action = SysProcPressure::Action::UpdateStats};
+    return requestHandler(request);
+  });
 }
 
-void SysProcPressure::startMonitoring(void)
+auto SysProcPressure::pushRequest(Request &request) -> int
 {
+  return m_queue->push(request);
+}
+
+void SysProcPressure::enableEvents()
+{
+  // Module queue
+  App()->addEventSource(m_queue);
+
+  // Update timer
   m_timer->start(m_usecInterval, true);
   App()->addEventSource(m_timer);
 }
 
-void SysProcPressure::disable(void)
+auto SysProcPressure::requestHandler(const Request &request) -> bool
 {
-  m_timer->stop();
-  App()->remEventSource(m_timer);
+  switch (request.action) {
+  case SysProcPressure::Action::UpdateStats:
+    return doUpdateStats(getShared(), request);
+  case SysProcPressure::Action::CollectAndSend:
+    return doCollectAndSend(getShared(), request);
+  default:
+    break;
+  }
+
+  logError() << "Unknown action request";
+  return false;
 }
 
-bool SysProcPressure::processOnTick(void)
+static bool doUpdateStats(const std::shared_ptr<SysProcPressure> &mgr,
+                          const SysProcPressure::Request &request)
 {
-  tkm::msg::server::Data data;
-  tkm::msg::server::SysProcPressure psiEvent;
-
-  data.set_what(tkm::msg::server::Data_What_SysProcPressure);
-  data.set_timestamp(time(NULL));
-
-  m_entries.foreach ([this, &psiEvent](const std::shared_ptr<PressureStat> &entry) {
+  mgr->getProcEntries().foreach ([&mgr](const std::shared_ptr<PressureStat> &entry) {
     entry->updateStats();
     if (entry->getName() == "cpu") {
-      psiEvent.mutable_cpu_some()->CopyFrom(entry->getDataSome());
-      psiEvent.mutable_cpu_full()->CopyFrom(entry->getDataFull());
+      mgr->getProcPressure().mutable_cpu_some()->CopyFrom(entry->getDataSome());
+      mgr->getProcPressure().mutable_cpu_full()->CopyFrom(entry->getDataFull());
     } else if (entry->getName() == "memory") {
-      psiEvent.mutable_mem_some()->CopyFrom(entry->getDataSome());
-      psiEvent.mutable_mem_full()->CopyFrom(entry->getDataFull());
+      mgr->getProcPressure().mutable_mem_some()->CopyFrom(entry->getDataSome());
+      mgr->getProcPressure().mutable_mem_full()->CopyFrom(entry->getDataFull());
     } else if (entry->getName() == "io") {
-      psiEvent.mutable_io_some()->CopyFrom(entry->getDataSome());
-      psiEvent.mutable_io_full()->CopyFrom(entry->getDataFull());
+      mgr->getProcPressure().mutable_io_some()->CopyFrom(entry->getDataSome());
+      mgr->getProcPressure().mutable_io_full()->CopyFrom(entry->getDataFull());
     }
   });
 
-  data.mutable_payload()->PackFrom(psiEvent);
-  App()->getTCPServer()->sendData(data);
+  return true;
+}
+
+static bool doCollectAndSend(const std::shared_ptr<SysProcPressure> &mgr,
+                             const SysProcPressure::Request &request)
+{
+  tkm::msg::monitor::Data data;
+
+  data.set_what(tkm::msg::monitor::Data_What_SysProcPressure);
+  data.set_timestamp(time(NULL));
+
+  data.mutable_payload()->PackFrom(mgr->getProcPressure());
+  request.collector->sendData(data);
 
   return true;
 }

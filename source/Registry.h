@@ -15,9 +15,11 @@
 #include <memory>
 #include <string>
 
+#include "ICollector.h"
 #include "Options.h"
 #include "ProcEntry.h"
 
+#include "../bswinfra/source/AsyncQueue.h"
 #include "../bswinfra/source/SafeList.h"
 
 using namespace bswi::event;
@@ -25,24 +27,17 @@ using namespace bswi::event;
 namespace tkm::monitor
 {
 
-class Registry
+class Registry : public std::enable_shared_from_this<Registry>
 {
 public:
-  explicit Registry(std::shared_ptr<Options> &options)
-  : m_options(options)
-  {
-    long pollInterval = -1;
+  enum class Action { CollectAndSend };
+  typedef struct Request {
+    Action action;
+    std::shared_ptr<ICollector> collector;
+  } Request;
 
-    try {
-      pollInterval = std::stol(m_options->getFor(Options::Key::ProcPollInterval));
-    } catch (...) {
-      // Discard non pid entries
-    }
-
-    if (pollInterval != -1) {
-      m_pollInterval = pollInterval;
-    }
-  };
+public:
+  explicit Registry(std::shared_ptr<Options> &options);
   ~Registry() = default;
 
 public:
@@ -50,19 +45,31 @@ public:
   void operator=(Registry const &) = delete;
 
 public:
+  auto getShared() -> std::shared_ptr<Registry> { return shared_from_this(); }
   void initFromProc(void);
-  long getPollInterval(void) { return m_pollInterval; }
+
   void addEntry(int pid);
   void remEntry(int pid);
+  void remEntry(std::string &name);
   auto getEntry(int pid) -> const std::shared_ptr<ProcEntry>;
+  auto getEntry(std::string &name) -> const std::shared_ptr<ProcEntry>;
+  auto getRegistryList(void) -> bswi::util::SafeList<std::shared_ptr<ProcEntry>> &
+  {
+    return m_list;
+  }
+
+  auto pushRequest(Registry::Request &request) -> int;
+  void enableEvents();
 
 private:
+  bool requestHandler(const Request &request);
+  auto getProcNameForPID(int pid) -> std::string;
   bool isBlacklisted(int pid);
 
 private:
-  std::shared_ptr<Options> m_options = nullptr;
   bswi::util::SafeList<std::shared_ptr<ProcEntry>> m_list{"RegistryList"};
-  long m_pollInterval = 3000000;
+  std::shared_ptr<AsyncQueue<Request>> m_queue = nullptr;
+  std::shared_ptr<Options> m_options = nullptr;
 };
 
 } // namespace tkm::monitor

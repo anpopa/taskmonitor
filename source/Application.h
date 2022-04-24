@@ -59,6 +59,8 @@ public:
   auto getTCPServer() -> std::shared_ptr<TCPServer> & { return m_netServer; }
   auto getDispatcher() -> std::shared_ptr<Dispatcher> & { return m_dispatcher; }
   auto getRegistry() -> std::shared_ptr<Registry> & { return m_registry; }
+  auto getProcAcct() -> std::shared_ptr<ProcAcct> & { return m_procAcct; }
+  auto getProcEvent() -> std::shared_ptr<ProcEvent> & { return m_procEvent; }
   auto getSysProcStat() -> std::shared_ptr<SysProcStat> & { return m_sysProcStat; }
   auto getSysProcMeminfo() -> std::shared_ptr<SysProcMeminfo> & { return m_sysProcMeminfo; }
   auto getSysProcPressure() -> std::shared_ptr<SysProcPressure> & { return m_sysProcPressure; }

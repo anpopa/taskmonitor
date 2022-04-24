@@ -15,8 +15,6 @@
 #endif
 #include <filesystem>
 
-namespace fs = std::filesystem;
-
 using std::shared_ptr;
 using std::string;
 
@@ -24,8 +22,6 @@ using std::string;
 
 namespace tkm::monitor
 {
-
-static bool shouldStartTCPServer(const std::shared_ptr<tkm::monitor::Options> &opts);
 
 Application *Application::appInstance = nullptr;
 
@@ -42,12 +38,10 @@ Application::Application(const string &name, const string &description, const st
   if (m_options->getFor(Options::Key::EnableTCPServer) == "true") {
     m_netServer = std::make_shared<TCPServer>(m_options);
 
-    if (shouldStartTCPServer(m_options)) {
-      try {
-        m_netServer->bindAndListen();
-      } catch (std::exception &e) {
-        logError() << "Fail to start server. Exception: " << e.what();
-      }
+    try {
+      m_netServer->bindAndListen();
+    } catch (std::exception &e) {
+      logError() << "Fail to start server. Exception: " << e.what();
     }
   }
 
@@ -58,11 +52,18 @@ Application::Application(const string &name, const string &description, const st
   m_procEvent->enableEvents();
 
   m_registry = std::make_shared<Registry>(m_options);
-  m_sysProcStat = std::make_shared<SysProcStat>(m_options);
-  m_sysProcMeminfo = std::make_shared<SysProcMeminfo>(m_options);
-  m_sysProcPressure = std::make_shared<SysProcPressure>(m_options);
+  m_registry->enableEvents();
 
-  m_dispatcher = std::make_unique<Dispatcher>(m_options, m_procAcct, m_procEvent);
+  m_sysProcStat = std::make_shared<SysProcStat>(m_options);
+  m_sysProcStat->enableEvents();
+
+  m_sysProcMeminfo = std::make_shared<SysProcMeminfo>(m_options);
+  m_sysProcMeminfo->enableEvents();
+
+  m_sysProcPressure = std::make_shared<SysProcPressure>(m_options);
+  m_sysProcPressure->enableEvents();
+
+  m_dispatcher = std::make_unique<Dispatcher>(m_options);
   m_dispatcher->enableEvents();
 
   startWatchdog();
@@ -100,23 +101,6 @@ void Application::startWatchdog(void)
 #else
   logInfo() << "Watchdog build time disabled";
 #endif
-}
-
-static bool shouldStartTCPServer(const std::shared_ptr<tkm::monitor::Options> &opts)
-{
-  if (opts->getFor(Options::Key::TCPServerStartIfPath) != "none") {
-    fs::path condPath(opts->getFor(Options::Key::TCPServerStartIfPath));
-    if (fs::exists(condPath)) {
-      return true;
-    }
-    return false;
-  }
-
-  if (opts->getFor(Options::Key::TCPServerStartOnSignal) == "true") {
-    return false;
-  }
-
-  return true;
 }
 
 } // namespace tkm::monitor

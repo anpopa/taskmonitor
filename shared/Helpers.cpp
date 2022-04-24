@@ -139,17 +139,17 @@ auto jnkHsh(const char *key) -> uint64_t
   return hash;
 }
 
-bool sendClientDescriptor(int fd, tkm::msg::client::Descriptor &descriptor)
+bool sendCollectorDescriptor(int fd, tkm::msg::collector::Descriptor &descriptor)
 {
-  tkm::msg::client::Message message{};
+  tkm::msg::collector::Message message{};
   tkm::msg::Envelope envelope{};
 
   // We pack an empty descriptor to calculate envelope size
-  message.set_type(tkm::msg::client::Message_Type_Descriptor);
+  message.set_type(tkm::msg::collector::Message_Type_Descriptor);
   message.mutable_data()->PackFrom(descriptor);
   envelope.mutable_mesg()->PackFrom(message);
-  envelope.set_target(tkm::msg::Envelope_Recipient_Server);
-  envelope.set_origin(tkm::msg::Envelope_Recipient_Client);
+  envelope.set_target(tkm::msg::Envelope_Recipient_Monitor);
+  envelope.set_origin(tkm::msg::Envelope_Recipient_Collector);
 
   unsigned char buffer[128]{};
   pbio::ArrayOutputStream outputArray(buffer, sizeof(buffer));
@@ -170,17 +170,17 @@ bool sendClientDescriptor(int fd, tkm::msg::client::Descriptor &descriptor)
   return true;
 }
 
-bool readClientDescriptor(int fd, tkm::msg::client::Descriptor &descriptor)
+bool readCollectorDescriptor(int fd, tkm::msg::collector::Descriptor &descriptor)
 {
-  tkm::msg::client::Message message{};
+  tkm::msg::collector::Message message{};
   tkm::msg::Envelope envelope{};
 
   // We pack an empty descriptor to calculate envelope size
-  message.set_type(tkm::msg::client::Message_Type_Descriptor);
+  message.set_type(tkm::msg::collector::Message_Type_Descriptor);
   message.mutable_data()->PackFrom(descriptor);
   envelope.mutable_mesg()->PackFrom(message);
-  envelope.set_target(tkm::msg::Envelope_Recipient_Server);
-  envelope.set_origin(tkm::msg::Envelope_Recipient_Client);
+  envelope.set_target(tkm::msg::Envelope_Recipient_Monitor);
+  envelope.set_origin(tkm::msg::Envelope_Recipient_Collector);
 
   unsigned char buffer[128]{};
   pbio::ArrayInputStream inputArray(buffer, sizeof(buffer));
@@ -202,7 +202,7 @@ bool readClientDescriptor(int fd, tkm::msg::client::Descriptor &descriptor)
   }
 
   envelope.mesg().UnpackTo(&message);
-  if (message.type() != tkm::msg::client::Message_Type_Descriptor) {
+  if (message.type() != tkm::msg::collector::Message_Type_Descriptor) {
     return false;
   }
 

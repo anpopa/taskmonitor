@@ -5,7 +5,7 @@
  * @author    Alin Popa <alin.popa@fxdata.ro>
  * @copyright MIT
  * @brief     TCPServer Class
- * @details   Server listening to UDP TCPClient connections
+ * @details   Server listening to UDP TCPCollector connections
  *-
  */
 
@@ -17,10 +17,10 @@
 #include "Defaults.h"
 #include "EnvelopeReader.h"
 #include "Helpers.h"
-#include "TCPClient.h"
+#include "TCPCollector.h"
 #include "TCPServer.h"
 
-#include "Client.pb.h"
+#include "Collector.pb.h"
 
 using std::shared_ptr;
 using std::string;
@@ -45,34 +45,30 @@ TCPServer::TCPServer(std::shared_ptr<Options> &options)
 
   lateSetup(
       [this]() {
-        int clientFd = accept(m_sockFd, (struct sockaddr *) nullptr, nullptr);
+        int collectorFd = accept(m_sockFd, (struct sockaddr *) nullptr, nullptr);
 
-        if (clientFd < 0) {
+        if (collectorFd < 0) {
           logWarn() << "Fail to accept on TCPServer socket";
           return false;
         }
 
-        // The client has 3 seconds to send the descriptor or will be disconnected
+        // The collector has 3 seconds to send the descriptor or will be disconnected
         struct timeval tv;
         tv.tv_sec = 3;
         tv.tv_usec = 0;
-        setsockopt(clientFd, SOL_SOCKET, SO_RCVTIMEO, (const char *) &tv, sizeof(tv));
+        setsockopt(collectorFd, SOL_SOCKET, SO_RCVTIMEO, (const char *) &tv, sizeof(tv));
 
-        tkm::msg::client::Descriptor descriptor{};
-        if (!readClientDescriptor(clientFd, descriptor)) {
-          logWarn() << "Client " << clientFd << " read descriptor failed";
-          close(clientFd);
-          return true; // this is a client issue, process next client
+        tkm::msg::collector::Descriptor descriptor{};
+        if (!readCollectorDescriptor(collectorFd, descriptor)) {
+          logWarn() << "Collector " << collectorFd << " read descriptor failed";
+          close(collectorFd);
+          return true; // this is a collector issue, process next collector
         }
 
-        logInfo() << "New Client with FD: " << clientFd;
-        std::shared_ptr<TCPClient> client = std::make_shared<TCPClient>(clientFd);
-
-        m_clients.append(client);
-        m_clients.commit();
-
-        client->descriptor = descriptor;
-        client->enableEvents();
+        logInfo() << "New Collector with FD: " << collectorFd;
+        std::shared_ptr<TCPCollector> collector = std::make_shared<TCPCollector>(collectorFd);
+        collector->descriptor = descriptor;
+        collector->enableEvents();
 
         return true;
       },
@@ -89,37 +85,6 @@ void TCPServer::enableEvents()
 TCPServer::~TCPServer()
 {
   static_cast<void>(invalidate());
-  m_clients.foreach ([this](const std::shared_ptr<IClient> &entry) { m_clients.remove(entry); });
-  m_clients.commit();
-}
-
-void TCPServer::sendData(const tkm::msg::server::Data &data)
-{
-  tkm::msg::Envelope envelope;
-  tkm::msg::server::Message message;
-
-  message.set_type(tkm::msg::server::Message_Type_Data);
-  message.mutable_payload()->PackFrom(data);
-  envelope.mutable_mesg()->PackFrom(message);
-  envelope.set_target(tkm::msg::Envelope_Recipient_Client);
-  envelope.set_origin(tkm::msg::Envelope_Recipient_Server);
-
-  m_clients.foreach ([this, &envelope](const std::shared_ptr<IClient> &entry) {
-    if (entry->getStreamEnabled()) {
-      entry->writeEnvelope(envelope);
-    }
-  });
-}
-
-void TCPServer::notifyClientTerminated(int id)
-{
-  m_clients.foreach ([this, id](const std::shared_ptr<IClient> &entry) {
-    if (entry->getFD() == id) {
-      logDebug() << "Found entry to remove with pid " << id;
-      m_clients.remove(entry);
-    }
-  });
-  m_clients.commit();
 }
 
 void TCPServer::bindAndListen()

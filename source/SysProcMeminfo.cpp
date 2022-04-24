@@ -11,9 +11,11 @@
 
 #include "SysProcMeminfo.h"
 #include "Application.h"
+#include "Monitor.pb.h"
 
 #include <fstream>
 #include <iostream>
+#include <memory>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -21,19 +23,10 @@
 namespace tkm::monitor
 {
 
-void SysProcMeminfo::printStats(void)
-{
-  logInfo() << "SysProcMeminfo[MEM] "
-            << "MemTotal=" << m_memInfo.mem_total() << " "
-            << "MemFree=" << m_memInfo.mem_free() << " "
-            << "MemAvailable=" << m_memInfo.mem_available() << " "
-            << "MemCached=" << m_memInfo.mem_cached() << " "
-            << "MemAvailablePercent=" << m_memInfo.mem_percent() << "% "
-            << "SwapTotal=" << m_memInfo.swap_total() << " "
-            << "SwapFree=" << m_memInfo.swap_free() << " "
-            << "SwapCached=" << m_memInfo.swap_cached() << " "
-            << "SwapFreePercent=" << m_memInfo.swap_percent() << "%";
-}
+static bool doUpdateStats(const std::shared_ptr<SysProcMeminfo> &mgr,
+                          const SysProcMeminfo::Request &request);
+static bool doCollectAndSend(const std::shared_ptr<SysProcMeminfo> &mgr,
+                             const SysProcMeminfo::Request &request);
 
 SysProcMeminfo::SysProcMeminfo(std::shared_ptr<Options> &options)
 : m_options(options)
@@ -44,26 +37,46 @@ SysProcMeminfo::SysProcMeminfo(std::shared_ptr<Options> &options)
     throw std::runtime_error("Fail process MemPollInterval");
   }
 
-  if (options->getFor(Options::Key::SysMemPrintToLog) == "false") {
-    m_printToLog = false;
-  }
-
-  m_timer = std::make_shared<Timer>("SysProcMeminfo", [this]() { return processOnTick(); });
+  m_queue = std::make_shared<AsyncQueue<Request>>(
+      "SysProcMeminfoQueue", [this](const Request &request) { return requestHandler(request); });
+  m_timer = std::make_shared<Timer>("SysProcMeminfoTimer", [this]() {
+    SysProcMeminfo::Request request = {.action = SysProcMeminfo::Action::UpdateStats};
+    return requestHandler(request);
+  });
 }
 
-void SysProcMeminfo::startMonitoring(void)
+auto SysProcMeminfo::pushRequest(Request &request) -> int
 {
+  return m_queue->push(request);
+}
+
+void SysProcMeminfo::enableEvents()
+{
+  // Module queue
+  App()->addEventSource(m_queue);
+
+  // Update timer
   m_timer->start(m_usecInterval, true);
   App()->addEventSource(m_timer);
 }
 
-void SysProcMeminfo::disable(void)
+auto SysProcMeminfo::requestHandler(const Request &request) -> bool
 {
-  m_timer->stop();
-  App()->remEventSource(m_timer);
+  switch (request.action) {
+  case SysProcMeminfo::Action::UpdateStats:
+    return doUpdateStats(getShared(), request);
+  case SysProcMeminfo::Action::CollectAndSend:
+    return doCollectAndSend(getShared(), request);
+  default:
+    break;
+  }
+
+  logError() << "Unknown action request";
+  return false;
 }
 
-bool SysProcMeminfo::processOnTick(void)
+static bool doUpdateStats(const std::shared_ptr<SysProcMeminfo> &mgr,
+                          const SysProcMeminfo::Request &request)
 {
   std::ifstream memInfoStream{"/proc/meminfo"};
 
@@ -82,12 +95,7 @@ bool SysProcMeminfo::processOnTick(void)
     throw std::runtime_error("Fail to open /proc/meminfo file");
   }
 
-  tkm::msg::server::Data data;
   std::string line;
-
-  data.set_what(tkm::msg::server::Data_What_SysProcMeminfo);
-  data.set_timestamp(time(NULL));
-
   while (std::getline(memInfoStream, line)) {
     LineData lineData = LineData::Unset;
     std::vector<std::string> tokens;
@@ -124,46 +132,55 @@ bool SysProcMeminfo::processOnTick(void)
 
     switch (lineData) {
     case LineData::MemTotal:
-      m_memInfo.set_mem_total(std::stoul(tokens[1].c_str()));
+      mgr->getProcMemInfo().set_mem_total(std::stoul(tokens[1].c_str()));
       break;
     case LineData::MemFree:
-      m_memInfo.set_mem_free(std::stoul(tokens[1].c_str()));
+      mgr->getProcMemInfo().set_mem_free(std::stoul(tokens[1].c_str()));
       break;
     case LineData::MemAvailable:
-      m_memInfo.set_mem_available(std::stoul(tokens[1].c_str()));
+      mgr->getProcMemInfo().set_mem_available(std::stoul(tokens[1].c_str()));
       break;
     case LineData::MemCached:
-      m_memInfo.set_mem_cached(std::stoul(tokens[1].c_str()));
+      mgr->getProcMemInfo().set_mem_cached(std::stoul(tokens[1].c_str()));
       break;
     case LineData::SwapTotal:
-      m_memInfo.set_swap_total(std::stoul(tokens[1].c_str()));
+      mgr->getProcMemInfo().set_swap_total(std::stoul(tokens[1].c_str()));
       break;
     case LineData::SwapFree:
-      m_memInfo.set_swap_free(std::stoul(tokens[1].c_str()));
+      mgr->getProcMemInfo().set_swap_free(std::stoul(tokens[1].c_str()));
       break;
     case LineData::SwapCached:
-      m_memInfo.set_swap_cached(std::stoul(tokens[1].c_str()));
+      mgr->getProcMemInfo().set_swap_cached(std::stoul(tokens[1].c_str()));
       break;
     default:
       break;
     }
   }
 
-  if (m_memInfo.mem_total() > 0) {
-    uint32_t memPercent = (m_memInfo.mem_available() * 100) / m_memInfo.mem_total();
-    m_memInfo.set_mem_percent(memPercent);
+  if (mgr->getProcMemInfo().mem_total() > 0) {
+    uint32_t memPercent =
+        (mgr->getProcMemInfo().mem_available() * 100) / mgr->getProcMemInfo().mem_total();
+    mgr->getProcMemInfo().set_mem_percent(memPercent);
   }
-  if (m_memInfo.swap_total() > 0) {
-    uint32_t swapPercent = (m_memInfo.swap_free() * 100) / m_memInfo.swap_total();
-    m_memInfo.set_swap_percent(swapPercent);
-  }
-
-  if (m_printToLog) {
-    printStats();
+  if (mgr->getProcMemInfo().swap_total() > 0) {
+    uint32_t swapPercent =
+        (mgr->getProcMemInfo().swap_free() * 100) / mgr->getProcMemInfo().swap_total();
+    mgr->getProcMemInfo().set_swap_percent(swapPercent);
   }
 
-  data.mutable_payload()->PackFrom(m_memInfo);
-  App()->getTCPServer()->sendData(data);
+  return true;
+}
+
+static bool doCollectAndSend(const std::shared_ptr<SysProcMeminfo> &mgr,
+                             const SysProcMeminfo::Request &request)
+{
+  tkm::msg::monitor::Data data;
+
+  data.set_what(tkm::msg::monitor::Data_What_SysProcMeminfo);
+  data.set_timestamp(time(NULL));
+  data.mutable_payload()->PackFrom(mgr->getProcMemInfo());
+
+  request.collector->sendData(data);
 
   return true;
 }

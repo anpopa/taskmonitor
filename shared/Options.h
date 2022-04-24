@@ -25,28 +25,22 @@ class Options
 {
 public:
   enum class Key {
+    RxBufferSize,
+    TxBufferSize,
+    MsgBufferSize,
     StatPollInterval,
     ProcPollInterval,
     MemPollInterval,
     PressurePollInterval,
-    RxBufferSize,
-    TxBufferSize,
-    MsgBufferSize,
-    ReadProcAtInit,
-    SkipIfNoClients,
     EnableTCPServer,
+    EnableUDSServer,
     TCPServerAddress,
     TCPServerPort,
     TCPServerStartIfPath,
     TCPServerStartOnSignal,
-    EnableSysPressure,
-    EnableSysMeminfo,
-    EnableSysStat,
-    SysStatsPrintToLog,
-    SysMemPrintToLog,
-    PressureWithCPU,
-    PressureWithMemory,
-    PressureWithIO
+    UDSServerSocketPath,
+    UDSServerStartIfPath,
+    UDSServerStartOnSignal,
   };
 
 public:

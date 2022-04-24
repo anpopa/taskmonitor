@@ -14,10 +14,11 @@
 #include <time.h>
 #include <unistd.h>
 
+#include "ICollector.h"
+#include "Monitor.pb.h"
 #include "Options.h"
-#include "Server.pb.h"
 
-#include "../bswinfra/source/Exceptions.h"
+#include "../bswinfra/source/AsyncQueue.h"
 #include "../bswinfra/source/SafeList.h"
 #include "../bswinfra/source/Timer.h"
 
@@ -38,18 +39,25 @@ public:
 
   void updateStats(void);
   auto getName(void) -> const std::string & { return m_name; }
-  auto getDataSome(void) -> tkm::msg::server::PSIData & { return m_dataSome; }
-  auto getDataFull(void) -> tkm::msg::server::PSIData & { return m_dataFull; }
+  auto getDataSome(void) -> tkm::msg::monitor::PSIData & { return m_dataSome; }
+  auto getDataFull(void) -> tkm::msg::monitor::PSIData & { return m_dataFull; }
 
 private:
-  tkm::msg::server::PSIData m_dataSome;
-  tkm::msg::server::PSIData m_dataFull;
+  tkm::msg::monitor::PSIData m_dataSome;
+  tkm::msg::monitor::PSIData m_dataFull;
   std::string m_name;
 };
 
 class SysProcPressure : public std::enable_shared_from_this<SysProcPressure>
 {
 public:
+public:
+  enum class Action { UpdateStats, CollectAndSend };
+  typedef struct Request {
+    Action action;
+    std::shared_ptr<ICollector> collector;
+  } Request;
+
   explicit SysProcPressure(std::shared_ptr<Options> &options);
   ~SysProcPressure() = default;
 
@@ -59,19 +67,24 @@ public:
 
 public:
   auto getShared() -> std::shared_ptr<SysProcPressure> { return shared_from_this(); }
+  auto pushRequest(SysProcPressure::Request &request) -> int;
+  auto getProcPressure() -> tkm::msg::monitor::SysProcPressure & { return m_psiData; }
+  auto getProcEntries() -> bswi::util::SafeList<std::shared_ptr<PressureStat>> &
+  {
+    return m_entries;
+  }
   void enableEvents();
 
-  void startMonitoring(void);
-  void disable(void);
-
 private:
-  bool processOnTick(void);
+  bool requestHandler(const Request &request);
 
 private:
   bswi::util::SafeList<std::shared_ptr<PressureStat>> m_entries{"StatPressureList"};
+  std::shared_ptr<AsyncQueue<Request>> m_queue = nullptr;
   std::shared_ptr<Options> m_options = nullptr;
+  tkm::msg::monitor::SysProcPressure m_psiData;
   std::shared_ptr<Timer> m_timer = nullptr;
-  size_t m_usecInterval = 0;
+  uint64_t m_usecInterval = 0;
 };
 
 } // namespace tkm::monitor

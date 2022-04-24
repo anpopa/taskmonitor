@@ -11,13 +11,17 @@
 
 #pragma once
 
+#include <bits/types/struct_timespec.h>
+#include <cstdint>
+#include <ctime>
 #include <time.h>
 #include <unistd.h>
 
+#include "ICollector.h"
+#include "Monitor.pb.h"
 #include "Options.h"
-#include "Server.pb.h"
 
-#include "../bswinfra/source/Exceptions.h"
+#include "../bswinfra/source/AsyncQueue.h"
 #include "../bswinfra/source/SafeList.h"
 #include "../bswinfra/source/Timer.h"
 
@@ -28,7 +32,7 @@ namespace tkm::monitor
 
 struct CPUStat : public std::enable_shared_from_this<CPUStat> {
 public:
-  explicit CPUStat(const std::string &name, size_t usecInterval)
+  explicit CPUStat(const std::string &name, uint64_t usecInterval)
   : m_usecInterval(usecInterval)
   {
     m_sysHZ = sysconf(_SC_CLK_TCK);
@@ -43,10 +47,7 @@ public:
   auto getName(void) -> const std::string & { return m_data.name(); }
 
   void updateStats(uint64_t newUserJiffies, uint64_t newSystemJiffies);
-  auto getData(void) -> tkm::msg::server::CPUStat & { return m_data; }
-  void printStats(void);
-
-  auto getPollInterval(void) -> int { return m_usecInterval; }
+  auto getData(void) -> tkm::msg::monitor::CPUStat & { return m_data; }
   auto getLastUserCPUTime(void) -> uint64_t { return (m_lastUserJiffies * 1000000 / m_sysHZ); }
   auto getLastSystemCPUTime(void) -> uint64_t { return (m_lastSystemJiffies * 1000000 / m_sysHZ); }
 
@@ -57,18 +58,25 @@ private:
   }
 
 private:
+  uint64_t m_usecInterval = 0;
   uint64_t m_lastUserJiffies = 0;
   uint64_t m_lastSystemJiffies = 0;
   int m_totalPercent = 0;
   int m_userPercent = 0;
   int m_sysPercent = 0;
   int m_sysHZ = 0;
-  size_t m_usecInterval = 0;
-  tkm::msg::server::CPUStat m_data;
+  tkm::msg::monitor::CPUStat m_data;
 };
 
 class SysProcStat : public std::enable_shared_from_this<SysProcStat>
 {
+public:
+  enum class Action { UpdateStats, CollectAndSend };
+  typedef struct Request {
+    Action action;
+    std::shared_ptr<ICollector> collector;
+  } Request;
+
 public:
   explicit SysProcStat(std::shared_ptr<Options> &options);
   ~SysProcStat() = default;
@@ -79,21 +87,21 @@ public:
 
 public:
   auto getShared() -> std::shared_ptr<SysProcStat> { return shared_from_this(); }
+  auto getCPUStat(const std::string &name) -> const std::shared_ptr<CPUStat>;
+  auto getCPUStatList() -> bswi::util::SafeList<std::shared_ptr<CPUStat>> & { return m_cpus; }
+  auto getUsecInterval() -> uint64_t { return m_usecInterval; };
+  auto pushRequest(SysProcStat::Request &request) -> int;
   void enableEvents();
 
-  void startMonitoring(void);
-  void disable(void);
-  auto getCPUStat(const std::string &name) -> const std::shared_ptr<CPUStat>;
-
 private:
-  bool processOnTick(void);
+  bool requestHandler(const Request &request);
 
 private:
   bswi::util::SafeList<std::shared_ptr<CPUStat>> m_cpus{"StatCPUList"};
+  std::shared_ptr<AsyncQueue<Request>> m_queue = nullptr;
   std::shared_ptr<Options> m_options = nullptr;
   std::shared_ptr<Timer> m_timer = nullptr;
-  bool m_printToLog = true;
-  size_t m_usecInterval = 0;
+  uint64_t m_usecInterval = 0;
 };
 
 } // namespace tkm::monitor

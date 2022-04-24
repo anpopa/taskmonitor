@@ -11,6 +11,7 @@
 
 #include <csignal>
 #include <filesystem>
+#include <memory>
 #include <netdb.h>
 #include <stdlib.h>
 #include <string.h>
@@ -30,6 +31,8 @@ using std::string;
 
 namespace tkm::monitor
 {
+
+static bool doCollectAndSend(const shared_ptr<ProcEvent> &mgr, const ProcEvent::Request &request);
 
 ProcEvent::ProcEvent(std::shared_ptr<Options> &options)
 : Pollable("ProcEvent")
@@ -67,9 +70,9 @@ ProcEvent::ProcEvent(std::shared_ptr<Options> &options)
         }
 
         // Fill common data
-        tkm::msg::server::Data data;
-        tkm::msg::server::ProcEvent procEvent;
-        data.set_what(tkm::msg::server::Data_What_ProcEvent);
+        tkm::msg::monitor::Data data;
+        tkm::msg::monitor::ProcEvent procEvent;
+        data.set_what(tkm::msg::monitor::Data_What_ProcEvent);
         data.set_timestamp(time(NULL));
 
         switch (nlcn_msg.proc_ev.what) {
@@ -77,76 +80,24 @@ ProcEvent::ProcEvent(std::shared_ptr<Options> &options)
           logDebug() << "ProcEvent Set mcast listen OK";
           break;
         case proc_event::what::PROC_EVENT_FORK: {
-          tkm::msg::server::ProcEventFork forkData;
-
-          forkData.set_parent_pid(nlcn_msg.proc_ev.event_data.fork.parent_pid);
-          forkData.set_parent_tgid(nlcn_msg.proc_ev.event_data.fork.parent_tgid);
-          forkData.set_child_pid(nlcn_msg.proc_ev.event_data.fork.child_pid);
-          forkData.set_child_tgid(nlcn_msg.proc_ev.event_data.fork.child_tgid);
-
-          procEvent.set_what(tkm::msg::server::ProcEvent_What_Fork);
-          procEvent.mutable_data()->PackFrom(forkData);
-          data.mutable_payload()->PackFrom(procEvent);
-
-          App()->getTCPServer()->sendData(data);
+          m_eventData.set_fork_count(m_eventData.fork_count() + 1);
           break;
         }
         case proc_event::what::PROC_EVENT_EXEC: {
-          tkm::msg::server::ProcEventExec execData;
-
-          execData.set_process_pid(nlcn_msg.proc_ev.event_data.exec.process_pid);
-          execData.set_process_tgid(nlcn_msg.proc_ev.event_data.exec.process_tgid);
-
-          procEvent.set_what(tkm::msg::server::ProcEvent_What_Exec);
-          procEvent.mutable_data()->PackFrom(execData);
-          data.mutable_payload()->PackFrom(procEvent);
-
-          App()->getTCPServer()->sendData(data);
+          m_eventData.set_exec_count(m_eventData.exec_count() + 1);
           App()->getRegistry()->addEntry(nlcn_msg.proc_ev.event_data.exec.process_pid);
           break;
         }
         case proc_event::what::PROC_EVENT_UID: {
-          tkm::msg::server::ProcEventUID uidData;
-
-          uidData.set_process_pid(nlcn_msg.proc_ev.event_data.id.process_pid);
-          uidData.set_process_tgid(nlcn_msg.proc_ev.event_data.id.process_tgid);
-          uidData.set_ruid(nlcn_msg.proc_ev.event_data.id.r.ruid);
-          uidData.set_euid(nlcn_msg.proc_ev.event_data.id.e.euid);
-
-          procEvent.set_what(tkm::msg::server::ProcEvent_What_UID);
-          procEvent.mutable_data()->PackFrom(uidData);
-          data.mutable_payload()->PackFrom(procEvent);
-
-          App()->getTCPServer()->sendData(data);
+          m_eventData.set_uid_count(m_eventData.uid_count() + 1);
           break;
         }
         case proc_event::what::PROC_EVENT_GID: {
-          tkm::msg::server::ProcEventGID gidData;
-
-          gidData.set_process_pid(nlcn_msg.proc_ev.event_data.id.process_pid);
-          gidData.set_process_tgid(nlcn_msg.proc_ev.event_data.id.process_tgid);
-          gidData.set_rgid(nlcn_msg.proc_ev.event_data.id.r.rgid);
-          gidData.set_egid(nlcn_msg.proc_ev.event_data.id.e.egid);
-
-          procEvent.set_what(tkm::msg::server::ProcEvent_What_GID);
-          procEvent.mutable_data()->PackFrom(gidData);
-          data.mutable_payload()->PackFrom(procEvent);
-
-          App()->getTCPServer()->sendData(data);
+          m_eventData.set_gid_count(m_eventData.gid_count() + 1);
           break;
         }
         case proc_event::what::PROC_EVENT_EXIT: {
-          tkm::msg::server::ProcEventExit exitData;
-
-          exitData.set_process_pid(nlcn_msg.proc_ev.event_data.id.process_pid);
-          exitData.set_process_tgid(nlcn_msg.proc_ev.event_data.id.process_tgid);
-          exitData.set_exit_code(nlcn_msg.proc_ev.event_data.exit.exit_code);
-
-          procEvent.set_what(tkm::msg::server::ProcEvent_What_Exit);
-          procEvent.mutable_data()->PackFrom(exitData);
-          data.mutable_payload()->PackFrom(procEvent);
-
-          App()->getTCPServer()->sendData(data);
+          m_eventData.set_exit_count(m_eventData.exit_count() + 1);
           App()->getRegistry()->remEntry(nlcn_msg.proc_ev.event_data.exit.process_pid);
           break;
         }
@@ -165,21 +116,50 @@ ProcEvent::ProcEvent(std::shared_ptr<Options> &options)
     logInfo() << "Server closed connection. Terminate";
     ::raise(SIGTERM);
   });
-}
 
-void ProcEvent::enableEvents()
-{
-  App()->addEventSource(getShared());
+  m_queue = std::make_shared<AsyncQueue<ProcEvent::Request>>(
+      "ProcEventQueue", [this](const Request &request) { return requestHandler(request); });
 }
 
 ProcEvent::~ProcEvent()
 {
   if (m_sockFd != -1) {
     ::close(m_sockFd);
+    m_sockFd = -1;
   }
 }
 
-auto ProcEvent::startProcMonitoring(void) -> int
+auto ProcEvent::pushRequest(ProcEvent::Request &request) -> int
+{
+  return m_queue->push(request);
+}
+
+void ProcEvent::enableEvents()
+{
+  // Main pollable events
+  App()->addEventSource(getShared());
+
+  // Request queue events
+  App()->addEventSource(m_queue);
+
+  // Start monitoring
+  startMonitoring();
+}
+
+auto ProcEvent::requestHandler(const Request &request) -> bool
+{
+  switch (request.action) {
+  case ProcEvent::Action::CollectAndSend:
+    return doCollectAndSend(getShared(), request);
+  default:
+    break;
+  }
+
+  logError() << "Unknown action request";
+  return false;
+}
+
+void ProcEvent::startMonitoring(void)
 {
   struct __attribute__((aligned(NLMSG_ALIGNTO))) {
     struct nlmsghdr nl_hdr;
@@ -201,10 +181,20 @@ auto ProcEvent::startProcMonitoring(void) -> int
 
   if (send(m_sockFd, &nlcn_msg, sizeof(nlcn_msg), 0) == -1) {
     logError() << "Netlink send error";
-    return -1;
   }
+}
 
-  return 0;
+static bool doCollectAndSend(const shared_ptr<ProcEvent> &mgr, const ProcEvent::Request &request)
+{
+  tkm::msg::monitor::Data data;
+
+  data.set_what(tkm::msg::monitor::Data_What_ProcEvent);
+  data.set_timestamp(time(NULL));
+  data.mutable_payload()->PackFrom(mgr->getProcEventData());
+
+  request.collector->sendData(data);
+
+  return true;
 }
 
 } // namespace tkm::monitor

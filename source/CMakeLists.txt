@@ -10,7 +10,7 @@ set(BINARY_SRC
     Application.cpp
     ProcEntry.cpp
     Registry.cpp
-    TCPClient.cpp
+    TCPCollector.cpp
     TCPServer.cpp
     SysProcStat.cpp
     SysProcMeminfo.cpp

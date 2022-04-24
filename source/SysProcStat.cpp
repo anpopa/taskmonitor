@@ -11,9 +11,11 @@
 
 #include "SysProcStat.h"
 #include "Application.h"
+#include "Monitor.pb.h"
 
 #include <fstream>
 #include <iostream>
+#include <memory>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -24,6 +26,11 @@ static constexpr int statSystemJiffiesPos = 3;
 
 namespace tkm::monitor
 {
+
+static bool doUpdateStats(const std::shared_ptr<SysProcStat> &mgr,
+                          const SysProcStat::Request &request);
+static bool doCollectAndSend(const std::shared_ptr<SysProcStat> &mgr,
+                             const SysProcStat::Request &request);
 
 void CPUStat::updateStats(uint64_t newUserJiffies, uint64_t newSystemJiffies)
 {
@@ -52,14 +59,6 @@ void CPUStat::updateStats(uint64_t newUserJiffies, uint64_t newSystemJiffies)
   m_data.set_sys(m_sysPercent);
 }
 
-void CPUStat::printStats(void)
-{
-  logInfo() << "SysProcStat[" << getName() << "] "
-            << "Total=" << m_totalPercent << "% "
-            << "User=" << m_userPercent << "% "
-            << "System=" << m_sysPercent << "%";
-}
-
 SysProcStat::SysProcStat(std::shared_ptr<Options> &options)
 : m_options(options)
 {
@@ -69,38 +68,65 @@ SysProcStat::SysProcStat(std::shared_ptr<Options> &options)
     throw std::runtime_error("Fail process StatPollInterval");
   }
 
-  if (options->getFor(Options::Key::SysStatsPrintToLog) == "false") {
-    m_printToLog = false;
-  }
-
-  m_timer = std::make_shared<Timer>("SysProcStat", [this]() { return processOnTick(); });
+  m_queue = std::make_shared<AsyncQueue<Request>>(
+      "SysProcStat", [this](const Request &request) { return requestHandler(request); });
+  m_timer = std::make_shared<Timer>("SysProcStatTimer", [this]() {
+    SysProcStat::Request request = {.action = SysProcStat::Action::UpdateStats};
+    return requestHandler(request);
+  });
 }
 
-void SysProcStat::startMonitoring(void)
+auto SysProcStat::pushRequest(Request &request) -> int
 {
+  return m_queue->push(request);
+}
+
+void SysProcStat::enableEvents()
+{
+  // Module queue
+  App()->addEventSource(m_queue);
+
+  // Update timer
   m_timer->start(m_usecInterval, true);
   App()->addEventSource(m_timer);
 }
 
-void SysProcStat::disable(void)
+auto SysProcStat::getCPUStat(const std::string &name) -> const std::shared_ptr<CPUStat>
 {
-  m_timer->stop();
-  App()->remEventSource(m_timer);
+  std::shared_ptr<CPUStat> cpuStat = nullptr;
+
+  m_cpus.foreach ([this, &name, &cpuStat](const std::shared_ptr<CPUStat> &entry) {
+    if (entry->getName() == name) {
+      cpuStat = entry;
+    }
+  });
+
+  return cpuStat;
 }
 
-bool SysProcStat::processOnTick(void)
+auto SysProcStat::requestHandler(const Request &request) -> bool
+{
+  switch (request.action) {
+  case SysProcStat::Action::UpdateStats:
+    return doUpdateStats(getShared(), request);
+  case SysProcStat::Action::CollectAndSend:
+    return doCollectAndSend(getShared(), request);
+  default:
+    break;
+  }
+
+  logError() << "Unknown action request";
+  return false;
+}
+
+static bool doUpdateStats(const std::shared_ptr<SysProcStat> &mgr,
+                          const SysProcStat::Request &request)
 {
   std::ifstream statStream{"/proc/stat"};
 
   if (!statStream.is_open()) {
     throw std::runtime_error("Fail to open /proc/stat file");
   }
-
-  tkm::msg::server::Data data;
-  tkm::msg::server::SysProcStat statEvent;
-
-  data.set_what(tkm::msg::server::Data_What_SysProcStat);
-  data.set_timestamp(time(NULL));
 
   std::string line;
   while (std::getline(statStream, line)) {
@@ -121,33 +147,24 @@ bool SysProcStat::processOnTick(void)
       return false;
     }
 
-    auto updateCpuStatEntry =
-        [this, &statEvent, &data, tokens](const std::shared_ptr<CPUStat> &entry) {
-          uint64_t newUserJiffies = 0;
-          uint64_t newSysJiffies = 0;
+    auto updateCpuStatEntry = [tokens](const std::shared_ptr<CPUStat> &entry) {
+      uint64_t newUserJiffies = 0;
+      uint64_t newSysJiffies = 0;
 
-          try {
-            newUserJiffies = std::stoul(tokens[statUserJiffiesPos].c_str());
-            newSysJiffies = std::stoul(tokens[statSystemJiffiesPos].c_str());
-          } catch (...) {
-            logError() << "Cannot convert stat data to Jiffies";
-            return;
-          }
+      try {
+        newUserJiffies = std::stoul(tokens[statUserJiffiesPos].c_str());
+        newSysJiffies = std::stoul(tokens[statSystemJiffiesPos].c_str());
+      } catch (...) {
+        logError() << "Cannot convert stat data to Jiffies";
+        return;
+      }
 
-          entry->updateStats(newUserJiffies, newSysJiffies);
-          statEvent.mutable_cpu()->CopyFrom(entry->getData());
-
-          if (m_printToLog) {
-            entry->printStats();
-          }
-
-          data.mutable_payload()->PackFrom(statEvent);
-          App()->getTCPServer()->sendData(data);
-        };
+      entry->updateStats(newUserJiffies, newSysJiffies);
+    };
 
     auto found = false;
-    m_cpus.foreach (
-        [this, tokens, &found, updateCpuStatEntry](const std::shared_ptr<CPUStat> &entry) {
+    mgr->getCPUStatList().foreach (
+        [tokens, &found, updateCpuStatEntry](const std::shared_ptr<CPUStat> &entry) {
           if (entry->getName() == tokens[statCpuNamePos].c_str()) {
             updateCpuStatEntry(entry);
             found = true;
@@ -157,10 +174,10 @@ bool SysProcStat::processOnTick(void)
     if (!found) {
       logInfo() << "Adding new cpu core for statistics";
       std::shared_ptr<CPUStat> entry =
-          std::make_shared<CPUStat>(tokens[statCpuNamePos].c_str(), m_usecInterval);
+          std::make_shared<CPUStat>(tokens[statCpuNamePos].c_str(), mgr->getUsecInterval());
 
-      m_cpus.append(entry);
-      m_cpus.commit();
+      mgr->getCPUStatList().append(entry);
+      mgr->getCPUStatList().commit();
       updateCpuStatEntry(entry);
     }
   }
@@ -168,17 +185,20 @@ bool SysProcStat::processOnTick(void)
   return true;
 }
 
-auto SysProcStat::getCPUStat(const std::string &name) -> const std::shared_ptr<CPUStat>
+static bool doCollectAndSend(const std::shared_ptr<SysProcStat> &mgr,
+                             const SysProcStat::Request &request)
 {
-  std::shared_ptr<CPUStat> cpuStat = nullptr;
+  mgr->getCPUStatList().foreach ([&request](const std::shared_ptr<CPUStat> &entry) {
+    tkm::msg::monitor::Data data;
 
-  m_cpus.foreach ([this, &name, &cpuStat](const std::shared_ptr<CPUStat> &entry) {
-    if (entry->getName() == name) {
-      cpuStat = entry;
-    }
+    data.set_what(tkm::msg::monitor::Data_What_SysProcStat);
+    data.set_timestamp(time(NULL));
+
+    data.mutable_payload()->PackFrom(entry->getData());
+    request.collector->sendData(data);
   });
 
-  return cpuStat;
+  return true;
 }
 
 } // namespace tkm::monitor

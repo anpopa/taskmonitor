@@ -17,20 +17,30 @@
 #include "Dispatcher.h"
 #include "ProcEntry.h"
 
+#include "Registry.h"
+#include "SysProcMeminfo.h"
+#include "SysProcPressure.h"
+#include "SysProcStat.h"
+
 using std::shared_ptr;
 using std::string;
 
 namespace tkm::monitor
 {
 
-static bool doActionRegisterEvents(Dispatcher *manager, const Dispatcher::Request &request);
+static bool doGetProcAcct(const shared_ptr<Dispatcher> &dispatcher,
+                          const Dispatcher::Request &request);
+static bool doGetProcEventStats(const shared_ptr<Dispatcher> &dispatcher,
+                                const Dispatcher::Request &request);
+static bool doGetSysProcMeminfo(const shared_ptr<Dispatcher> &dispatcher,
+                                const Dispatcher::Request &request);
+static bool doGetSysProcStat(const shared_ptr<Dispatcher> &dispatcher,
+                             const Dispatcher::Request &request);
+static bool doGetSysProcPressure(const shared_ptr<Dispatcher> &dispatcher,
+                                 const Dispatcher::Request &request);
 
-Dispatcher::Dispatcher(shared_ptr<Options> &options,
-                       shared_ptr<ProcAcct> &procAcct,
-                       shared_ptr<ProcEvent> &procEvent)
+Dispatcher::Dispatcher(shared_ptr<Options> &options)
 : m_options(options)
-, m_procAcct(procAcct)
-, m_procEvent(procEvent)
 {
   m_queue = std::make_shared<AsyncQueue<Request>>(
       "DispatcherQueue", [this](const Request &request) { return requestHandler(request); });
@@ -49,8 +59,16 @@ void Dispatcher::enableEvents()
 auto Dispatcher::requestHandler(const Request &request) -> bool
 {
   switch (request.action) {
-  case Dispatcher::Action::RegisterEvents:
-    return doActionRegisterEvents(this, request);
+  case Dispatcher::Action::GetProcAcct:
+    return doGetProcAcct(getShared(), request);
+  case Dispatcher::Action::GetProcEventStats:
+    return doGetProcEventStats(getShared(), request);
+  case Dispatcher::Action::GetSysProcMeminfo:
+    return doGetSysProcMeminfo(getShared(), request);
+  case Dispatcher::Action::GetSysProcStat:
+    return doGetSysProcStat(getShared(), request);
+  case Dispatcher::Action::GetSysProcPressure:
+    return doGetSysProcPressure(getShared(), request);
   default:
     break;
   }
@@ -59,31 +77,44 @@ auto Dispatcher::requestHandler(const Request &request) -> bool
   return false;
 }
 
-static bool doActionRegisterEvents(Dispatcher *manager, const Dispatcher::Request &)
+static bool doGetProcAcct(const shared_ptr<Dispatcher> &dispatcher,
+                          const Dispatcher::Request &request)
 {
-  logDebug() << "Opt proc at init " << App()->getOptions()->getFor(Options::Key::ReadProcAtInit);
-  if (App()->getOptions()->getFor(Options::Key::ReadProcAtInit) == "true") {
-    App()->getRegistry()->initFromProc();
-  } else {
-    App()->getRegistry()->addEntry(getpid());
-  }
+  Registry::Request rq = {.action = Registry::Action::CollectAndSend,
+                          .collector = request.collector};
+  return App()->getRegistry()->pushRequest(rq);
+}
 
-  if (App()->getOptions()->getFor(Options::Key::EnableSysStat) == "true") {
-    App()->getSysProcStat()->startMonitoring();
-  }
+static bool doGetProcEventStats(const shared_ptr<Dispatcher> &dispatcher,
+                                const Dispatcher::Request &request)
+{
+  ProcEvent::Request rq = {.action = ProcEvent::Action::CollectAndSend,
+                           .collector = request.collector};
+  return App()->getProcEvent()->pushRequest(rq);
+}
 
-  if (App()->getOptions()->getFor(Options::Key::EnableSysMeminfo) == "true") {
-    App()->getSysProcMeminfo()->startMonitoring();
-  }
+static bool doGetSysProcMeminfo(const shared_ptr<Dispatcher> &dispatcher,
+                                const Dispatcher::Request &request)
+{
+  SysProcMeminfo::Request rq = {.action = SysProcMeminfo::Action::CollectAndSend,
+                                .collector = request.collector};
+  return App()->getSysProcMeminfo()->pushRequest(rq);
+}
 
-  if (App()->getOptions()->getFor(Options::Key::EnableSysPressure) == "true") {
-    App()->getSysProcPressure()->startMonitoring();
-  }
+static bool doGetSysProcStat(const shared_ptr<Dispatcher> &dispatcher,
+                             const Dispatcher::Request &request)
+{
+  SysProcStat::Request rq = {.action = SysProcStat::Action::CollectAndSend,
+                             .collector = request.collector};
+  return App()->getSysProcStat()->pushRequest(rq);
+}
 
-  // Start process monitoring
-  manager->getProcEvent()->startProcMonitoring();
-
-  return true;
+static bool doGetSysProcPressure(const shared_ptr<Dispatcher> &dispatcher,
+                                 const Dispatcher::Request &request)
+{
+  SysProcPressure::Request rq = {.action = SysProcPressure::Action::CollectAndSend,
+                                 .collector = request.collector};
+  return App()->getSysProcPressure()->pushRequest(rq);
 }
 
 } // namespace tkm::monitor

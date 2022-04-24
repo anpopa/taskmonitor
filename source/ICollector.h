@@ -4,8 +4,8 @@
  * @date      2021-2022
  * @author    Alin Popa <alin.popa@fxdata.ro>
  * @copyright MIT
- * @brief     IClient Class
- * @details   Client Interface
+ * @brief     ICollector Class
+ * @details   Collector Interface
  *-
  */
 
@@ -19,7 +19,8 @@
 #include <mutex>
 #include <unistd.h>
 
-#include "Client.pb.h"
+#include "Collector.pb.h"
+#include "Monitor.pb.h"
 
 #include "../bswinfra/source/Pollable.h"
 
@@ -28,24 +29,24 @@ using namespace bswi::event;
 namespace tkm::monitor
 {
 
-class IClient : public Pollable
+class ICollector : public Pollable
 {
 public:
-  explicit IClient(const std::string &name, int fd)
+  explicit ICollector(const std::string &name, int fd)
   : Pollable(name)
-  , m_clientFd(fd)
+  , m_fd(fd)
   {
     m_reader = std::make_unique<EnvelopeReader>(fd);
     m_writer = std::make_unique<EnvelopeWriter>(fd);
   }
 
-  ~IClient() { disconnect(); }
+  ~ICollector() { disconnect(); }
 
   void disconnect()
   {
-    if (m_clientFd > 0) {
-      ::close(m_clientFd);
-      m_clientFd = -1;
+    if (m_fd > 0) {
+      ::close(m_fd);
+      m_fd = -1;
     }
   }
 
@@ -53,6 +54,7 @@ public:
   {
     return m_reader->next(envelope);
   }
+
   bool writeEnvelope(const tkm::msg::Envelope &envelope)
   {
     if (m_writer->send(envelope) == IAsyncEnvelope::Status::Ok) {
@@ -61,26 +63,36 @@ public:
     return true;
   }
 
-  void setStreamEnabled(bool state) { m_streamEnabled = state; }
-  bool getStreamEnabled(void) { return m_streamEnabled; }
+  void sendData(const tkm::msg::monitor::Data &data)
+  {
+    tkm::msg::Envelope envelope;
+    tkm::msg::monitor::Message message;
+
+    message.set_type(tkm::msg::monitor::Message_Type_Data);
+    message.mutable_payload()->PackFrom(data);
+    envelope.mutable_mesg()->PackFrom(message);
+    envelope.set_target(tkm::msg::Envelope_Recipient_Collector);
+    envelope.set_origin(tkm::msg::Envelope_Recipient_Monitor);
+
+    writeEnvelope(envelope);
+  }
 
 public:
-  IClient(IClient const &) = delete;
-  void operator=(IClient const &) = delete;
+  ICollector(ICollector const &) = delete;
+  void operator=(ICollector const &) = delete;
 
-  [[nodiscard]] int getFD() const { return m_clientFd; }
+  [[nodiscard]] int getFD() const { return m_fd; }
 
 public:
-  tkm::msg::client::Descriptor descriptor{};
+  tkm::msg::collector::Descriptor descriptor{};
   std::string id{};
 
 private:
-  bool m_streamEnabled = false;
   std::unique_ptr<EnvelopeReader> m_reader = nullptr;
   std::unique_ptr<EnvelopeWriter> m_writer = nullptr;
 
 protected:
-  int m_clientFd = -1;
+  int m_fd = -1;
 };
 
 } // namespace tkm::monitor

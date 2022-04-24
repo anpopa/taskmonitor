@@ -98,12 +98,7 @@ auto main(int argc, char **argv) -> int
     configPath = string(config_path);
   }
 
-  Dispatcher::Request registerEvents{
-      .action = Dispatcher::Action::RegisterEvents,
-  };
-
   app = std::make_unique<tkm::monitor::Application>("TaskMonitor", "TaskMonitor", configPath);
-  app->getDispatcher()->pushRequest(registerEvents);
   app->run();
 
   return EXIT_SUCCESS;
