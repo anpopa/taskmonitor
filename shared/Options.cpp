@@ -29,13 +29,14 @@ Options::Options(const string &configFile)
 auto Options::getFor(Key key) -> string const
 {
   switch (key) {
-  case Key::RxBufferSize:
+  case Key::RuntimeDirectory:
     if (hasConfigFile()) {
       const optional<string> prop =
           m_configFile->getPropertyValue("monitor", -1, "RuntimeDirectory");
       return prop.value_or(tkmDefaults.getFor(Defaults::Default::RuntimeDirectory));
     }
     return tkmDefaults.getFor(Defaults::Default::RuntimeDirectory);
+  case Key::RxBufferSize:
     if (hasConfigFile()) {
       const optional<string> prop = m_configFile->getPropertyValue("monitor", -1, "RxBufferSize");
       return prop.value_or(tkmDefaults.getFor(Defaults::Default::RxBufferSize));
@@ -71,6 +72,13 @@ auto Options::getFor(Key key) -> string const
       return prop.value_or(tkmDefaults.getFor(Defaults::Default::ProcPollInterval));
     }
     return tkmDefaults.getFor(Defaults::Default::ProcPollInterval);
+  case Key::ReadProcAtInit:
+    if (hasConfigFile()) {
+      const optional<string> prop =
+          m_configFile->getPropertyValue("prrocacct", -1, "ReadProcAtInit");
+      return prop.value_or(tkmDefaults.getFor(Defaults::Default::ReadProcAtInit));
+    }
+    return tkmDefaults.getFor(Defaults::Default::ReadProcAtInit);
   case Key::PressurePollInterval:
     if (hasConfigFile()) {
       const optional<string> prop =
@@ -111,13 +119,6 @@ auto Options::getFor(Key key) -> string const
       return prop.value_or(tkmDefaults.getFor(Defaults::Default::TCPServerStartIfPath));
     }
     return tkmDefaults.getFor(Defaults::Default::TCPServerStartIfPath);
-  case Key::TCPServerStartOnSignal:
-    if (hasConfigFile()) {
-      const optional<string> prop =
-          m_configFile->getPropertyValue("tcpserver", -1, "StartOnSignal");
-      return prop.value_or(tkmDefaults.getFor(Defaults::Default::TCPServerStartOnSignal));
-    }
-    return tkmDefaults.getFor(Defaults::Default::TCPServerStartOnSignal);
   case Key::UDSServerSocketPath:
     if (hasConfigFile()) {
       const optional<string> prop = m_configFile->getPropertyValue("udsserver", -1, "SocketPath");
@@ -130,13 +131,6 @@ auto Options::getFor(Key key) -> string const
       return prop.value_or(tkmDefaults.getFor(Defaults::Default::UDSServerStartIfPath));
     }
     return tkmDefaults.getFor(Defaults::Default::UDSServerStartIfPath);
-  case Key::UDSServerStartOnSignal:
-    if (hasConfigFile()) {
-      const optional<string> prop =
-          m_configFile->getPropertyValue("udsserver", -1, "StartOnSignal");
-      return prop.value_or(tkmDefaults.getFor(Defaults::Default::UDSServerStartOnSignal));
-    }
-    return tkmDefaults.getFor(Defaults::Default::UDSServerStartOnSignal);
   default:
     logError() << "Unknown option key";
     break;

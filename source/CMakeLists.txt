@@ -12,6 +12,8 @@ set(BINARY_SRC
     Registry.cpp
     TCPCollector.cpp
     TCPServer.cpp
+    UDSCollector.cpp
+    UDSServer.cpp
     SysProcStat.cpp
     SysProcMeminfo.cpp
     SysProcPressure.cpp

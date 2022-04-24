@@ -132,11 +132,11 @@ ProcAcct::ProcAcct(std::shared_ptr<Options> &options)
   int err = NLE_SUCCESS;
 
   try {
-    msgBufferSize = std::stol(m_options->getFor(Options::Key::MsgBufferSize));
-    rxBufferSize = std::stol(m_options->getFor(Options::Key::TxBufferSize));
-    rxBufferSize = std::stol(m_options->getFor(Options::Key::RxBufferSize));
-  } catch (...) {
-    logWarn() << "Invalid buffer size in config. Use defaults";
+    msgBufferSize = std::stoul(m_options->getFor(Options::Key::MsgBufferSize));
+    rxBufferSize = std::stoul(m_options->getFor(Options::Key::TxBufferSize));
+    rxBufferSize = std::stoul(m_options->getFor(Options::Key::RxBufferSize));
+  } catch (std::exception &e) {
+    logWarn() << "Invalid buffer size in config. Exception: " << e.what() << ". Use defaults";
     msgBufferSize = 1048576;
     txBufferSize = 1048576;
     rxBufferSize = 1048576;

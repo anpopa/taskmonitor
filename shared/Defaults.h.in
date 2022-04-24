@@ -32,6 +32,7 @@ public:
     StatPollInterval,
     ProcPollInterval,
     MemPollInterval,
+    ReadProcAtInit,
     PressurePollInterval,
     TCPServerAddress,
     TCPServerPort,
@@ -54,16 +55,15 @@ public:
     m_table.insert(std::pair<Default, std::string>(Default::MemPollInterval, "3000000"));
     m_table.insert(std::pair<Default, std::string>(Default::ProcPollInterval, "5000000"));
     m_table.insert(std::pair<Default, std::string>(Default::PressurePollInterval, "5000000"));
+    m_table.insert(std::pair<Default, std::string>(Default::ReadProcAtInit, "true"));
     m_table.insert(std::pair<Default, std::string>(Default::EnableTCPServer, "true"));
-    m_table.insert(std::pair<Default, std::string>(Default::EnableUDSServer, "true"));
+    m_table.insert(std::pair<Default, std::string>(Default::EnableUDSServer, "false"));
     m_table.insert(std::pair<Default, std::string>(Default::TCPServerAddress, "localhost"));
     m_table.insert(std::pair<Default, std::string>(Default::TCPServerPort, "3357"));
     m_table.insert(std::pair<Default, std::string>(Default::TCPServerStartIfPath, "none"));
-    m_table.insert(std::pair<Default, std::string>(Default::TCPServerStartOnSignal, "true"));
-    m_table.insert(
-        std::pair<Default, std::string>(Default::UDSServerSocketPath, "taskmonitor.sock"));
+    m_table.insert(std::pair<Default, std::string>(Default::UDSServerSocketPath,
+                                                   "/run/taskmonitor/taskmonitor.sock"));
     m_table.insert(std::pair<Default, std::string>(Default::UDSServerStartIfPath, "none"));
-    m_table.insert(std::pair<Default, std::string>(Default::UDSServerStartOnSignal, "true"));
   }
 
   auto getFor(Default key) -> std::string & { return m_table.at(key); }

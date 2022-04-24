@@ -25,6 +25,9 @@ namespace tkm::monitor
 
 Application *Application::appInstance = nullptr;
 
+static bool shouldStartTCPServer(const std::shared_ptr<tkm::monitor::Options> &opts);
+static bool shouldStartUDSServer(const std::shared_ptr<tkm::monitor::Options> &opts);
+
 Application::Application(const string &name, const string &description, const string &configFile)
 : bswi::app::IApplication(name, description)
 {
@@ -38,10 +41,24 @@ Application::Application(const string &name, const string &description, const st
   if (m_options->getFor(Options::Key::EnableTCPServer) == "true") {
     m_netServer = std::make_shared<TCPServer>(m_options);
 
-    try {
-      m_netServer->bindAndListen();
-    } catch (std::exception &e) {
-      logError() << "Fail to start server. Exception: " << e.what();
+    if (shouldStartTCPServer(m_options)) {
+      try {
+        m_netServer->bindAndListen();
+      } catch (std::exception &e) {
+        logError() << "Fail to start TCP server. Exception: " << e.what();
+      }
+    }
+  }
+
+  if (m_options->getFor(Options::Key::EnableUDSServer) == "true") {
+    m_udsServer = std::make_shared<UDSServer>(m_options);
+
+    if (shouldStartUDSServer(m_options)) {
+      try {
+        m_udsServer->start();
+      } catch (std::exception &e) {
+        logError() << "Fail to start UDS server. Exception: " << e.what();
+      }
     }
   }
 
@@ -101,6 +118,32 @@ void Application::startWatchdog(void)
 #else
   logInfo() << "Watchdog build time disabled";
 #endif
+}
+
+static bool shouldStartTCPServer(const std::shared_ptr<tkm::monitor::Options> &opts)
+{
+  if (opts->getFor(Options::Key::TCPServerStartIfPath) != "none") {
+    std::filesystem::path condPath(opts->getFor(Options::Key::TCPServerStartIfPath));
+    if (std::filesystem::exists(condPath)) {
+      return true;
+    }
+    return false;
+  }
+
+  return true;
+}
+
+static bool shouldStartUDSServer(const std::shared_ptr<tkm::monitor::Options> &opts)
+{
+  if (opts->getFor(Options::Key::TCPServerStartIfPath) != "none") {
+    std::filesystem::path condPath(opts->getFor(Options::Key::TCPServerStartIfPath));
+    if (std::filesystem::exists(condPath)) {
+      return true;
+    }
+    return false;
+  }
+
+  return true;
 }
 
 } // namespace tkm::monitor

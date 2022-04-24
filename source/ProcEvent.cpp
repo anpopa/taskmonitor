@@ -24,6 +24,7 @@
 
 #include "Application.h"
 #include "Defaults.h"
+#include "Logger.h"
 #include "ProcEvent.h"
 
 using std::shared_ptr;
@@ -80,23 +81,45 @@ ProcEvent::ProcEvent(std::shared_ptr<Options> &options)
           logDebug() << "ProcEvent Set mcast listen OK";
           break;
         case proc_event::what::PROC_EVENT_FORK: {
+          logInfo() << "proc.event[fork]:"
+                    << " parent_pid=" << nlcn_msg.proc_ev.event_data.fork.parent_pid
+                    << " parent_tgid=" << nlcn_msg.proc_ev.event_data.fork.parent_tgid
+                    << " child_pid=" << nlcn_msg.proc_ev.event_data.fork.child_pid
+                    << " child_tgid=" << nlcn_msg.proc_ev.event_data.fork.child_tgid;
           m_eventData.set_fork_count(m_eventData.fork_count() + 1);
           break;
         }
         case proc_event::what::PROC_EVENT_EXEC: {
+          logInfo() << "proc.event[exec]:"
+                    << " process_pid=" << nlcn_msg.proc_ev.event_data.exec.process_pid
+                    << " process_tgid=" << nlcn_msg.proc_ev.event_data.exec.process_tgid;
           m_eventData.set_exec_count(m_eventData.exec_count() + 1);
           App()->getRegistry()->addEntry(nlcn_msg.proc_ev.event_data.exec.process_pid);
           break;
         }
         case proc_event::what::PROC_EVENT_UID: {
+          logInfo() << "proc.event[uid]:"
+                    << " process_pid=" << nlcn_msg.proc_ev.event_data.id.process_pid
+                    << " process_tgid=" << nlcn_msg.proc_ev.event_data.id.process_tgid
+                    << " ruid=" << nlcn_msg.proc_ev.event_data.id.r.ruid
+                    << " ruid=" << nlcn_msg.proc_ev.event_data.id.e.euid;
           m_eventData.set_uid_count(m_eventData.uid_count() + 1);
           break;
         }
         case proc_event::what::PROC_EVENT_GID: {
+          logInfo() << "proc.event[gid]:"
+                    << " process_pid=" << nlcn_msg.proc_ev.event_data.id.process_pid
+                    << " process_tgid=" << nlcn_msg.proc_ev.event_data.id.process_tgid
+                    << " rgid=" << nlcn_msg.proc_ev.event_data.id.r.rgid
+                    << " rgid=" << nlcn_msg.proc_ev.event_data.id.e.egid;
           m_eventData.set_gid_count(m_eventData.gid_count() + 1);
           break;
         }
         case proc_event::what::PROC_EVENT_EXIT: {
+          logInfo() << "proc.event[exit]:"
+                    << " process_pid=" << nlcn_msg.proc_ev.event_data.id.process_pid
+                    << " process_tgid=" << nlcn_msg.proc_ev.event_data.id.process_tgid
+                    << " exit_code=" << nlcn_msg.proc_ev.event_data.exit.exit_code;
           m_eventData.set_exit_count(m_eventData.exit_count() + 1);
           App()->getRegistry()->remEntry(nlcn_msg.proc_ev.event_data.exit.process_pid);
           break;

@@ -25,6 +25,7 @@
 #include "SysProcPressure.h"
 #include "SysProcStat.h"
 #include "TCPServer.h"
+#include "UDSServer.h"
 
 #include "../bswinfra/source/IApplication.h"
 
@@ -57,6 +58,7 @@ public:
   }
   auto getOptions() -> std::shared_ptr<Options> & { return m_options; }
   auto getTCPServer() -> std::shared_ptr<TCPServer> & { return m_netServer; }
+  auto getUDSServer() -> std::shared_ptr<UDSServer> & { return m_udsServer; }
   auto getDispatcher() -> std::shared_ptr<Dispatcher> & { return m_dispatcher; }
   auto getRegistry() -> std::shared_ptr<Registry> & { return m_registry; }
   auto getProcAcct() -> std::shared_ptr<ProcAcct> & { return m_procAcct; }
@@ -80,6 +82,7 @@ private:
 private:
   std::shared_ptr<Options> m_options = nullptr;
   std::shared_ptr<TCPServer> m_netServer = nullptr;
+  std::shared_ptr<UDSServer> m_udsServer = nullptr;
   std::shared_ptr<ProcAcct> m_procAcct = nullptr;
   std::shared_ptr<ProcEvent> m_procEvent = nullptr;
   std::shared_ptr<Dispatcher> m_dispatcher = nullptr;

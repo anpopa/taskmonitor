@@ -44,6 +44,10 @@ auto Registry::pushRequest(Request &request) -> int
 void Registry::enableEvents()
 {
   App()->addEventSource(m_queue);
+
+  if (m_options->getFor(Options::Key::ReadProcAtInit) == "true") {
+    initFromProc();
+  }
 }
 
 auto Registry::requestHandler(const Request &request) -> bool
@@ -191,7 +195,7 @@ auto Registry::getProcNameForPID(int pid) -> std::string
       tokens.push_back(buf);
     }
 
-    if (tokens.size() < 3) {
+    if (tokens.size() < 2) {
       logError() << "Proc status file parse error";
       throw std::runtime_error("Fail to parse /proc/<pid>/status file");
     }

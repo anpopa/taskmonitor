@@ -32,22 +32,6 @@ static void terminate(int signum)
   exit(EXIT_SUCCESS);
 }
 
-static void delayStart(int signum)
-{
-  if (signum != SIGUSR1) {
-    return;
-  }
-
-  if (app == nullptr) {
-    return;
-  }
-
-  if (app->getOptions()->getFor(Options::Key::TCPServerStartOnSignal) == "true") {
-    logInfo() << "Start TCPServer module";
-    app->getTCPServer()->bindAndListen();
-  }
-}
-
 auto main(int argc, char **argv) -> int
 {
   const char *config_path = nullptr;
@@ -87,7 +71,6 @@ auto main(int argc, char **argv) -> int
   signal(SIGPIPE, SIG_IGN);
   signal(SIGINT, terminate);
   signal(SIGTERM, terminate);
-  signal(SIGUSR1, delayStart);
 
   fs::path configPath(tkmDefaults.getFor(Defaults::Default::ConfPath));
   if (config_path != nullptr) {

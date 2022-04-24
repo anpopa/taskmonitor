@@ -25,6 +25,7 @@ class Options
 {
 public:
   enum class Key {
+    RuntimeDirectory,
     RxBufferSize,
     TxBufferSize,
     MsgBufferSize,
@@ -32,15 +33,14 @@ public:
     ProcPollInterval,
     MemPollInterval,
     PressurePollInterval,
+    ReadProcAtInit,
     EnableTCPServer,
     EnableUDSServer,
     TCPServerAddress,
     TCPServerPort,
     TCPServerStartIfPath,
-    TCPServerStartOnSignal,
     UDSServerSocketPath,
     UDSServerStartIfPath,
-    UDSServerStartOnSignal,
   };
 
 public:
