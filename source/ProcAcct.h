@@ -31,11 +31,6 @@ namespace tkm::monitor
 class ProcAcct : public Pollable, public std::enable_shared_from_this<ProcAcct>
 {
 public:
-  typedef struct Request {
-    std::shared_ptr<ProcEntry> procEntry;
-  } Request;
-
-public:
   explicit ProcAcct(std::shared_ptr<Options> &options);
   ~ProcAcct();
 
@@ -47,7 +42,7 @@ public:
   auto getShared() -> std::shared_ptr<ProcAcct> { return shared_from_this(); }
   void enableEvents();
 
-  bool requestTaskAcct(ProcAcct::Request &request);
+  bool requestTaskAcct(int pid);
 
 private:
   std::shared_ptr<Options> m_options = nullptr;

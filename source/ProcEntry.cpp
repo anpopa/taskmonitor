@@ -21,9 +21,12 @@ ProcEntry::ProcEntry(int pid, const std::string &name)
 : m_pid(pid)
 , m_name(name)
 {
-  m_timer = std::make_shared<Timer>("ProcEntry", [this, pid]() {
-    ProcAcct::Request request = {.procEntry = getShared()};
-    return App()->getProcAcct()->requestTaskAcct(request);
+  m_timer = std::make_shared<Timer>("ProcEntry", [pid]() {
+    if (!App()->getProcAcct()->requestTaskAcct(pid)) {
+      App()->getRegistry()->remEntry(pid);
+      return false;
+    }
+    return true;
   });
 }
 

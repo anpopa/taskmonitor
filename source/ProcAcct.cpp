@@ -185,7 +185,7 @@ ProcAcct::ProcAcct(std::shared_ptr<Options> &options)
         int err = NLE_SUCCESS;
 
         if ((err = nl_recvmsgs_default(m_nlSock)) < 0) {
-          if ((err != -NLE_AGAIN) && (err != -NLE_BUSY) && (err != NLE_OBJ_NOTFOUND)) {
+          if ((err != -NLE_AGAIN) && (err != -NLE_BUSY) && (err != -NLE_OBJ_NOTFOUND)) {
             logError() << "Error receiving message: " << nl_geterror(err);
             return false;
           }
@@ -217,7 +217,7 @@ ProcAcct::~ProcAcct()
   }
 }
 
-bool ProcAcct::requestTaskAcct(ProcAcct::Request &request)
+bool ProcAcct::requestTaskAcct(int pid)
 {
   struct nl_msg *msg = nullptr;
   int err = NLE_SUCCESS;
@@ -240,18 +240,19 @@ bool ProcAcct::requestTaskAcct(ProcAcct::Request &request)
     return false;
   }
 
-  if ((err = nla_put_u32(msg, TASKSTATS_CMD_ATTR_PID, request.procEntry->getPid())) < 0) {
+  if ((err = nla_put_u32(msg, TASKSTATS_CMD_ATTR_PID, pid)) < 0) {
     logError() << "Error setting attribute: " << nl_geterror(err);
     nlmsg_free(msg);
     return false;
   }
 
   if ((err = nl_send_sync(m_nlSock, msg)) < 0) {
-    logError() << "Error sending message: " << nl_geterror(err);
+    logWarn() << "Failed to send accounting request message for pid=" << pid
+              << ".Message=" << nl_geterror(err);
     return false;
   } // nl_send_sync free the msg
 
-  return 0;
+  return true;
 }
 
 } // namespace tkm::monitor

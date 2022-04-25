@@ -165,17 +165,17 @@ static bool doUpdateStats(const std::shared_ptr<SysProcStat> &mgr,
     auto found = false;
     mgr->getCPUStatList().foreach (
         [tokens, &found, updateCpuStatEntry](const std::shared_ptr<CPUStat> &entry) {
-          if (entry->getName() == tokens[statCpuNamePos].c_str()) {
+          if (entry->getName() == tokens[statCpuNamePos]) {
             updateCpuStatEntry(entry);
             found = true;
           }
         });
 
     if (!found) {
-      logInfo() << "Adding new cpu core for statistics";
       std::shared_ptr<CPUStat> entry =
-          std::make_shared<CPUStat>(tokens[statCpuNamePos].c_str(), mgr->getUsecInterval());
+          std::make_shared<CPUStat>(tokens[statCpuNamePos], mgr->getUsecInterval());
 
+      logInfo() << "Adding new cpu core '" << entry->getName() << "' for statistics";
       mgr->getCPUStatList().append(entry);
       mgr->getCPUStatList().commit();
       updateCpuStatEntry(entry);
@@ -189,6 +189,7 @@ static bool doCollectAndSend(const std::shared_ptr<SysProcStat> &mgr,
                              const SysProcStat::Request &request)
 {
   mgr->getCPUStatList().foreach ([&request](const std::shared_ptr<CPUStat> &entry) {
+    tkm::msg::monitor::SysProcStat statEvent;
     tkm::msg::monitor::Data data;
 
     data.set_what(tkm::msg::monitor::Data_What_SysProcStat);
@@ -199,7 +200,8 @@ static bool doCollectAndSend(const std::shared_ptr<SysProcStat> &mgr,
     clock_gettime(CLOCK_MONOTONIC, &currentTime);
     data.set_monotonic_time_sec(currentTime.tv_sec);
 
-    data.mutable_payload()->PackFrom(entry->getData());
+    statEvent.mutable_cpu()->CopyFrom(entry->getData());
+    data.mutable_payload()->PackFrom(statEvent);
     request.collector->sendData(data);
   });
 

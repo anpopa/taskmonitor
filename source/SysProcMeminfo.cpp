@@ -185,7 +185,6 @@ static bool doCollectAndSend(const std::shared_ptr<SysProcMeminfo> &mgr,
   data.set_monotonic_time_sec(currentTime.tv_sec);
 
   data.mutable_payload()->PackFrom(mgr->getProcMemInfo());
-
   request.collector->sendData(data);
 
   return true;

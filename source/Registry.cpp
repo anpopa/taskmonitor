@@ -32,6 +32,12 @@ static bool doCollectAndSend(const std::shared_ptr<Registry> &mgr,
 Registry::Registry(std::shared_ptr<Options> &options)
 : m_options(options)
 {
+  try {
+    m_usecPollInterval = std::stol(m_options->getFor(Options::Key::ProcPollInterval));
+  } catch (...) {
+    throw std::runtime_error("Fail process ProcPollInterval");
+  }
+
   m_queue = std::make_shared<AsyncQueue<Request>>(
       "RegistryEventQueue", [this](const Request &request) { return requestHandler(request); });
 }
@@ -81,6 +87,7 @@ void Registry::initFromProc(void)
       if (!isBlacklisted(pid)) {
         logDebug() << "Add process monitoring for pid " << pid;
         std::shared_ptr<ProcEntry> entry = std::make_shared<ProcEntry>(pid, getProcNameForPID(pid));
+        entry->startMonitoring(m_usecPollInterval);
         m_list.append(entry);
       }
     }
@@ -128,6 +135,7 @@ void Registry::addEntry(int pid)
 
   if (!found && !isBlacklisted(pid)) {
     std::shared_ptr<ProcEntry> entry = std::make_shared<ProcEntry>(pid, getProcNameForPID(pid));
+    entry->startMonitoring(m_usecPollInterval);
     m_list.append(entry);
     m_list.commit();
   }
@@ -209,11 +217,15 @@ auto Registry::getProcNameForPID(int pid) -> std::string
 
 static bool doCollectAndSend(const std::shared_ptr<Registry> &mgr, const Registry::Request &request)
 {
+
+  logDebug() << "Collect and send procacct";
+
   mgr->getRegistryList().foreach ([&request](const std::shared_ptr<ProcEntry> &entry) {
     tkm::msg::monitor::Data data;
 
     data.set_what(tkm::msg::monitor::Data_What_ProcAcct);
 
+    logDebug() << "Collect send data for pid=" << entry->getPid() << " name=" << entry->getName();
     struct timespec currentTime;
     clock_gettime(CLOCK_REALTIME, &currentTime);
     data.set_system_time_sec(currentTime.tv_sec);

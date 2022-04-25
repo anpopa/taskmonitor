@@ -70,6 +70,7 @@ private:
   bswi::util::SafeList<std::shared_ptr<ProcEntry>> m_list{"RegistryList"};
   std::shared_ptr<AsyncQueue<Request>> m_queue = nullptr;
   std::shared_ptr<Options> m_options = nullptr;
+  unsigned int m_usecPollInterval = 0;
 };
 
 } // namespace tkm::monitor
