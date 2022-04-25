@@ -181,7 +181,12 @@ static bool doCollectAndSend(const std::shared_ptr<SysProcPressure> &mgr,
   tkm::msg::monitor::Data data;
 
   data.set_what(tkm::msg::monitor::Data_What_SysProcPressure);
-  data.set_timestamp(time(NULL));
+
+  struct timespec currentTime;
+  clock_gettime(CLOCK_REALTIME, &currentTime);
+  data.set_system_time_sec(currentTime.tv_sec);
+  clock_gettime(CLOCK_MONOTONIC, &currentTime);
+  data.set_monotonic_time_sec(currentTime.tv_sec);
 
   data.mutable_payload()->PackFrom(mgr->getProcPressure());
   request.collector->sendData(data);

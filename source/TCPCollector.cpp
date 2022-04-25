@@ -137,7 +137,19 @@ static bool doCreateSession(const shared_ptr<TCPCollector> &collector,
   logInfo() << "Send new sessionID=" << sessionInfo.id();
 
   // TODO: Don't know how to get LC ID yet
-  sessionInfo.set_lifecycleid("na");
+  sessionInfo.set_lifecycle_id("na");
+  try {
+    sessionInfo.set_proc_acct_poll_interval(
+        std::stol(App()->getOptions()->getFor(Options::Key::ProcPollInterval)));
+    sessionInfo.set_sys_proc_stat_poll_interval(
+        std::stol(App()->getOptions()->getFor(Options::Key::StatPollInterval)));
+    sessionInfo.set_sys_proc_meminfo_poll_interval(
+        std::stol(App()->getOptions()->getFor(Options::Key::MemPollInterval)));
+    sessionInfo.set_sys_proc_pressure_poll_interval(
+        std::stol(App()->getOptions()->getFor(Options::Key::PressurePollInterval)));
+  } catch (...) {
+    throw std::runtime_error("Fail to process session poll interval data");
+  }
 
   message.set_type(tkm::msg::monitor::Message::Type::Message_Type_SetSession);
   message.mutable_payload()->PackFrom(sessionInfo);

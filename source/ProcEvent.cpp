@@ -9,7 +9,9 @@
  *-
  */
 
+#include <bits/types/struct_timespec.h>
 #include <csignal>
+#include <ctime>
 #include <filesystem>
 #include <memory>
 #include <netdb.h>
@@ -74,7 +76,12 @@ ProcEvent::ProcEvent(std::shared_ptr<Options> &options)
         tkm::msg::monitor::Data data;
         tkm::msg::monitor::ProcEvent procEvent;
         data.set_what(tkm::msg::monitor::Data_What_ProcEvent);
-        data.set_timestamp(time(NULL));
+
+        struct timespec currentTime;
+        clock_gettime(CLOCK_REALTIME, &currentTime);
+        data.set_system_time_sec(currentTime.tv_sec);
+        clock_gettime(CLOCK_MONOTONIC, &currentTime);
+        data.set_monotonic_time_sec(currentTime.tv_sec);
 
         switch (nlcn_msg.proc_ev.what) {
         case proc_event::what::PROC_EVENT_NONE:
@@ -212,7 +219,13 @@ static bool doCollectAndSend(const shared_ptr<ProcEvent> &mgr, const ProcEvent::
   tkm::msg::monitor::Data data;
 
   data.set_what(tkm::msg::monitor::Data_What_ProcEvent);
-  data.set_timestamp(time(NULL));
+
+  struct timespec currentTime;
+  clock_gettime(CLOCK_REALTIME, &currentTime);
+  data.set_system_time_sec(currentTime.tv_sec);
+  clock_gettime(CLOCK_MONOTONIC, &currentTime);
+  data.set_monotonic_time_sec(currentTime.tv_sec);
+
   data.mutable_payload()->PackFrom(mgr->getProcEventData());
 
   request.collector->sendData(data);
