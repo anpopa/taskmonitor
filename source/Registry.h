@@ -64,7 +64,7 @@ public:
 private:
   bool requestHandler(const Request &request);
   auto getProcNameForPID(int pid) -> std::string;
-  bool isBlacklisted(int pid);
+  bool isBlacklisted(const std::string &name);
 
 private:
   bswi::util::SafeList<std::shared_ptr<ProcEntry>> m_list{"RegistryList"};
