@@ -9,7 +9,6 @@
  *-
  */
 
-#include <bits/types/struct_timespec.h>
 #include <csignal>
 #include <ctime>
 #include <filesystem>

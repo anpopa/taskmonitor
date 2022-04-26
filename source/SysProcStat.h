@@ -11,7 +11,6 @@
 
 #pragma once
 
-#include <bits/types/struct_timespec.h>
 #include <cstdint>
 #include <ctime>
 #include <time.h>
