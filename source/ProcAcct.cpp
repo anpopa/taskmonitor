@@ -52,7 +52,6 @@ static void processDelayAcct(struct taskstats *t)
   acct.set_ac_ppid(t->ac_ppid);
   acct.set_ac_utime(t->ac_utime);
   acct.set_ac_stime(t->ac_stime);
-  acct.set_cpu_percent(entry->getCPUPercent(t->ac_utime, t->ac_stime));
 
   acct.mutable_cpu()->set_cpu_count(t->cpu_count);
   acct.mutable_cpu()->set_cpu_run_real_total(t->cpu_run_real_total);

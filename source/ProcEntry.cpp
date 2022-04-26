@@ -43,16 +43,4 @@ void ProcEntry::disable(void)
   App()->remEventSource(m_timer);
 }
 
-auto ProcEntry::getCPUPercent(uint64_t utime, uint64_t stime) -> uint32_t
-{
-  if (m_lastCPUTime == 0) {
-    m_lastCPUTime = utime + stime;
-  }
-
-  uint32_t cpuPercent = (((utime + stime) - m_lastCPUTime) * 100) / m_pollInterval;
-  m_lastCPUTime = utime + stime;
-
-  return cpuPercent;
-}
-
 } // namespace tkm::monitor

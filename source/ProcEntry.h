@@ -38,17 +38,15 @@ public:
   void startMonitoring(unsigned int interval);
   void disable(void);
 
-  auto getCPUPercent(uint64_t utime, uint64_t stime) -> uint32_t;
   auto getAcct() -> const tkm::msg::monitor::ProcAcct & { return m_acct; }
+  void setAcct(tkm::msg::monitor::ProcAcct &acct) { m_acct.CopyFrom(acct); }
   auto getName() -> std::string & { return m_name; }
   auto getPid() -> int { return m_pid; }
-  void setAcct(tkm::msg::monitor::ProcAcct &acct) { m_acct.CopyFrom(acct); }
 
 private:
   std::shared_ptr<Timer> m_timer = nullptr;
   tkm::msg::monitor::ProcAcct m_acct;
   unsigned int m_pollInterval = 0;
-  uint64_t m_lastCPUTime = 0;
   std::string m_name{};
   int m_pid = 0;
 };

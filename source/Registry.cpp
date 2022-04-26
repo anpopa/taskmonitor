@@ -149,6 +149,7 @@ void Registry::addEntry(int pid)
       procName = getProcNameForPID(pid);
     } catch (...) {
       logWarn() << "Proc entry removed before entry added";
+      return;
     }
 
     if (!isBlacklisted(procName)) {
