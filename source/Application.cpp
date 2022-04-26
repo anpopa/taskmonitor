@@ -94,7 +94,7 @@ void Application::startWatchdog(void)
 
   status = sd_watchdog_enabled(0, &usec);
   if (status > 0) {
-    logInfo() << "Systemd watchdog enabled with timeout %lu seconds" << USEC2SEC(usec);
+    logInfo() << "Systemd watchdog enabled with timeout seconds: " << USEC2SEC(usec);
 
     auto timer = std::make_shared<Timer>("Watchdog", [this]() {
       if (sd_notify(0, "WATCHDOG=1") < 0) {
