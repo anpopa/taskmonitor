@@ -31,6 +31,7 @@ public:
     MsgBufferSize,
     StatPollInterval,
     ProcPollInterval,
+    ProcEventPollInterval,
     MemPollInterval,
     PressurePollInterval,
     ReadProcAtInit,

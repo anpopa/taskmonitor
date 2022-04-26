@@ -141,6 +141,8 @@ static bool doCreateSession(const shared_ptr<TCPCollector> &collector,
   try {
     sessionInfo.set_proc_acct_poll_interval(
         std::stol(App()->getOptions()->getFor(Options::Key::ProcPollInterval)));
+    sessionInfo.set_proc_event_poll_interval(
+        std::stol(App()->getOptions()->getFor(Options::Key::ProcEventPollInterval)));
     sessionInfo.set_sys_proc_stat_poll_interval(
         std::stol(App()->getOptions()->getFor(Options::Key::StatPollInterval)));
     sessionInfo.set_sys_proc_meminfo_poll_interval(

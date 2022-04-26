@@ -72,6 +72,12 @@ auto Options::getFor(Key key) -> string const
       return prop.value_or(tkmDefaults.getFor(Defaults::Default::ProcPollInterval));
     }
     return tkmDefaults.getFor(Defaults::Default::ProcPollInterval);
+  case Key::ProcEventPollInterval:
+    if (hasConfigFile()) {
+      const optional<string> prop = m_configFile->getPropertyValue("procevent", -1, "PollInterval");
+      return prop.value_or(tkmDefaults.getFor(Defaults::Default::ProcEventPollInterval));
+    }
+    return tkmDefaults.getFor(Defaults::Default::ProcEventPollInterval);
   case Key::ReadProcAtInit:
     if (hasConfigFile()) {
       const optional<string> prop =

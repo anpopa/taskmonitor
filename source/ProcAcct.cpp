@@ -186,7 +186,7 @@ ProcAcct::ProcAcct(std::shared_ptr<Options> &options)
 
         if ((err = nl_recvmsgs_default(m_nlSock)) < 0) {
           if ((err != -NLE_AGAIN) && (err != -NLE_BUSY) && (err != -NLE_OBJ_NOTFOUND)) {
-            logError() << "Error receiving message: " << nl_geterror(err);
+            logError() << "Error receiving procacct message: " << nl_geterror(err);
             return false;
           }
         }
@@ -247,8 +247,8 @@ bool ProcAcct::requestTaskAcct(int pid)
   }
 
   if ((err = nl_send_sync(m_nlSock, msg)) < 0) {
-    logWarn() << "Failed to send accounting request message for pid=" << pid
-              << ".Message=" << nl_geterror(err);
+    logWarn() << "Cannot to send accounting request message for pid=" << pid
+              << ". Reason: " << nl_geterror(err);
     return false;
   } // nl_send_sync free the msg
 
