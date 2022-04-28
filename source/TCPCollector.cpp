@@ -130,8 +130,8 @@ static bool doCreateSession(const std::shared_ptr<TCPCollector> collector,
   logInfo() << "Session hash content: " << idContent
             << " jenkinsHash: " << tkm::jnkHsh(idContent.c_str());
   collector->id = std::to_string(tkm::jnkHsh(idContent.c_str()));
-  sessionInfo.set_id(collector->id);
-  logInfo() << "Send new sessionID=" << sessionInfo.id();
+  sessionInfo.set_hash(collector->id);
+  logInfo() << "Send new sessionID=" << sessionInfo.hash();
 
   // TODO: Don't know how to get LC ID yet
   sessionInfo.set_lifecycle_id("na");
@@ -157,7 +157,8 @@ static bool doCreateSession(const std::shared_ptr<TCPCollector> collector,
   envelope.set_target(tkm::msg::Envelope_Recipient_Collector);
   envelope.set_origin(tkm::msg::Envelope_Recipient_Monitor);
 
-  logDebug() << "Send session id: " << sessionInfo.id() << " to collector: " << collector->getFD();
+  logDebug() << "Send session id: " << sessionInfo.hash()
+             << " to collector: " << collector->getFD();
   return collector->writeEnvelope(envelope);
 }
 
