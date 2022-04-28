@@ -22,7 +22,7 @@ namespace fs = std::filesystem;
 namespace tkm::monitor
 {
 
-UDSServer::UDSServer(std::shared_ptr<Options> &options)
+UDSServer::UDSServer(const std::shared_ptr<Options> options)
 : Pollable("UDSServer")
 , m_options(options)
 {

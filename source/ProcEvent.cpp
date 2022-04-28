@@ -28,15 +28,12 @@
 #include "Logger.h"
 #include "ProcEvent.h"
 
-using std::shared_ptr;
-using std::string;
-
 namespace tkm::monitor
 {
 
-static bool doCollectAndSend(const shared_ptr<ProcEvent> &mgr, const ProcEvent::Request &request);
+static bool doCollectAndSend(const std::shared_ptr<ProcEvent> mgr, const ProcEvent::Request &rq);
 
-ProcEvent::ProcEvent(std::shared_ptr<Options> &options)
+ProcEvent::ProcEvent(const std::shared_ptr<Options> options)
 : Pollable("ProcEvent")
 , m_options(options)
 {
@@ -213,7 +210,7 @@ void ProcEvent::startMonitoring(void)
   }
 }
 
-static bool doCollectAndSend(const shared_ptr<ProcEvent> &mgr, const ProcEvent::Request &request)
+static bool doCollectAndSend(const std::shared_ptr<ProcEvent> mgr, const ProcEvent::Request &rq)
 {
   tkm::msg::monitor::Data data;
 
@@ -227,7 +224,7 @@ static bool doCollectAndSend(const shared_ptr<ProcEvent> &mgr, const ProcEvent::
 
   data.mutable_payload()->PackFrom(mgr->getProcEventData());
 
-  request.collector->sendData(data);
+  rq.collector->sendData(data);
 
   return true;
 }

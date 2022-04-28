@@ -19,23 +19,20 @@
 
 #include "Collector.pb.h"
 
-using std::shared_ptr;
-using std::string;
-
 namespace tkm::monitor
 {
 
-static bool doCreateSession(const shared_ptr<TCPCollector> &collector,
+static bool doCreateSession(const std::shared_ptr<TCPCollector> collector,
                             const tkm::msg::collector::Request &rq);
-static bool doGetProcAcct(const shared_ptr<TCPCollector> &collector,
+static bool doGetProcAcct(const std::shared_ptr<TCPCollector> collector,
                           const tkm::msg::collector::Request &rq);
-static bool doGetProcEventStats(const shared_ptr<TCPCollector> &collector,
+static bool doGetProcEventStats(const std::shared_ptr<TCPCollector> collector,
                                 const tkm::msg::collector::Request &rq);
-static bool doGetSysProcMeminfo(const shared_ptr<TCPCollector> &collector,
+static bool doGetSysProcMeminfo(const std::shared_ptr<TCPCollector> collector,
                                 const tkm::msg::collector::Request &rq);
-static bool doGetSysProcStat(const shared_ptr<TCPCollector> &collector,
+static bool doGetSysProcStat(const std::shared_ptr<TCPCollector> collector,
                              const tkm::msg::collector::Request &rq);
-static bool doGetSysProcPressure(const shared_ptr<TCPCollector> &collector,
+static bool doGetSysProcPressure(const std::shared_ptr<TCPCollector> collector,
                                  const tkm::msg::collector::Request &rq);
 
 TCPCollector::TCPCollector(int fd)
@@ -117,7 +114,7 @@ TCPCollector::~TCPCollector()
   }
 }
 
-static bool doCreateSession(const shared_ptr<TCPCollector> &collector,
+static bool doCreateSession(const std::shared_ptr<TCPCollector> collector,
                             const tkm::msg::collector::Request &rq)
 {
   tkm::msg::Envelope envelope;
@@ -164,14 +161,14 @@ static bool doCreateSession(const shared_ptr<TCPCollector> &collector,
   return collector->writeEnvelope(envelope);
 }
 
-static bool doGetProcAcct(const shared_ptr<TCPCollector> &collector,
+static bool doGetProcAcct(const std::shared_ptr<TCPCollector> collector,
                           const tkm::msg::collector::Request &rq)
 {
   Dispatcher::Request req = {.action = Dispatcher::Action::GetProcAcct, .collector = collector};
   return App()->getDispatcher()->pushRequest(req);
 }
 
-static bool doGetProcEventStats(const shared_ptr<TCPCollector> &collector,
+static bool doGetProcEventStats(const std::shared_ptr<TCPCollector> collector,
                                 const tkm::msg::collector::Request &rq)
 {
   Dispatcher::Request req = {.action = Dispatcher::Action::GetProcEventStats,
@@ -179,7 +176,7 @@ static bool doGetProcEventStats(const shared_ptr<TCPCollector> &collector,
   return App()->getDispatcher()->pushRequest(req);
 }
 
-static bool doGetSysProcMeminfo(const shared_ptr<TCPCollector> &collector,
+static bool doGetSysProcMeminfo(const std::shared_ptr<TCPCollector> collector,
                                 const tkm::msg::collector::Request &rq)
 {
   Dispatcher::Request req = {.action = Dispatcher::Action::GetSysProcMeminfo,
@@ -187,14 +184,14 @@ static bool doGetSysProcMeminfo(const shared_ptr<TCPCollector> &collector,
   return App()->getDispatcher()->pushRequest(req);
 }
 
-static bool doGetSysProcStat(const shared_ptr<TCPCollector> &collector,
+static bool doGetSysProcStat(const std::shared_ptr<TCPCollector> collector,
                              const tkm::msg::collector::Request &rq)
 {
   Dispatcher::Request req = {.action = Dispatcher::Action::GetSysProcStat, .collector = collector};
   return App()->getDispatcher()->pushRequest(req);
 }
 
-static bool doGetSysProcPressure(const shared_ptr<TCPCollector> &collector,
+static bool doGetSysProcPressure(const std::shared_ptr<TCPCollector> collector,
                                  const tkm::msg::collector::Request &rq)
 {
   Dispatcher::Request req = {.action = Dispatcher::Action::GetSysProcPressure,

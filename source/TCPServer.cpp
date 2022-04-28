@@ -22,13 +22,10 @@
 
 #include "Collector.pb.h"
 
-using std::shared_ptr;
-using std::string;
-
 namespace tkm::monitor
 {
 
-TCPServer::TCPServer(std::shared_ptr<Options> &options)
+TCPServer::TCPServer(const std::shared_ptr<Options> options)
 : Pollable("TCPServer")
 , m_options(options)
 {
@@ -101,7 +98,7 @@ void TCPServer::bindAndListen()
   m_addr.sin_addr.s_addr = INADDR_ANY;
 
   if (m_options->getFor(Options::Key::TCPServerAddress) != "any") {
-    string serverAddress = m_options->getFor(Options::Key::TCPServerAddress);
+    std::string serverAddress = m_options->getFor(Options::Key::TCPServerAddress);
     struct hostent *server = gethostbyname(serverAddress.c_str());
     bcopy(server->h_addr, (char *) &m_addr.sin_addr.s_addr, (size_t) server->h_length);
   }

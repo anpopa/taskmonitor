@@ -24,7 +24,6 @@
 
 #include "Monitor.pb.h"
 
-using namespace bswi::log;
 using namespace bswi::event;
 
 namespace tkm::monitor
@@ -33,7 +32,7 @@ namespace tkm::monitor
 class TCPServer : public Pollable, public std::enable_shared_from_this<TCPServer>
 {
 public:
-  TCPServer(std::shared_ptr<Options> &options);
+  TCPServer(const std::shared_ptr<Options> options);
   ~TCPServer();
 
 public:

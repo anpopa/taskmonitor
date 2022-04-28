@@ -23,9 +23,9 @@
 namespace tkm::monitor
 {
 
-static bool doUpdateStats(const std::shared_ptr<SysProcPressure> &mgr,
+static bool doUpdateStats(const std::shared_ptr<SysProcPressure> mgr,
                           const SysProcPressure::Request &request);
-static bool doCollectAndSend(const std::shared_ptr<SysProcPressure> &mgr,
+static bool doCollectAndSend(const std::shared_ptr<SysProcPressure> mgr,
                              const SysProcPressure::Request &request);
 
 static auto tokenize(const std::string &str, const char &ch) -> std::vector<std::string>
@@ -94,7 +94,7 @@ void PressureStat::updateStats(void)
   }
 }
 
-SysProcPressure::SysProcPressure(std::shared_ptr<Options> &options)
+SysProcPressure::SysProcPressure(const std::shared_ptr<Options> options)
 : m_options(options)
 {
   try {
@@ -155,7 +155,7 @@ auto SysProcPressure::requestHandler(const Request &request) -> bool
   return false;
 }
 
-static bool doUpdateStats(const std::shared_ptr<SysProcPressure> &mgr,
+static bool doUpdateStats(const std::shared_ptr<SysProcPressure> mgr,
                           const SysProcPressure::Request &request)
 {
   mgr->getProcEntries().foreach ([&mgr](const std::shared_ptr<PressureStat> &entry) {
@@ -175,7 +175,7 @@ static bool doUpdateStats(const std::shared_ptr<SysProcPressure> &mgr,
   return true;
 }
 
-static bool doCollectAndSend(const std::shared_ptr<SysProcPressure> &mgr,
+static bool doCollectAndSend(const std::shared_ptr<SysProcPressure> mgr,
                              const SysProcPressure::Request &request)
 {
   tkm::msg::monitor::Data data;

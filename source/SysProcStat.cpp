@@ -27,9 +27,9 @@ static constexpr int statSystemJiffiesPos = 3;
 namespace tkm::monitor
 {
 
-static bool doUpdateStats(const std::shared_ptr<SysProcStat> &mgr,
+static bool doUpdateStats(const std::shared_ptr<SysProcStat> mgr,
                           const SysProcStat::Request &request);
-static bool doCollectAndSend(const std::shared_ptr<SysProcStat> &mgr,
+static bool doCollectAndSend(const std::shared_ptr<SysProcStat> mgr,
                              const SysProcStat::Request &request);
 
 void CPUStat::updateStats(uint64_t newUserJiffies, uint64_t newSystemJiffies)
@@ -59,7 +59,7 @@ void CPUStat::updateStats(uint64_t newUserJiffies, uint64_t newSystemJiffies)
   m_data.set_sys(m_sysPercent);
 }
 
-SysProcStat::SysProcStat(std::shared_ptr<Options> &options)
+SysProcStat::SysProcStat(const std::shared_ptr<Options> options)
 : m_options(options)
 {
   try {
@@ -119,7 +119,7 @@ auto SysProcStat::requestHandler(const Request &request) -> bool
   return false;
 }
 
-static bool doUpdateStats(const std::shared_ptr<SysProcStat> &mgr,
+static bool doUpdateStats(const std::shared_ptr<SysProcStat> mgr,
                           const SysProcStat::Request &request)
 {
   std::ifstream statStream{"/proc/stat"};
@@ -185,7 +185,7 @@ static bool doUpdateStats(const std::shared_ptr<SysProcStat> &mgr,
   return true;
 }
 
-static bool doCollectAndSend(const std::shared_ptr<SysProcStat> &mgr,
+static bool doCollectAndSend(const std::shared_ptr<SysProcStat> mgr,
                              const SysProcStat::Request &request)
 {
   mgr->getCPUStatList().foreach ([&request](const std::shared_ptr<CPUStat> &entry) {

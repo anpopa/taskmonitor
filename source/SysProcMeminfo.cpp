@@ -23,12 +23,12 @@
 namespace tkm::monitor
 {
 
-static bool doUpdateStats(const std::shared_ptr<SysProcMeminfo> &mgr,
+static bool doUpdateStats(const std::shared_ptr<SysProcMeminfo> mgr,
                           const SysProcMeminfo::Request &request);
-static bool doCollectAndSend(const std::shared_ptr<SysProcMeminfo> &mgr,
+static bool doCollectAndSend(const std::shared_ptr<SysProcMeminfo> mgr,
                              const SysProcMeminfo::Request &request);
 
-SysProcMeminfo::SysProcMeminfo(std::shared_ptr<Options> &options)
+SysProcMeminfo::SysProcMeminfo(const std::shared_ptr<Options> options)
 : m_options(options)
 {
   try {
@@ -75,7 +75,7 @@ auto SysProcMeminfo::requestHandler(const Request &request) -> bool
   return false;
 }
 
-static bool doUpdateStats(const std::shared_ptr<SysProcMeminfo> &mgr,
+static bool doUpdateStats(const std::shared_ptr<SysProcMeminfo> mgr,
                           const SysProcMeminfo::Request &request)
 {
   std::ifstream memInfoStream{"/proc/meminfo"};
@@ -171,7 +171,7 @@ static bool doUpdateStats(const std::shared_ptr<SysProcMeminfo> &mgr,
   return true;
 }
 
-static bool doCollectAndSend(const std::shared_ptr<SysProcMeminfo> &mgr,
+static bool doCollectAndSend(const std::shared_ptr<SysProcMeminfo> mgr,
                              const SysProcMeminfo::Request &request)
 {
   tkm::msg::monitor::Data data;

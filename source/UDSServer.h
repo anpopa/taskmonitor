@@ -29,7 +29,7 @@ namespace tkm::monitor
 class UDSServer : public Pollable, public std::enable_shared_from_this<UDSServer>
 {
 public:
-  explicit UDSServer(std::shared_ptr<Options> &options);
+  explicit UDSServer(const std::shared_ptr<Options> options);
   ~UDSServer();
 
   auto getShared(void) -> std::shared_ptr<UDSServer> { return shared_from_this(); }

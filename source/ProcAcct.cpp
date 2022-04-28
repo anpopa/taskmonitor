@@ -123,7 +123,7 @@ int callbackStatisticsMessage(struct nl_msg *nlmsg, void *arg)
 namespace tkm::monitor
 {
 
-ProcAcct::ProcAcct(std::shared_ptr<Options> &options)
+ProcAcct::ProcAcct(const std::shared_ptr<Options> options)
 : Pollable("ProcAcct")
 , m_options(options)
 {

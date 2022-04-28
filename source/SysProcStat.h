@@ -77,7 +77,7 @@ public:
   } Request;
 
 public:
-  explicit SysProcStat(std::shared_ptr<Options> &options);
+  explicit SysProcStat(const std::shared_ptr<Options> options);
   ~SysProcStat() = default;
 
 public:

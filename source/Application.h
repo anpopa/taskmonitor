@@ -56,18 +56,18 @@ public:
       m_mainEventLoop.reset();
     }
   }
-  auto getOptions() -> std::shared_ptr<Options> & { return m_options; }
-  auto getTCPServer() -> std::shared_ptr<TCPServer> & { return m_netServer; }
-  auto getUDSServer() -> std::shared_ptr<UDSServer> & { return m_udsServer; }
-  auto getDispatcher() -> std::shared_ptr<Dispatcher> & { return m_dispatcher; }
-  auto getRegistry() -> std::shared_ptr<Registry> & { return m_registry; }
-  auto getProcAcct() -> std::shared_ptr<ProcAcct> & { return m_procAcct; }
-  auto getProcEvent() -> std::shared_ptr<ProcEvent> & { return m_procEvent; }
-  auto getSysProcStat() -> std::shared_ptr<SysProcStat> & { return m_sysProcStat; }
-  auto getSysProcMeminfo() -> std::shared_ptr<SysProcMeminfo> & { return m_sysProcMeminfo; }
-  auto getSysProcPressure() -> std::shared_ptr<SysProcPressure> & { return m_sysProcPressure; }
+  auto getOptions() -> const std::shared_ptr<Options> { return m_options; }
+  auto getTCPServer() -> const std::shared_ptr<TCPServer> { return m_netServer; }
+  auto getUDSServer() -> const std::shared_ptr<UDSServer> { return m_udsServer; }
+  auto getDispatcher() -> const std::shared_ptr<Dispatcher> { return m_dispatcher; }
+  auto getRegistry() -> const std::shared_ptr<Registry> { return m_registry; }
+  auto getProcAcct() -> const std::shared_ptr<ProcAcct> { return m_procAcct; }
+  auto getProcEvent() -> const std::shared_ptr<ProcEvent> { return m_procEvent; }
+  auto getSysProcStat() -> const std::shared_ptr<SysProcStat> { return m_sysProcStat; }
+  auto getSysProcMeminfo() -> const std::shared_ptr<SysProcMeminfo> { return m_sysProcMeminfo; }
+  auto getSysProcPressure() -> const std::shared_ptr<SysProcPressure> { return m_sysProcPressure; }
   bool hasConfigFile() { return m_options->hasConfigFile(); }
-  auto getConfigFile() -> std::shared_ptr<bswi::kf::KeyFile> &
+  auto getConfigFile() -> const std::shared_ptr<bswi::kf::KeyFile>
   {
     return m_options->getConfigFile();
   }

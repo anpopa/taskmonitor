@@ -20,16 +20,12 @@
 
 #include "../bswinfra/source/KeyFile.h"
 
-namespace fs = std::filesystem;
-using namespace bswi::kf;
-
 namespace tkm::monitor
 {
 
-static bool doCollectAndSend(const std::shared_ptr<Registry> &mgr,
-                             const Registry::Request &request);
+static bool doCollectAndSend(const std::shared_ptr<Registry> mgr, const Registry::Request &rq);
 
-Registry::Registry(std::shared_ptr<Options> &options)
+Registry::Registry(const std::shared_ptr<Options> options)
 : m_options(options)
 {
   try {
@@ -74,7 +70,7 @@ void Registry::initFromProc(void)
   std::string path = "/proc";
 
   logDebug() << "Read existing proc entries";
-  for (const auto &entry : fs::directory_iterator(path)) {
+  for (const auto &entry : std::filesystem::directory_iterator(path)) {
     int pid = -1;
 
     try {
@@ -119,7 +115,7 @@ auto Registry::getEntry(int pid) -> const std::shared_ptr<ProcEntry>
   return retEntry;
 }
 
-auto Registry::getEntry(std::string &name) -> const std::shared_ptr<ProcEntry>
+auto Registry::getEntry(const std::string &name) -> const std::shared_ptr<ProcEntry>
 {
   std::shared_ptr<ProcEntry> retEntry = nullptr;
 
@@ -187,7 +183,8 @@ void Registry::remEntry(std::string &name)
 bool Registry::isBlacklisted(const std::string &name)
 {
   if (m_options->hasConfigFile()) {
-    const std::vector<Property> props = m_options->getConfigFile()->getProperties("blacklist", -1);
+    const std::vector<bswi::kf::Property> props =
+        m_options->getConfigFile()->getProperties("blacklist", -1);
     for (const auto &prop : props) {
       if (name.find(prop.key) != std::string::npos) {
         return true;
@@ -200,7 +197,8 @@ bool Registry::isBlacklisted(const std::string &name)
 
 auto Registry::getProcNameForPID(int pid) -> std::string
 {
-  auto statusPath = fs::path("/proc") / fs::path(std::to_string(pid)) / fs::path("status");
+  auto statusPath = std::filesystem::path("/proc") / std::filesystem::path(std::to_string(pid)) /
+                    std::filesystem::path("status");
   std::ifstream statusStream{statusPath};
 
   if (!statusStream.is_open()) {
@@ -234,10 +232,10 @@ auto Registry::getProcNameForPID(int pid) -> std::string
   throw std::runtime_error("Fail to find the process name");
 }
 
-static bool doCollectAndSend(const std::shared_ptr<Registry> &mgr, const Registry::Request &request)
+static bool doCollectAndSend(const std::shared_ptr<Registry> mgr, const Registry::Request &rq)
 {
 
-  mgr->getRegistryList().foreach ([&request](const std::shared_ptr<ProcEntry> &entry) {
+  mgr->getRegistryList().foreach ([&rq](const std::shared_ptr<ProcEntry> &entry) {
     tkm::msg::monitor::Data data;
 
     data.set_what(tkm::msg::monitor::Data_What_ProcAcct);
@@ -249,7 +247,7 @@ static bool doCollectAndSend(const std::shared_ptr<Registry> &mgr, const Registr
     data.set_monotonic_time_sec(currentTime.tv_sec);
 
     data.mutable_payload()->PackFrom(entry->getAcct());
-    request.collector->sendData(data);
+    rq.collector->sendData(data);
   });
   return true;
 }

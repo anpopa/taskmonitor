@@ -31,7 +31,7 @@ namespace tkm::monitor
 class ProcAcct : public Pollable, public std::enable_shared_from_this<ProcAcct>
 {
 public:
-  explicit ProcAcct(std::shared_ptr<Options> &options);
+  explicit ProcAcct(const std::shared_ptr<Options> options);
   ~ProcAcct();
 
 public:

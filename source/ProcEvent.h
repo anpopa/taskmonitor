@@ -37,7 +37,7 @@ public:
   } Request;
 
 public:
-  explicit ProcEvent(std::shared_ptr<Options> &options);
+  explicit ProcEvent(const std::shared_ptr<Options> options);
   ~ProcEvent(void);
 
 public:

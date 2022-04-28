@@ -25,8 +25,8 @@ namespace tkm::monitor
 
 Application *Application::appInstance = nullptr;
 
-static bool shouldStartTCPServer(const std::shared_ptr<tkm::monitor::Options> &opts);
-static bool shouldStartUDSServer(const std::shared_ptr<tkm::monitor::Options> &opts);
+static bool shouldStartTCPServer(const std::shared_ptr<tkm::monitor::Options> opts);
+static bool shouldStartUDSServer(const std::shared_ptr<tkm::monitor::Options> opts);
 
 Application::Application(const string &name, const string &description, const string &configFile)
 : bswi::app::IApplication(name, description)
@@ -120,7 +120,7 @@ void Application::startWatchdog(void)
 #endif
 }
 
-static bool shouldStartTCPServer(const std::shared_ptr<tkm::monitor::Options> &opts)
+static bool shouldStartTCPServer(const std::shared_ptr<tkm::monitor::Options> opts)
 {
   if (opts->getFor(Options::Key::TCPServerStartIfPath) != "none") {
     std::filesystem::path condPath(opts->getFor(Options::Key::TCPServerStartIfPath));
@@ -133,7 +133,7 @@ static bool shouldStartTCPServer(const std::shared_ptr<tkm::monitor::Options> &o
   return true;
 }
 
-static bool shouldStartUDSServer(const std::shared_ptr<tkm::monitor::Options> &opts)
+static bool shouldStartUDSServer(const std::shared_ptr<tkm::monitor::Options> opts)
 {
   if (opts->getFor(Options::Key::TCPServerStartIfPath) != "none") {
     std::filesystem::path condPath(opts->getFor(Options::Key::TCPServerStartIfPath));

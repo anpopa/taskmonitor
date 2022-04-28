@@ -58,7 +58,7 @@ public:
     std::shared_ptr<ICollector> collector;
   } Request;
 
-  explicit SysProcPressure(std::shared_ptr<Options> &options);
+  explicit SysProcPressure(const std::shared_ptr<Options> options);
   ~SysProcPressure() = default;
 
 public:

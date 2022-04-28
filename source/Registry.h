@@ -37,7 +37,7 @@ public:
   } Request;
 
 public:
-  explicit Registry(std::shared_ptr<Options> &options);
+  explicit Registry(const std::shared_ptr<Options> options);
   ~Registry() = default;
 
 public:
@@ -52,7 +52,7 @@ public:
   void remEntry(int pid);
   void remEntry(std::string &name);
   auto getEntry(int pid) -> const std::shared_ptr<ProcEntry>;
-  auto getEntry(std::string &name) -> const std::shared_ptr<ProcEntry>;
+  auto getEntry(const std::string &name) -> const std::shared_ptr<ProcEntry>;
   auto getRegistryList(void) -> bswi::util::SafeList<std::shared_ptr<ProcEntry>> &
   {
     return m_list;

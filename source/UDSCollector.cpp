@@ -19,23 +19,20 @@
 
 #include "Collector.pb.h"
 
-using std::shared_ptr;
-using std::string;
-
 namespace tkm::monitor
 {
 
-static bool doCreateSession(const shared_ptr<UDSCollector> &collector,
+static bool doCreateSession(const std::shared_ptr<UDSCollector> collector,
                             const tkm::msg::collector::Request &rq);
-static bool doGetProcAcct(const shared_ptr<UDSCollector> &collector,
+static bool doGetProcAcct(const std::shared_ptr<UDSCollector> collector,
                           const tkm::msg::collector::Request &rq);
-static bool doGetProcEventStats(const shared_ptr<UDSCollector> &collector,
+static bool doGetProcEventStats(const std::shared_ptr<UDSCollector> collector,
                                 const tkm::msg::collector::Request &rq);
-static bool doGetSysProcMeminfo(const shared_ptr<UDSCollector> &collector,
+static bool doGetSysProcMeminfo(const std::shared_ptr<UDSCollector> collector,
                                 const tkm::msg::collector::Request &rq);
-static bool doGetSysProcStat(const shared_ptr<UDSCollector> &collector,
+static bool doGetSysProcStat(const std::shared_ptr<UDSCollector> collector,
                              const tkm::msg::collector::Request &rq);
-static bool doGetSysProcPressure(const shared_ptr<UDSCollector> &collector,
+static bool doGetSysProcPressure(const std::shared_ptr<UDSCollector> collector,
                                  const tkm::msg::collector::Request &rq);
 
 UDSCollector::UDSCollector(int fd)
@@ -117,7 +114,7 @@ UDSCollector::~UDSCollector()
   }
 }
 
-static bool doCreateSession(const shared_ptr<UDSCollector> &collector,
+static bool doCreateSession(const std::shared_ptr<UDSCollector> collector,
                             const tkm::msg::collector::Request &rq)
 {
   tkm::msg::Envelope envelope;
@@ -162,14 +159,14 @@ static bool doCreateSession(const shared_ptr<UDSCollector> &collector,
   return collector->writeEnvelope(envelope);
 }
 
-static bool doGetProcAcct(const shared_ptr<UDSCollector> &collector,
+static bool doGetProcAcct(const std::shared_ptr<UDSCollector> collector,
                           const tkm::msg::collector::Request &rq)
 {
   Dispatcher::Request req = {.action = Dispatcher::Action::GetProcAcct, .collector = collector};
   return App()->getDispatcher()->pushRequest(req);
 }
 
-static bool doGetProcEventStats(const shared_ptr<UDSCollector> &collector,
+static bool doGetProcEventStats(const std::shared_ptr<UDSCollector> collector,
                                 const tkm::msg::collector::Request &rq)
 {
   Dispatcher::Request req = {.action = Dispatcher::Action::GetProcEventStats,
@@ -177,7 +174,7 @@ static bool doGetProcEventStats(const shared_ptr<UDSCollector> &collector,
   return App()->getDispatcher()->pushRequest(req);
 }
 
-static bool doGetSysProcMeminfo(const shared_ptr<UDSCollector> &collector,
+static bool doGetSysProcMeminfo(const std::shared_ptr<UDSCollector> collector,
                                 const tkm::msg::collector::Request &rq)
 {
   Dispatcher::Request req = {.action = Dispatcher::Action::GetSysProcMeminfo,
@@ -185,14 +182,14 @@ static bool doGetSysProcMeminfo(const shared_ptr<UDSCollector> &collector,
   return App()->getDispatcher()->pushRequest(req);
 }
 
-static bool doGetSysProcStat(const shared_ptr<UDSCollector> &collector,
+static bool doGetSysProcStat(const std::shared_ptr<UDSCollector> collector,
                              const tkm::msg::collector::Request &rq)
 {
   Dispatcher::Request req = {.action = Dispatcher::Action::GetSysProcStat, .collector = collector};
   return App()->getDispatcher()->pushRequest(req);
 }
 
-static bool doGetSysProcPressure(const shared_ptr<UDSCollector> &collector,
+static bool doGetSysProcPressure(const std::shared_ptr<UDSCollector> collector,
                                  const tkm::msg::collector::Request &rq)
 {
   Dispatcher::Request req = {.action = Dispatcher::Action::GetSysProcPressure,

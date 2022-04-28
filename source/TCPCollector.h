@@ -16,9 +16,6 @@
 #include "ICollector.h"
 #include "Options.h"
 
-using namespace bswi::log;
-using namespace bswi::event;
-
 namespace tkm::monitor
 {
 

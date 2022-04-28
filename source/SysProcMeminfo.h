@@ -36,7 +36,7 @@ public:
   } Request;
 
 public:
-  explicit SysProcMeminfo(std::shared_ptr<Options> &options);
+  explicit SysProcMeminfo(const std::shared_ptr<Options> options);
   ~SysProcMeminfo() = default;
 
 public:

@@ -45,7 +45,7 @@ public:
   } Request;
 
 public:
-  explicit Dispatcher(std::shared_ptr<Options> &options);
+  explicit Dispatcher(const std::shared_ptr<Options> options);
 
 public:
   auto getShared() -> std::shared_ptr<Dispatcher> { return shared_from_this(); }
@@ -56,8 +56,8 @@ private:
   bool requestHandler(const Request &request);
 
 private:
-  std::shared_ptr<Options> m_options = nullptr;
   std::shared_ptr<AsyncQueue<Request>> m_queue = nullptr;
+  std::shared_ptr<Options> m_options = nullptr;
 };
 
 } // namespace tkm::monitor

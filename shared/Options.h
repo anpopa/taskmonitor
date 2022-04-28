@@ -49,7 +49,7 @@ public:
 
   auto getFor(Key key) -> std::string const;
   bool hasConfigFile() { return m_configFile != nullptr; }
-  auto getConfigFile() -> std::shared_ptr<bswi::kf::KeyFile> & { return m_configFile; }
+  auto getConfigFile() -> std::shared_ptr<bswi::kf::KeyFile> { return m_configFile; }
 
 private:
   std::shared_ptr<bswi::kf::KeyFile> m_configFile = nullptr;
