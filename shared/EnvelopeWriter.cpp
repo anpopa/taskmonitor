@@ -76,7 +76,8 @@ bool EnvelopeWriter::flushInternal()
   auto status = true;
 
   while ((sizeToSend > 0) && status) {
-    auto retVal = ::send(m_fd, m_buffer + (m_bufferOffset - sizeToSend), sizeToSend, MSG_NOSIGNAL);
+    auto retVal = ::send(
+        m_fd, m_buffer + (m_bufferOffset - sizeToSend), sizeToSend, MSG_DONTWAIT | MSG_NOSIGNAL);
     if (retVal < 0) {
       if (errno == EWOULDBLOCK || (EWOULDBLOCK != EAGAIN && errno == EAGAIN)) {
         if (sendRetry++ < maxRetry) {

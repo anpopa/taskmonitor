@@ -11,6 +11,7 @@
 
 #include <cstring>
 #include <errno.h>
+#include <sys/socket.h>
 #include <unistd.h>
 
 #include "EnvelopeReader.h"
@@ -32,7 +33,8 @@ auto EnvelopeReader::next(tkm::msg::Envelope &envelope) -> IAsyncEnvelope::Statu
 {
   std::scoped_lock lk(m_mutex);
 
-  auto retVal = read(m_fd, m_buffer + m_bufferOffset, sizeof(m_buffer) - m_bufferOffset);
+  auto retVal =
+      recv(m_fd, m_buffer + m_bufferOffset, sizeof(m_buffer) - m_bufferOffset, MSG_DONTWAIT);
   if (retVal < 0) {
     if (errno == EWOULDBLOCK || (EWOULDBLOCK != EAGAIN && errno == EAGAIN)) {
       if (m_bufferOffset == 0) {
