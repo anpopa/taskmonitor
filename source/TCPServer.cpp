@@ -86,6 +86,8 @@ TCPServer::~TCPServer()
 
 void TCPServer::bindAndListen()
 {
+  int port = -1;
+
   if (m_bound) {
     logWarn() << "TCPServer already listening";
     return;
@@ -100,13 +102,13 @@ void TCPServer::bindAndListen()
   if (m_options->getFor(Options::Key::TCPServerAddress) != "any") {
     std::string serverAddress = m_options->getFor(Options::Key::TCPServerAddress);
     struct hostent *server = gethostbyname(serverAddress.c_str());
-    bcopy(server->h_addr, (char *) &m_addr.sin_addr.s_addr, (size_t) server->h_length);
+    memcpy(server->h_addr, (char *) &m_addr.sin_addr.s_addr, (size_t) server->h_length);
   }
 
-  auto port = std::stoi(tkmDefaults.getFor(Defaults::Default::TCPServerPort));
   try {
     port = std::stoi(m_options->getFor(Options::Key::TCPServerPort));
   } catch (const std::exception &e) {
+    port = std::stoi(tkmDefaults.getFor(Defaults::Default::TCPServerPort));
     logWarn() << "Cannot convert port number from config: " << e.what();
   }
   m_addr.sin_port = htons(port);

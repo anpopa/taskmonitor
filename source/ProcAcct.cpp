@@ -28,6 +28,7 @@
 #include "Application.h"
 #include "Defaults.h"
 #include "ProcAcct.h"
+#include "netlink/errno.h"
 
 using std::shared_ptr;
 using std::string;
@@ -104,7 +105,7 @@ int callbackStatisticsMessage(struct nl_msg *nlmsg, void *arg)
 
   nlhdr = nlmsg_hdr(nlmsg);
   if ((answer = genlmsg_parse(nlhdr, 0, nlattrs, TASKSTATS_TYPE_MAX, NULL)) < 0) {
-    logError() << "Error parsing msg";
+    logError() << "Error parsing msg: " << nl_geterror(answer);
     return -1;
   }
 
@@ -132,7 +133,7 @@ ProcAcct::ProcAcct(const std::shared_ptr<Options> options)
 
   try {
     msgBufferSize = std::stoul(m_options->getFor(Options::Key::MsgBufferSize));
-    rxBufferSize = std::stoul(m_options->getFor(Options::Key::TxBufferSize));
+    txBufferSize = std::stoul(m_options->getFor(Options::Key::TxBufferSize));
     rxBufferSize = std::stoul(m_options->getFor(Options::Key::RxBufferSize));
   } catch (std::exception &e) {
     logWarn() << "Invalid buffer size in config. Exception: " << e.what() << ". Use defaults";
@@ -141,8 +142,9 @@ ProcAcct::ProcAcct(const std::shared_ptr<Options> options)
     rxBufferSize = 1048576;
   }
 
-  if ((m_nlSock = nl_socket_alloc()) == nullptr) {
-    throw std::runtime_error("Fail to create netlink socket");
+  m_nlSock = nl_socket_alloc();
+  if (m_nlSock == nullptr) {
+    throw std::runtime_error("Fail to allocate netlink socket");
   }
 
   if ((err = nl_connect(m_nlSock, NETLINK_GENERIC)) < 0) {
@@ -150,12 +152,14 @@ ProcAcct::ProcAcct(const std::shared_ptr<Options> options)
     throw std::runtime_error("Fail to connect netlink socket");
   }
 
-  if ((err = nl_socket_set_nonblocking(m_nlSock)) < 0) {
+  err = nl_socket_set_nonblocking(m_nlSock);
+  if (err < 0) {
     logError() << "Error setting socket nonblocking: " << nl_geterror(err);
     throw std::runtime_error("Fail to set nonblocking netlink socket");
   }
 
-  if ((m_sockFd = nl_socket_get_fd(m_nlSock)) < 0) {
+  m_sockFd = nl_socket_get_fd(m_nlSock);
+  if (m_sockFd < 0) {
     throw std::runtime_error("Fail to get netlink socket");
   }
 
@@ -173,8 +177,9 @@ ProcAcct::ProcAcct(const std::shared_ptr<Options> options)
     throw std::runtime_error("Fail to retirve family id");
   }
 
-  if ((err = nl_socket_modify_cb(
-           m_nlSock, NL_CB_VALID, NL_CB_CUSTOM, callbackStatisticsMessage, this)) < 0) {
+  // TODO: If ever plan to make the ProcAcct dynamicaly available please consider a weakptr for this
+  err = nl_socket_modify_cb(m_nlSock, NL_CB_VALID, NL_CB_CUSTOM, callbackStatisticsMessage, this);
+  if (err < 0) {
     logError() << "Error setting socket cb: " << nl_geterror(err);
     throw std::runtime_error("Fail to set message callback");
   }
