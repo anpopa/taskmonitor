@@ -17,7 +17,7 @@ option(WITH_TESTS "Build test suite" N)
 option(WITH_TIDY "Build with clang-tidy" N)
 
 if(WITH_SYSTEMD)
-    set(WITH_JOURNALD ON CACHE BOOL "Build with jounrald logger backend")
+    set(WITH_JOURNALD ON CACHE BOOL "Build with journald logger backend")
     add_compile_options("-DWITH_SYSTEMD")
 else()
     set(WITH_SYSLOG ON CACHE BOOL "Build with syslog logger backend")

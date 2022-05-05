@@ -11,7 +11,7 @@ set(CMAKE_MODULE_PATH "${BSWINFRA_DIR}/cmake" "${INTERFACES_DIR}/cmake")
 
 option(WITH_SYSTEMD "Build with systemd watchdog and journald support" Y)
 if(WITH_SYSTEMD)
-    set(WITH_JOURNALD ON CACHE BOOL "Build with jounrald logger backend")
+    set(WITH_JOURNALD ON CACHE BOOL "Build with journald logger backend")
     add_compile_options("-DWITH_SYSTEMD")
 else()
     set(WITH_SYSLOG ON CACHE BOOL "Build with syslog logger backend")
