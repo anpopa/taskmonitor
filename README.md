@@ -39,7 +39,7 @@ TaskMonitor depends on the following libraries
 ## Execute
 The service needs elevated capabilities.    
 To start in manually:    
-`sudo taskmonitor -c /etc/taskmonitor.conf`
+`sudo taskmonitor -c /etc/taskmonitor.conf`    
 As a systemd service if WITH_SYSTEMD is ON:    
 `sudo systemctl enable --now taskmonitor.service`
 
