@@ -1,4 +1,3 @@
-# CMake general setup
 cmake_minimum_required(VERSION 3.7.2)
 project(TaskMonitor)
 
@@ -7,17 +6,22 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
-# BaseSoftwareInfrastructure
 set(BSWINFRA_DIR ${CMAKE_CURRENT_SOURCE_DIR}/bswinfra)
-# TaskMonitorInterfaces
 set(INTERFACES_DIR ${CMAKE_CURRENT_SOURCE_DIR}/interfaces)
 set(CMAKE_MODULE_PATH "${BSWINFRA_DIR}/cmake" "${INTERFACES_DIR}/cmake")
 
 message (STATUS "Module paths: ${CMAKE_MODULE_PATH}")
 
-option(WITH_SYSTEMD "Build with systemd watchdog support" Y)
+option(WITH_SYSTEMD "Build with systemd watchdog and journald support" Y)
 option(WITH_TESTS "Build test suite" N)
 option(WITH_TIDY "Build with clang-tidy" N)
+
+if(WITH_SYSTEMD)
+    set(WITH_JOURNALD ON CACHE BOOL "Build with jounrald logger backend")
+    add_compile_options("-DWITH_SYSTEMD")
+else()
+    set(WITH_SYSLOG ON CACHE BOOL "Build with syslog logger backend")
+endif()
 
 include(BSWInfra)
 include(TaskMonitorInterfaces)
@@ -33,7 +37,7 @@ if(CMAKE_BUILD_TYPE STREQUAL Coverage)
         "*/bswinfra/*"
         "*/build/*"
         "*/tests/*"
-    )
+        )
     set(COVERAGE_BASE_DIR ${CMAKE_SOURCE_DIR}/source)
     set(COVERAGE_BRANCH_COVERAGE ON)
     set(COVERAGE_THRESHOLD_LINE 90)
@@ -66,13 +70,9 @@ configure_file(
 configure_file(
     ${CMAKE_SOURCE_DIR}/config/taskmonitor.service.in
     ${CMAKE_BINARY_DIR}/config/taskmonitor.service)
-    
-if(WITH_SYSTEMD)
-    add_compile_options("-DWITH_SYSTEMD")
-endif()
 
 if(WITH_TIDY)
-	set(CMAKE_CXX_CLANG_TIDY "clang-tidy")
+    set(CMAKE_CXX_CLANG_TIDY "clang-tidy")
 endif()
 
 # Header files
@@ -81,7 +81,7 @@ include_directories(${CMAKE_BINARY_DIR}/shared)
 
 # Dependencies
 find_package          (PkgConfig REQUIRED)
-find_package		  (Threads REQUIRED)
+find_package          (Threads REQUIRED)
 set                   (LIBS ${LIBS} pthread)
 
 # Use libnl
@@ -142,7 +142,6 @@ add_compile_options (
     )
 
 # Status reporting
-message (STATUS "SYSTEM_TYPE: "          ${CMAKE_SYSTEM_NAME})
 message (STATUS "CMAKE_BUILD_TYPE: "     ${CMAKE_BUILD_TYPE})
 message (STATUS "WITH_SYSTEMD: "         ${WITH_SYSTEMD})
 message (STATUS "WITH_TESTS: "           ${WITH_TESTS})

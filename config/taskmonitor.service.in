@@ -1,14 +1,14 @@
 ###############################################################################
-#  Task Monitor
+#  TaskMonitor version @GIT_SHA1@
 ###############################################################################
 [Unit]
-Description=Task Monitor Service
+Description=TaskMonitor Service
 
 [Service]
 Type=simple
 User=root
 Group=root
-ExecStart=@CMAKE_INSTALL_PREFIX@/bin/taskmonitor -c /etc/taskmonitor.conf
+ExecStart=@CMAKE_INSTALL_PREFIX@/sbin/taskmonitor -c /etc/taskmonitor.conf
 WatchdogSec=10
 
 [Install]

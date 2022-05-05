@@ -5,11 +5,17 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
-# BaseSoftwareInfrastructure
 set(BSWINFRA_DIR ${CMAKE_CURRENT_LIST_DIR}/../bswinfra)
-# TaskMonitorInterfaces
 set(INTERFACES_DIR ${CMAKE_CURRENT_LIST_DIR}/../interfaces)
 set(CMAKE_MODULE_PATH "${BSWINFRA_DIR}/cmake" "${INTERFACES_DIR}/cmake")
+
+option(WITH_SYSTEMD "Build with systemd watchdog and journald support" Y)
+if(WITH_SYSTEMD)
+    set(WITH_JOURNALD ON CACHE BOOL "Build with jounrald logger backend")
+    add_compile_options("-DWITH_SYSTEMD")
+else()
+    set(WITH_SYSLOG ON CACHE BOOL "Build with syslog logger backend")
+endif()
 
 include(BSWInfra)
 include(TaskMonitorInterfaces)
@@ -39,17 +45,13 @@ configure_file(
     ${CMAKE_CURRENT_LIST_DIR}/../config/taskmonitor.service.in
     ${CMAKE_BINARY_DIR}/taskmonitor/taskmonitor.service)
 
-if(WITH_SYSTEMD)
-    add_compile_options("-DWITH_SYSTEMD")
-endif()
-
 # Header files
 include_directories(${CMAKE_CURRENT_LIST_DIR}/../shared)
 include_directories(${CMAKE_BINARY_DIR}/taskmonitor/shared)
 
 # Dependencies
 find_package          (PkgConfig REQUIRED)
-find_package		  (Threads REQUIRED)
+find_package          (Threads REQUIRED)
 set                   (LIBS ${LIBS} pthread)
 
 # Use libnl
@@ -73,8 +75,5 @@ add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/../config)
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/../source)
 
 # Status reporting
-message (STATUS "   SYSTEM_TYPE: "          ${CMAKE_SYSTEM_NAME})
 message (STATUS "   CMAKE_BUILD_TYPE: "     ${CMAKE_BUILD_TYPE})
 message (STATUS "   WITH_SYSTEMD: "         ${WITH_SYSTEMD})
-message (STATUS "   WITH_SYSLOG: "          ${WITH_SYSLOG})
-message (STATUS "   WITH_JOURNALD: "        ${WITH_JOURNALD})
