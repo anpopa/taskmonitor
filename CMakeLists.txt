@@ -23,6 +23,7 @@ else()
     set(WITH_SYSLOG ON CACHE BOOL "Build with syslog logger backend")
 endif()
 
+include(GNUInstallDirs)
 include(BSWInfra)
 include(TaskMonitorInterfaces)
 
@@ -61,15 +62,15 @@ set(TKM_CONFIG_FILE "/etc/taskmonitor.conf" CACHE PATH "Default config file path
 
 configure_file(
     ${CMAKE_SOURCE_DIR}/shared/Defaults.h.in
-    ${CMAKE_BINARY_DIR}/shared/Defaults.h)
+    ${CMAKE_BINARY_DIR}/taskmonitor/shared/Defaults.h)
 
 configure_file(
     ${CMAKE_SOURCE_DIR}/config/taskmonitor.conf.in
-    ${CMAKE_BINARY_DIR}/config/taskmonitor.conf)
+    ${CMAKE_BINARY_DIR}/taskmonitor/config/taskmonitor.conf)
 
 configure_file(
     ${CMAKE_SOURCE_DIR}/config/taskmonitor.service.in
-    ${CMAKE_BINARY_DIR}/config/taskmonitor.service)
+    ${CMAKE_BINARY_DIR}/taskmonitor/config/taskmonitor.service)
 
 if(WITH_TIDY)
     set(CMAKE_CXX_CLANG_TIDY "clang-tidy")
@@ -77,7 +78,7 @@ endif()
 
 # Header files
 include_directories(${CMAKE_SOURCE_DIR}/shared)
-include_directories(${CMAKE_BINARY_DIR}/shared)
+include_directories(${CMAKE_BINARY_DIR}/taskmonitor/shared)
 
 # Dependencies
 find_package          (PkgConfig REQUIRED)
@@ -140,6 +141,9 @@ add_compile_options (
     -Wcast-align
     -Wredundant-decls
     )
+
+# Install license file
+install(FILES ${CMAKE_SOURCE_DIR}/LICENSE DESTINATION ${CMAKE_INSTALL_PREFIX}/share/licenses/taskmonitor/)
 
 # Status reporting
 message (STATUS "CMAKE_BUILD_TYPE: "     ${CMAKE_BUILD_TYPE})

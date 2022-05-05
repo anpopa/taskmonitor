@@ -18,8 +18,8 @@ namespace tkm::monitor
 {
 
 ProcEntry::ProcEntry(int pid, const std::string &name)
-: m_pid(pid)
-, m_name(name)
+: m_name(name)
+, m_pid(pid)
 {
   m_timer = std::make_shared<Timer>("ProcEntry", [pid]() {
     if (!App()->getProcAcct()->requestTaskAcct(pid)) {

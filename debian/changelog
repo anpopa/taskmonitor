@@ -1,0 +1,5 @@
+taskmonitor (0.0.1) main; urgency=medium
+
+  * taskmonitor: Initial debian package
+
+ -- Alin Popa <alin.popa@fxdata.ro>  Sat, 5 May 2022 12:44:58 +0100

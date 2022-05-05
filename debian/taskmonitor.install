@@ -1,0 +1,4 @@
+etc/taskmonitor.conf
+etc/systemd/system/taskmonitor.service
+usr/sbin/taskmonitor
+usr/share/licenses/taskmonior/LICENSE

@@ -17,6 +17,7 @@ else()
     set(WITH_SYSLOG ON CACHE BOOL "Build with syslog logger backend")
 endif()
 
+include(GNUInstallDirs)
 include(BSWInfra)
 include(TaskMonitorInterfaces)
 
