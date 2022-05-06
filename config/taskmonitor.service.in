@@ -8,7 +8,7 @@ Description=TaskMonitor Service
 Type=simple
 User=root
 Group=root
-ExecStart=@CMAKE_INSTALL_PREFIX@/sbin/taskmonitor -c /etc/taskmonitor.conf
+ExecStart=@CMAKE_INSTALL_PREFIX@/sbin/taskmonitor -c @CMAKE_INSTALL_FULL_SYSCONFDIR@/taskmonitor.conf
 WatchdogSec=10
 
 [Install]
