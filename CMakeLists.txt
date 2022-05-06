@@ -8,7 +8,7 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 set(BSWINFRA_DIR ${CMAKE_CURRENT_SOURCE_DIR}/bswinfra)
 set(INTERFACES_DIR ${CMAKE_CURRENT_SOURCE_DIR}/interfaces)
-set(CMAKE_MODULE_PATH "${BSWINFRA_DIR}/cmake" "${INTERFACES_DIR}/cmake")
+set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" "${BSWINFRA_DIR}/cmake" "${INTERFACES_DIR}/cmake")
 
 message (STATUS "Module paths: ${CMAKE_MODULE_PATH}")
 
@@ -23,7 +23,23 @@ else()
     set(WITH_SYSLOG ON CACHE BOOL "Build with syslog logger backend")
 endif()
 
+# Build time configuration setup
+if(EXISTS "${CMAKE_SOURCE_DIR}/.git")
+    execute_process(
+        COMMAND git --git-dir "${CMAKE_CURRENT_SOURCE_DIR}/.git" rev-parse --short HEAD
+        OUTPUT_VARIABLE GIT_SHA1
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+        )
+else(EXISTS "${CMAKE_SOURCE_DIR}/.git")
+    set(GIT_SHA1 "")
+endif(EXISTS "${CMAKE_SOURCE_DIR}/.git")
+
+set(PROJECT_VERSION_MAJOR "1")
+set(PROJECT_VERSION_MINOR "0")
+set(PROJECT_VERSION_PATCH ${GIT_SHA1})
+
 include(GNUInstallDirs)
+include(Packing)
 include(BSWInfra)
 include(TaskMonitorInterfaces)
 
@@ -46,17 +62,6 @@ if(CMAKE_BUILD_TYPE STREQUAL Coverage)
 
     include(CoverageTarget)
 endif()
-
-# Build time configuration setup
-if(EXISTS "${CMAKE_SOURCE_DIR}/.git")
-    execute_process(
-        COMMAND git --git-dir "${CMAKE_CURRENT_SOURCE_DIR}/.git" rev-parse --short HEAD
-        OUTPUT_VARIABLE GIT_SHA1
-        OUTPUT_STRIP_TRAILING_WHITESPACE
-        )
-else(EXISTS "${CMAKE_SOURCE_DIR}/.git")
-    set(GIT_SHA1 "")
-endif(EXISTS "${CMAKE_SOURCE_DIR}/.git")
 
 set(TKM_CONFIG_FILE "/etc/taskmonitor.conf" CACHE PATH "Default config file path")
 

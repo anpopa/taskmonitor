@@ -7,6 +7,9 @@
 build/
 cmake-build-debug/
 
+# Packages
+packages
+
 # Node artifact files
 node_modules/
 dist/
