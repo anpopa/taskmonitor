@@ -1,6 +1,5 @@
 set(CPACK_PACKAGE_NAME ${PROJECT_NAME})
-set(CPACK_PACKAGE_DESCRIPTION_SUMMARY
-  "A simple system service to collect performance indicators from embedded systems")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Performance monitoring service for embedded systems")
 set(CPACK_VERBATIM_VARIABLES YES)
 
 set(CPACK_PACKAGE_INSTALL_DIRECTORY ${CPACK_PACKAGE_NAME})
@@ -18,20 +17,21 @@ set(CPACK_RESOURCE_FILE_README "${CMAKE_CURRENT_SOURCE_DIR}/README.md")
 
 # RPM
 set(CPACK_RPM_FILE_NAME RPM-DEFAULT)
-set(CPACK_RPM_DEBUGINFO_PACKAGE OFF) # Disabled by default due to strange path requirements
-set(CPACK_RPM_PACKAGE_SOURCES ON)
+set(CPACK_RPM_DEBUGINFO_PACKAGE OFF)
 set(CPACK_RPM_PACKAGE_LICENSE "MIT")
 set(CPACK_RPM_CHANGELOG_FILE "${CMAKE_SOURCE_DIR}/CHANGELOG")
 set(CPACK_RPM_PACKAGE_DESCRIPTION ${CPACK_PACKAGE_DESCRIPTION_SUMMARY})
 set(CPACK_RPM_PACKAGE_GROUP "Applications/System")
-set(CPACK_RPM_PACKAGE_REQUIRES "systemd >= 243, libnl3 >= 3.4.0, protobuf >= 3.14.0")
+set(CPACK_RPM_PACKAGE_REQUIRES
+  "systemd >= 243, libnl3 >= 3.4.0, protobuf >= 3.14.0")
 list(APPEND CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST_ADDITION "/usr/sbin")
 
 # DEB
 set(CPACK_DEBIAN_FILE_NAME DEB-DEFAULT)
-set(CPACK_DEBIAN_DEBUGINFO_PACKAGE ON)
+set(CPACK_DEBIAN_DEBUGINFO_PACKAGE OFF)
 set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Alin Popa")
 set(CPACK_DEBIAN_PACKAGE_SECTION "Utilities")
-set(CPACK_DEBIAN_PACKAGE_DEPENDS "libsystemd (>= 243), libnl-3-200 (>= 3.4.0), libnl-genl-3-200 (>=3.5.0), libprotobuf23 (>=3.12.4)")
+set(CPACK_DEBIAN_PACKAGE_DEPENDS
+  "libsystemd (>= 243), libnl-3-200 (>= 3.4.0), libnl-genl-3-200 (>=3.5.0), libprotobuf23 (>=3.12.4)")
 
 include(CPack)
