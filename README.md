@@ -32,6 +32,8 @@ TaskMonitor depends on the following libraries
 | Option | Default | Info |
 | ------ | ------ | ------ |
 | WITH_SYSTEMD | ON | Enable systemd service, watchdog and journald support |
+| WITH_INSTALL_CONFIG | ON | Install default taskmonitor.conf on target |
+| WITH_INSTALL_LICENSE | ON | Install license file on target for QA checks |
 
 ### Local Build
 `mkdir build && cd build && cmake .. && make `

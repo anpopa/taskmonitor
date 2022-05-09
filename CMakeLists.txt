@@ -15,6 +15,8 @@ set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" "${BSWINFRA_DIR}/cmake
 message (STATUS "Module paths: ${CMAKE_MODULE_PATH}")
 
 option(WITH_SYSTEMD "Build with systemd watchdog and journald support" Y)
+option(WITH_INSTALL_CONFIG "Install default taskmonitor.conf on target" Y)
+option(WITH_INSTALL_LICENSE "Install license file on target" Y)
 option(WITH_TESTS "Build test suite" N)
 option(WITH_TIDY "Build with clang-tidy" N)
 
@@ -150,10 +152,14 @@ add_compile_options (
     )
 
 # Install license file
-install(FILES ${CMAKE_SOURCE_DIR}/LICENSE DESTINATION ${CMAKE_INSTALL_PREFIX}/share/licenses/taskmonitor/)
+if(WITH_INSTALL_LICENSE)
+    install(FILES ${CMAKE_SOURCE_DIR}/LICENSE DESTINATION ${CMAKE_INSTALL_PREFIX}/share/licenses/taskmonitor/)
+endif()
 
 # Status reporting
 message (STATUS "CMAKE_BUILD_TYPE: "     ${CMAKE_BUILD_TYPE})
 message (STATUS "WITH_SYSTEMD: "         ${WITH_SYSTEMD})
+message (STATUS "WITH_INSTALL_CONFIG: "  ${WITH_INSTALL_CONFIG})
+message (STATUS "WITH_INSTALL_LICENSE: " ${WITH_INSTALL_LICENSE})
 message (STATUS "WITH_TESTS: "           ${WITH_TESTS})
 message (STATUS "WITH_TIDY: "            ${WITH_TIDY})
