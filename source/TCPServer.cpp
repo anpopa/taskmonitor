@@ -102,7 +102,7 @@ void TCPServer::bindAndListen()
   if (m_options->getFor(Options::Key::TCPServerAddress) != "any") {
     std::string serverAddress = m_options->getFor(Options::Key::TCPServerAddress);
     struct hostent *server = gethostbyname(serverAddress.c_str());
-    memcpy(server->h_addr, (char *) &m_addr.sin_addr.s_addr, (size_t) server->h_length);
+    memcpy(&m_addr.sin_addr.s_addr, server->h_addr, (size_t) server->h_length);
   }
 
   try {
