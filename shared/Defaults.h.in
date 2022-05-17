@@ -23,18 +23,17 @@ public:
   enum class Default {
     Version,
     ConfPath,
+    ContainersPath,
     RuntimeDirectory,
     RxBufferSize,
     TxBufferSize,
     MsgBufferSize,
     EnableTCPServer,
     EnableUDSServer,
-    StatPollInterval,
-    ProcPollInterval,
-    ProcEventPollInterval,
-    MemPollInterval,
+    FastLaneInterval,
+    PaceLaneInterval,
+    SlowLaneInterval,
     ReadProcAtInit,
-    PressurePollInterval,
     TCPServerAddress,
     TCPServerPort,
     TCPServerStartIfPath,
@@ -48,15 +47,14 @@ public:
   {
     m_table.insert(std::pair<Default, std::string>(Default::Version, "@GIT_SHA1@"));
     m_table.insert(std::pair<Default, std::string>(Default::ConfPath, "@TKM_CONFIG_FILE@"));
+    m_table.insert(std::pair<Default, std::string>(Default::ContainersPath, "/var/lib/lxc"));
     m_table.insert(std::pair<Default, std::string>(Default::RuntimeDirectory, "/run/taskmonitor"));
     m_table.insert(std::pair<Default, std::string>(Default::RxBufferSize, "1048576"));
     m_table.insert(std::pair<Default, std::string>(Default::TxBufferSize, "1048576"));
     m_table.insert(std::pair<Default, std::string>(Default::MsgBufferSize, "1048576"));
-    m_table.insert(std::pair<Default, std::string>(Default::StatPollInterval, "1000000"));
-    m_table.insert(std::pair<Default, std::string>(Default::MemPollInterval, "3000000"));
-    m_table.insert(std::pair<Default, std::string>(Default::ProcPollInterval, "5000000"));
-    m_table.insert(std::pair<Default, std::string>(Default::ProcEventPollInterval, "5000000"));
-    m_table.insert(std::pair<Default, std::string>(Default::PressurePollInterval, "5000000"));
+    m_table.insert(std::pair<Default, std::string>(Default::FastLaneInterval, "1000000"));
+    m_table.insert(std::pair<Default, std::string>(Default::PaceLaneInterval, "5000000"));
+    m_table.insert(std::pair<Default, std::string>(Default::SlowLaneInterval, "10000000"));
     m_table.insert(std::pair<Default, std::string>(Default::ReadProcAtInit, "true"));
     m_table.insert(std::pair<Default, std::string>(Default::EnableTCPServer, "true"));
     m_table.insert(std::pair<Default, std::string>(Default::EnableUDSServer, "false"));

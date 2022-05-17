@@ -28,6 +28,7 @@
 #include "UDSServer.h"
 
 #include "../bswinfra/source/IApplication.h"
+#include "../bswinfra/source/Timer.h"
 
 using namespace bswi::event;
 
@@ -56,21 +57,28 @@ public:
       m_mainEventLoop.reset();
     }
   }
-  auto getOptions() -> const std::shared_ptr<Options> { return m_options; }
-  auto getTCPServer() -> const std::shared_ptr<TCPServer> { return m_netServer; }
-  auto getUDSServer() -> const std::shared_ptr<UDSServer> { return m_udsServer; }
-  auto getDispatcher() -> const std::shared_ptr<Dispatcher> { return m_dispatcher; }
-  auto getRegistry() -> const std::shared_ptr<Registry> { return m_registry; }
-  auto getProcAcct() -> const std::shared_ptr<ProcAcct> { return m_procAcct; }
-  auto getProcEvent() -> const std::shared_ptr<ProcEvent> { return m_procEvent; }
-  auto getSysProcStat() -> const std::shared_ptr<SysProcStat> { return m_sysProcStat; }
-  auto getSysProcMeminfo() -> const std::shared_ptr<SysProcMeminfo> { return m_sysProcMeminfo; }
-  auto getSysProcPressure() -> const std::shared_ptr<SysProcPressure> { return m_sysProcPressure; }
-  bool hasConfigFile() { return m_options->hasConfigFile(); }
-  auto getConfigFile() -> const std::shared_ptr<bswi::kf::KeyFile>
+  auto getOptions(void) -> const std::shared_ptr<Options> { return m_options; }
+  auto getTCPServer(void) -> const std::shared_ptr<TCPServer> { return m_netServer; }
+  auto getUDSServer(void) -> const std::shared_ptr<UDSServer> { return m_udsServer; }
+  auto getDispatcher(void) -> const std::shared_ptr<Dispatcher> { return m_dispatcher; }
+  auto getRegistry(void) -> const std::shared_ptr<Registry> { return m_registry; }
+  auto getProcAcct(void) -> const std::shared_ptr<ProcAcct> { return m_procAcct; }
+  auto getProcEvent(void) -> const std::shared_ptr<ProcEvent> { return m_procEvent; }
+  auto getSysProcStat(void) -> const std::shared_ptr<SysProcStat> { return m_sysProcStat; }
+  auto getSysProcMeminfo(void) -> const std::shared_ptr<SysProcMeminfo> { return m_sysProcMeminfo; }
+  auto getSysProcPressure(void) -> const std::shared_ptr<SysProcPressure>
+  {
+    return m_sysProcPressure;
+  }
+  bool hasConfigFile(void) { return m_options->hasConfigFile(); }
+  auto getConfigFile(void) -> const std::shared_ptr<bswi::kf::KeyFile>
   {
     return m_options->getConfigFile();
   }
+
+  void incProcAcctCollectorCounter() { m_procAcctCollectorCounter++; }
+  void decProcAcctCollectorCounter() { m_procAcctCollectorCounter--; }
+  auto getProcAcctCollectorCounter() -> unsigned short { return m_procAcctCollectorCounter; }
 
 public:
   Application(Application const &) = delete;
@@ -78,6 +86,7 @@ public:
 
 private:
   void startWatchdog(void);
+  void enableUpdateLanes(void);
 
 private:
   std::shared_ptr<Options> m_options = nullptr;
@@ -90,6 +99,12 @@ private:
   std::shared_ptr<SysProcStat> m_sysProcStat = nullptr;
   std::shared_ptr<SysProcMeminfo> m_sysProcMeminfo = nullptr;
   std::shared_ptr<SysProcPressure> m_sysProcPressure = nullptr;
+  std::atomic<unsigned short> m_procAcctCollectorCounter = 0;
+
+private:
+  std::shared_ptr<Timer> m_fastLaneTimer = nullptr;
+  std::shared_ptr<Timer> m_paceLaneTimer = nullptr;
+  std::shared_ptr<Timer> m_slowLaneTimer = nullptr;
 
 private:
   static Application *appInstance;

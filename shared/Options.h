@@ -26,14 +26,13 @@ class Options
 public:
   enum class Key {
     RuntimeDirectory,
+    ContainersPath,
     RxBufferSize,
     TxBufferSize,
     MsgBufferSize,
-    StatPollInterval,
-    ProcPollInterval,
-    ProcEventPollInterval,
-    MemPollInterval,
-    PressurePollInterval,
+    FastLaneInterval,
+    PaceLaneInterval,
+    SlowLaneInterval,
     ReadProcAtInit,
     EnableTCPServer,
     EnableUDSServer,

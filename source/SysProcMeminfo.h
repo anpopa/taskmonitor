@@ -20,7 +20,6 @@
 #include "Options.h"
 
 #include "../bswinfra/source/AsyncQueue.h"
-#include "../bswinfra/source/Timer.h"
 
 using namespace bswi::event;
 
@@ -49,6 +48,16 @@ public:
   auto pushRequest(SysProcMeminfo::Request &request) -> int;
   void enableEvents();
 
+  void setUpdateInterval(uint64_t interval)
+  {
+    if (interval > 0) {
+      m_updateInterval = interval;
+    }
+  }
+  bool update(void);
+  bool getUpdatePending(void) { return m_updatePending; }
+  void setUpdatePending(bool state) { m_updatePending = state; }
+
 private:
   bool requestHandler(const Request &request);
 
@@ -56,8 +65,8 @@ private:
   std::shared_ptr<AsyncQueue<Request>> m_queue = nullptr;
   std::shared_ptr<Options> m_options = nullptr;
   tkm::msg::monitor::SysProcMeminfo m_memInfo;
-  std::shared_ptr<Timer> m_timer = nullptr;
-  uint64_t m_usecInterval = 0;
+  uint64_t m_updateInterval = 1000000;
+  bool m_updatePending = false;
 };
 
 } // namespace tkm::monitor

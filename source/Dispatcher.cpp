@@ -29,10 +29,12 @@ namespace tkm::monitor
 {
 
 static bool doGetProcAcct(const shared_ptr<Dispatcher> disp, const Dispatcher::Request &rq);
+static bool doGetProcInfo(const shared_ptr<Dispatcher> disp, const Dispatcher::Request &rq);
 static bool doGetProcEventStats(const shared_ptr<Dispatcher> disp, const Dispatcher::Request &rq);
 static bool doGetSysProcMeminfo(const shared_ptr<Dispatcher> disp, const Dispatcher::Request &rq);
 static bool doGetSysProcStat(const shared_ptr<Dispatcher> disp, const Dispatcher::Request &rq);
 static bool doGetSysProcPsi(const shared_ptr<Dispatcher> disp, const Dispatcher::Request &rq);
+static bool doGetContextInfo(const shared_ptr<Dispatcher> disp, const Dispatcher::Request &rq);
 
 Dispatcher::Dispatcher(const shared_ptr<Options> options)
 : m_options(options)
@@ -56,6 +58,8 @@ auto Dispatcher::requestHandler(const Request &request) -> bool
   switch (request.action) {
   case Dispatcher::Action::GetProcAcct:
     return doGetProcAcct(getShared(), request);
+  case Dispatcher::Action::GetProcInfo:
+    return doGetProcInfo(getShared(), request);
   case Dispatcher::Action::GetProcEventStats:
     return doGetProcEventStats(getShared(), request);
   case Dispatcher::Action::GetSysProcMeminfo:
@@ -64,6 +68,8 @@ auto Dispatcher::requestHandler(const Request &request) -> bool
     return doGetSysProcStat(getShared(), request);
   case Dispatcher::Action::GetSysProcPressure:
     return doGetSysProcPsi(getShared(), request);
+  case Dispatcher::Action::GetContextInfo:
+    return doGetContextInfo(getShared(), request);
   default:
     break;
   }
@@ -74,7 +80,22 @@ auto Dispatcher::requestHandler(const Request &request) -> bool
 
 static bool doGetProcAcct(const shared_ptr<Dispatcher> disp, const Dispatcher::Request &rq)
 {
-  Registry::Request regrq = {.action = Registry::Action::CollectAndSend, .collector = rq.collector};
+  Registry::Request regrq = {.action = Registry::Action::CollectAndSendProcAcct,
+                             .collector = rq.collector};
+  return App()->getRegistry()->pushRequest(regrq);
+}
+
+static bool doGetProcInfo(const shared_ptr<Dispatcher> disp, const Dispatcher::Request &rq)
+{
+  Registry::Request regrq = {.action = Registry::Action::CollectAndSendProcInfo,
+                             .collector = rq.collector};
+  return App()->getRegistry()->pushRequest(regrq);
+}
+
+static bool doGetContextInfo(const shared_ptr<Dispatcher> disp, const Dispatcher::Request &rq)
+{
+  Registry::Request regrq = {.action = Registry::Action::CollectAndSendContextInfo,
+                             .collector = rq.collector};
   return App()->getRegistry()->pushRequest(regrq);
 }
 

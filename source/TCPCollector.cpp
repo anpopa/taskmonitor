@@ -26,6 +26,8 @@ static bool doCreateSession(const std::shared_ptr<TCPCollector> collector,
                             const tkm::msg::collector::Request &rq);
 static bool doGetProcAcct(const std::shared_ptr<TCPCollector> collector,
                           const tkm::msg::collector::Request &rq);
+static bool doGetProcInfo(const std::shared_ptr<TCPCollector> collector,
+                          const tkm::msg::collector::Request &rq);
 static bool doGetProcEventStats(const std::shared_ptr<TCPCollector> collector,
                                 const tkm::msg::collector::Request &rq);
 static bool doGetSysProcMeminfo(const std::shared_ptr<TCPCollector> collector,
@@ -34,6 +36,8 @@ static bool doGetSysProcStat(const std::shared_ptr<TCPCollector> collector,
                              const tkm::msg::collector::Request &rq);
 static bool doGetSysProcPressure(const std::shared_ptr<TCPCollector> collector,
                                  const tkm::msg::collector::Request &rq);
+static bool doGetContextInfo(const std::shared_ptr<TCPCollector> collector,
+                             const tkm::msg::collector::Request &rq);
 
 TCPCollector::TCPCollector(int fd)
 : ICollector("TCPCollector", fd)
@@ -73,6 +77,9 @@ TCPCollector::TCPCollector(int fd)
           case tkm::msg::collector::Request_Type_GetProcAcct:
             status = doGetProcAcct(getShared(), collectorMessage);
             break;
+          case tkm::msg::collector::Request_Type_GetProcInfo:
+            status = doGetProcInfo(getShared(), collectorMessage);
+            break;
           case tkm::msg::collector::Request_Type_GetProcEventStats:
             status = doGetProcEventStats(getShared(), collectorMessage);
             break;
@@ -84,6 +91,9 @@ TCPCollector::TCPCollector(int fd)
             break;
           case tkm::msg::collector::Request_Type_GetSysProcPressure:
             status = doGetSysProcPressure(getShared(), collectorMessage);
+            break;
+          case tkm::msg::collector::Request_Type_GetContextInfo:
+            status = doGetContextInfo(getShared(), collectorMessage);
             break;
           default:
             status = false;
@@ -98,7 +108,11 @@ TCPCollector::TCPCollector(int fd)
       bswi::event::IPollable::Events::Level,
       bswi::event::IEventSource::Priority::Normal);
 
-  setFinalize([this]() { logInfo() << "Ended connection with collector: " << getFD(); });
+  setFinalize([this]() {
+    logInfo() << "Ended connection with collector: " << getFD();
+    App()->decProcAcctCollectorCounter();
+  });
+  App()->incProcAcctCollectorCounter();
 }
 
 void TCPCollector::enableEvents()
@@ -137,15 +151,19 @@ static bool doCreateSession(const std::shared_ptr<TCPCollector> collector,
   sessionInfo.set_lifecycle_id("na");
   try {
     sessionInfo.set_proc_acct_poll_interval(
-        std::stol(App()->getOptions()->getFor(Options::Key::ProcPollInterval)));
+        std::stol(App()->getOptions()->getFor(Options::Key::SlowLaneInterval)));
+    sessionInfo.set_proc_info_poll_interval(
+        std::stol(App()->getOptions()->getFor(Options::Key::FastLaneInterval)));
     sessionInfo.set_proc_event_poll_interval(
-        std::stol(App()->getOptions()->getFor(Options::Key::ProcEventPollInterval)));
+        std::stol(App()->getOptions()->getFor(Options::Key::PaceLaneInterval)));
     sessionInfo.set_sys_proc_stat_poll_interval(
-        std::stol(App()->getOptions()->getFor(Options::Key::StatPollInterval)));
+        std::stol(App()->getOptions()->getFor(Options::Key::FastLaneInterval)));
     sessionInfo.set_sys_proc_meminfo_poll_interval(
-        std::stol(App()->getOptions()->getFor(Options::Key::MemPollInterval)));
+        std::stol(App()->getOptions()->getFor(Options::Key::PaceLaneInterval)));
     sessionInfo.set_sys_proc_pressure_poll_interval(
-        std::stol(App()->getOptions()->getFor(Options::Key::PressurePollInterval)));
+        std::stol(App()->getOptions()->getFor(Options::Key::PaceLaneInterval)));
+    sessionInfo.set_context_information_poll_interval(
+        std::stol(App()->getOptions()->getFor(Options::Key::PaceLaneInterval)));
   } catch (...) {
     throw std::runtime_error("Fail to process session poll interval data");
   }
@@ -166,6 +184,13 @@ static bool doGetProcAcct(const std::shared_ptr<TCPCollector> collector,
                           const tkm::msg::collector::Request &rq)
 {
   Dispatcher::Request req = {.action = Dispatcher::Action::GetProcAcct, .collector = collector};
+  return App()->getDispatcher()->pushRequest(req);
+}
+
+static bool doGetProcInfo(const std::shared_ptr<TCPCollector> collector,
+                          const tkm::msg::collector::Request &rq)
+{
+  Dispatcher::Request req = {.action = Dispatcher::Action::GetProcInfo, .collector = collector};
   return App()->getDispatcher()->pushRequest(req);
 }
 
@@ -197,6 +222,13 @@ static bool doGetSysProcPressure(const std::shared_ptr<TCPCollector> collector,
 {
   Dispatcher::Request req = {.action = Dispatcher::Action::GetSysProcPressure,
                              .collector = collector};
+  return App()->getDispatcher()->pushRequest(req);
+}
+
+static bool doGetContextInfo(const std::shared_ptr<TCPCollector> collector,
+                             const tkm::msg::collector::Request &rq)
+{
+  Dispatcher::Request req = {.action = Dispatcher::Action::GetContextInfo, .collector = collector};
   return App()->getDispatcher()->pushRequest(req);
 }
 

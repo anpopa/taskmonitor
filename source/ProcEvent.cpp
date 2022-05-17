@@ -97,7 +97,7 @@ ProcEvent::ProcEvent(const std::shared_ptr<Options> options)
                     << " process_pid=" << nlcn_msg.proc_ev.event_data.exec.process_pid
                     << " process_tgid=" << nlcn_msg.proc_ev.event_data.exec.process_tgid;
           m_eventData.set_exec_count(m_eventData.exec_count() + 1);
-          App()->getRegistry()->addEntry(nlcn_msg.proc_ev.event_data.exec.process_pid);
+          App()->getRegistry()->addProcEntry(nlcn_msg.proc_ev.event_data.exec.process_pid);
           break;
         }
         case proc_event::what::PROC_EVENT_UID: {
@@ -124,7 +124,7 @@ ProcEvent::ProcEvent(const std::shared_ptr<Options> options)
                     << " process_tgid=" << nlcn_msg.proc_ev.event_data.id.process_tgid
                     << " exit_code=" << nlcn_msg.proc_ev.event_data.exit.exit_code;
           m_eventData.set_exit_count(m_eventData.exit_count() + 1);
-          App()->getRegistry()->remEntry(nlcn_msg.proc_ev.event_data.exit.process_pid);
+          App()->getRegistry()->remProcEntry(nlcn_msg.proc_ev.event_data.exit.process_pid);
           break;
         }
         default:

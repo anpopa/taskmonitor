@@ -16,10 +16,6 @@
 #include <memory>
 #include <string>
 
-#include "../bswinfra/source/Timer.h"
-
-using namespace bswi::event;
-
 namespace tkm::monitor
 {
 
@@ -34,19 +30,42 @@ public:
   void operator=(ProcEntry const &) = delete;
 
 public:
-  auto getShared() -> std::shared_ptr<ProcEntry> { return shared_from_this(); }
-  void startMonitoring(unsigned int interval);
-  void disable(void);
+  auto getShared(void) -> std::shared_ptr<ProcEntry> { return shared_from_this(); }
 
-  auto getAcct() -> const tkm::msg::monitor::ProcAcct & { return m_acct; }
+  void setUpdateProcInfoInterval(uint64_t interval)
+  {
+    if (interval > 0) {
+      m_updateProcInfoInterval = interval;
+    }
+  }
+  bool updateProcAcct(void);
+  bool updateProcInfo(void);
+
+  auto getAcct(void) -> tkm::msg::monitor::ProcAcct & { return m_acct; }
   void setAcct(tkm::msg::monitor::ProcAcct &acct) { m_acct.CopyFrom(acct); }
-  auto getName() -> std::string & { return m_name; }
-  auto getPid() -> int { return m_pid; }
+
+  auto getInfo(void) -> tkm::msg::monitor::ProcInfo & { return m_info; }
+  void setInfo(tkm::msg::monitor::ProcInfo &info) { m_info.CopyFrom(info); }
+
+  auto getName(void) -> std::string & { return m_name; }
+  auto getPid(void) -> int { return m_pid; }
+  auto getContextId(void) -> uint64_t { return m_info.ctx_id(); }
+
+  bool getUpdateProcAcctPending(void) { return m_updateProcAcctPending; }
+  bool getUpdateProcInfoPending(void) { return m_updateProcInfoPending; }
+  void setUpdateProcAcctPending(bool state) { m_updateProcAcctPending = state; }
+  void setUpdateProcInfoPending(bool state) { m_updateProcInfoPending = state; }
 
 private:
-  std::shared_ptr<Timer> m_timer = nullptr;
+  void initInfoData(void);
+  bool updateInfoData(void);
+
+private:
   tkm::msg::monitor::ProcAcct m_acct;
-  unsigned int m_pollInterval = 0;
+  tkm::msg::monitor::ProcInfo m_info;
+  uint64_t m_updateProcInfoInterval = 1000000;
+  bool m_updateProcAcctPending = false;
+  bool m_updateProcInfoPending = false;
   std::string m_name{};
   int m_pid = 0;
 };

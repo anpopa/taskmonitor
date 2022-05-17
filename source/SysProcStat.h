@@ -22,7 +22,6 @@
 
 #include "../bswinfra/source/AsyncQueue.h"
 #include "../bswinfra/source/SafeList.h"
-#include "../bswinfra/source/Timer.h"
 
 using namespace bswi::event;
 
@@ -88,9 +87,19 @@ public:
   auto getShared() -> std::shared_ptr<SysProcStat> { return shared_from_this(); }
   auto getCPUStat(const std::string &name) -> const std::shared_ptr<CPUStat>;
   auto getCPUStatList() -> bswi::util::SafeList<std::shared_ptr<CPUStat>> & { return m_cpus; }
-  auto getUsecInterval() -> uint64_t { return m_usecInterval; };
   auto pushRequest(SysProcStat::Request &request) -> int;
   void enableEvents();
+
+  auto getUpdateInterval() -> uint64_t { return m_updateInterval; };
+  void setUpdateInterval(uint64_t interval)
+  {
+    if (interval > 0) {
+      m_updateInterval = interval;
+    }
+  }
+  bool update(void);
+  bool getUpdatePending(void) { return m_updatePending; }
+  void setUpdatePending(bool state) { m_updatePending = state; }
 
 private:
   bool requestHandler(const Request &request);
@@ -99,8 +108,8 @@ private:
   bswi::util::SafeList<std::shared_ptr<CPUStat>> m_cpus{"StatCPUList"};
   std::shared_ptr<AsyncQueue<Request>> m_queue = nullptr;
   std::shared_ptr<Options> m_options = nullptr;
-  std::shared_ptr<Timer> m_timer = nullptr;
-  uint64_t m_usecInterval = 0;
+  uint64_t m_updateInterval = 1000000;
+  bool m_updatePending = false;
 };
 
 } // namespace tkm::monitor

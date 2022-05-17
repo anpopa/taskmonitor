@@ -62,18 +62,8 @@ void CPUStat::updateStats(uint64_t newUserJiffies, uint64_t newSystemJiffies)
 SysProcStat::SysProcStat(const std::shared_ptr<Options> options)
 : m_options(options)
 {
-  try {
-    m_usecInterval = std::stol(m_options->getFor(Options::Key::StatPollInterval));
-  } catch (...) {
-    throw std::runtime_error("Fail process StatPollInterval");
-  }
-
   m_queue = std::make_shared<AsyncQueue<Request>>(
       "SysProcStat", [this](const Request &request) { return requestHandler(request); });
-  m_timer = std::make_shared<Timer>("SysProcStatTimer", [this]() {
-    SysProcStat::Request request = {.action = SysProcStat::Action::UpdateStats};
-    return requestHandler(request);
-  });
 }
 
 auto SysProcStat::pushRequest(Request &request) -> int
@@ -83,12 +73,23 @@ auto SysProcStat::pushRequest(Request &request) -> int
 
 void SysProcStat::enableEvents()
 {
-  // Module queue
   App()->addEventSource(m_queue);
+}
 
-  // Update timer
-  m_timer->start(m_usecInterval, true);
-  App()->addEventSource(m_timer);
+bool SysProcStat::update()
+{
+  if (getUpdatePending()) {
+    return true;
+  }
+
+  SysProcStat::Request request = {.action = SysProcStat::Action::UpdateStats};
+  bool status = requestHandler(request);
+
+  if (status) {
+    setUpdatePending(true);
+  }
+
+  return status;
 }
 
 auto SysProcStat::getCPUStat(const std::string &name) -> const std::shared_ptr<CPUStat>
@@ -106,17 +107,22 @@ auto SysProcStat::getCPUStat(const std::string &name) -> const std::shared_ptr<C
 
 auto SysProcStat::requestHandler(const Request &request) -> bool
 {
+  bool status = false;
+
   switch (request.action) {
   case SysProcStat::Action::UpdateStats:
-    return doUpdateStats(getShared(), request);
+    status = doUpdateStats(getShared(), request);
+    setUpdatePending(false);
+    break;
   case SysProcStat::Action::CollectAndSend:
-    return doCollectAndSend(getShared(), request);
+    status = doCollectAndSend(getShared(), request);
+    break;
   default:
+    logError() << "Unknown action request";
     break;
   }
 
-  logError() << "Unknown action request";
-  return false;
+  return status;
 }
 
 static bool doUpdateStats(const std::shared_ptr<SysProcStat> mgr,
@@ -173,7 +179,7 @@ static bool doUpdateStats(const std::shared_ptr<SysProcStat> mgr,
 
     if (!found) {
       std::shared_ptr<CPUStat> entry =
-          std::make_shared<CPUStat>(tokens[statCpuNamePos], mgr->getUsecInterval());
+          std::make_shared<CPUStat>(tokens[statCpuNamePos], mgr->getUpdateInterval());
 
       logInfo() << "Adding new cpu core '" << entry->getName() << "' for statistics";
       mgr->getCPUStatList().append(entry);

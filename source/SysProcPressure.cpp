@@ -97,12 +97,6 @@ void PressureStat::updateStats(void)
 SysProcPressure::SysProcPressure(const std::shared_ptr<Options> options)
 : m_options(options)
 {
-  try {
-    m_usecInterval = std::stol(m_options->getFor(Options::Key::PressurePollInterval));
-  } catch (...) {
-    throw std::runtime_error("Fail process PressurePollInterval");
-  }
-
   if (std::filesystem::exists("/proc/pressure/cpu")) {
     std::shared_ptr<PressureStat> entry = std::make_shared<PressureStat>("cpu");
     m_entries.append(entry);
@@ -119,10 +113,6 @@ SysProcPressure::SysProcPressure(const std::shared_ptr<Options> options)
 
   m_queue = std::make_shared<AsyncQueue<Request>>(
       "SysProcPressureQueue", [this](const Request &request) { return requestHandler(request); });
-  m_timer = std::make_shared<Timer>("SysProcMeminfoTimer", [this]() {
-    SysProcPressure::Request request = {.action = SysProcPressure::Action::UpdateStats};
-    return requestHandler(request);
-  });
 }
 
 auto SysProcPressure::pushRequest(Request &request) -> int
@@ -132,27 +122,43 @@ auto SysProcPressure::pushRequest(Request &request) -> int
 
 void SysProcPressure::enableEvents()
 {
-  // Module queue
   App()->addEventSource(m_queue);
+}
 
-  // Update timer
-  m_timer->start(m_usecInterval, true);
-  App()->addEventSource(m_timer);
+bool SysProcPressure::update()
+{
+  if (getUpdatePending()) {
+    return true;
+  }
+
+  SysProcPressure::Request request = {.action = SysProcPressure::Action::UpdateStats};
+  bool status = requestHandler(request);
+
+  if (status) {
+    setUpdatePending(true);
+  }
+
+  return status;
 }
 
 auto SysProcPressure::requestHandler(const Request &request) -> bool
 {
+  bool status = false;
+
   switch (request.action) {
   case SysProcPressure::Action::UpdateStats:
-    return doUpdateStats(getShared(), request);
+    status = doUpdateStats(getShared(), request);
+    setUpdatePending(false);
+    break;
   case SysProcPressure::Action::CollectAndSend:
-    return doCollectAndSend(getShared(), request);
+    status = doCollectAndSend(getShared(), request);
+    break;
   default:
+    logError() << "Unknown action request";
     break;
   }
 
-  logError() << "Unknown action request";
-  return false;
+  return status;
 }
 
 static bool doUpdateStats(const std::shared_ptr<SysProcPressure> mgr,

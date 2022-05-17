@@ -15,8 +15,14 @@
 #include <filesystem>
 #include <fstream>
 #include <memory>
+#include <sstream>
+#include <stdexcept>
+#include <string>
 #include <sys/socket.h>
 #include <unistd.h>
+#ifdef WITH_LXC
+#include <lxc/lxccontainer.h>
+#endif
 
 #include "Envelope.pb.h"
 
@@ -36,6 +42,10 @@ static inline bool is_base64(unsigned char c)
 {
   return (isalnum(c) || (c == '+') || (c == '/'));
 }
+
+#ifdef WITH_LXC
+static auto getContainerNameForContext(const std::string &contPath, uint64_t ctxId) -> std::string;
+#endif
 
 auto base64Encode(unsigned char const *bytes_to_encode, unsigned int in_len) -> std::string
 {
@@ -208,6 +218,104 @@ bool readCollectorDescriptor(int fd, tkm::msg::collector::Descriptor &descriptor
 
   message.data().UnpackTo(&descriptor);
   return true;
+}
+
+auto readLink(std::string const &path) -> std::string
+{
+  char buff[PATH_MAX];
+  ssize_t len = ::readlink(path.c_str(), buff, sizeof(buff) - 1);
+
+  if (len != -1) {
+    buff[len] = '\0';
+    return std::string(buff);
+  }
+
+  throw std::runtime_error("Failed to readlink for: " + path);
+}
+
+auto getContextId(pid_t pid) -> uint64_t
+{
+  std::stringstream ctxStr;
+
+  for (int i = 0; i < 7; i++) {
+    std::string procPath{};
+
+    switch (i) {
+    case 0: /* cgroup */
+      procPath = "/proc/" + std::to_string(pid) + "/ns/cgroup";
+      break;
+    case 1: /* ipc */
+      procPath = "/proc/" + std::to_string(pid) + "/ns/ipc";
+      break;
+    case 2: /* mnt */
+      procPath = "/proc/" + std::to_string(pid) + "/ns/mnt";
+      break;
+    case 3: /* net */
+      procPath = "/proc/" + std::to_string(pid) + "/ns/net";
+      break;
+    case 4: /* pid */
+      procPath = "/proc/" + std::to_string(pid) + "/ns/pid";
+      break;
+    case 5: /* user */
+      procPath = "/proc/" + std::to_string(pid) + "/ns/user";
+      break;
+    case 6: /* uts */
+      procPath = "/proc/" + std::to_string(pid) + "/ns/uts";
+      break;
+    default: /* never reached */
+      break;
+    }
+
+    ctxStr << readLink(procPath);
+  }
+
+  return jnkHsh(ctxStr.str().c_str());
+}
+
+#ifdef WITH_LXC
+static auto getContainerNameForContext(const std::string &contPath, uint64_t ctxId) -> std::string
+{
+  struct lxc_container **activeContainers = NULL;
+  std::string contName{"unknown"};
+  char **names = NULL;
+  bool found = false;
+
+  auto count = list_active_containers(contPath.c_str(), &names, &activeContainers);
+  for (int i = 0; i < count && !found; i++) {
+    struct lxc_container *container = activeContainers[i];
+    const char *name = names[i];
+
+    if (name == NULL || container == NULL) {
+      continue;
+    }
+
+    if (container->is_running(container)) {
+      auto pid = container->init_pid(container);
+      if (getContextId(pid) == ctxId) {
+        contName = std::string(name);
+      }
+    }
+  }
+
+  for (int i = 0; i < count; i++) {
+    free(names[i]);
+    lxc_container_put(activeContainers[i]);
+  }
+
+  return contName;
+}
+#endif
+
+auto getContextName(const std::string &contPath, uint64_t ctxId) -> std::string
+{
+  if (ctxId == getContextId(1)) {
+    return std::string{"root"};
+  }
+#ifdef WITH_LXC
+  return getContainerNameForContext(contPath, ctxId);
+#else
+  return std::string("unknown");
+#endif
 }
 
 } // namespace tkm

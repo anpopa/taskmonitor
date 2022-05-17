@@ -10,6 +10,10 @@
  */
 
 #include "Application.h"
+#include "ProcEntry.h"
+#include <cstdint>
+#include <memory>
+#include <string>
 #ifdef WITH_SYSTEMD
 #include <systemd/sd-daemon.h>
 #endif
@@ -83,7 +87,66 @@ Application::Application(const string &name, const string &description, const st
   m_dispatcher = std::make_unique<Dispatcher>(m_options);
   m_dispatcher->enableEvents();
 
+  enableUpdateLanes();
   startWatchdog();
+}
+
+void Application::enableUpdateLanes(void)
+{
+  uint64_t fastLaneInterval, paceLaneInterval, slowLaneInterval;
+
+  try {
+    fastLaneInterval = std::stoul(m_options->getFor(Options::Key::FastLaneInterval));
+  } catch (...) {
+    fastLaneInterval = 1000000;
+  }
+
+  try {
+    paceLaneInterval = std::stoul(m_options->getFor(Options::Key::PaceLaneInterval));
+  } catch (...) {
+    paceLaneInterval = 1000000;
+  }
+
+  try {
+    slowLaneInterval = std::stoul(m_options->getFor(Options::Key::SlowLaneInterval));
+  } catch (...) {
+    slowLaneInterval = 1000000;
+  }
+
+  m_fastLaneTimer = std::make_shared<Timer>("FastLaneTimer", [this]() {
+    // ProcInfo
+    m_registry->getProcList().foreach (
+        [](const std::shared_ptr<ProcEntry> &entry) { entry->updateProcInfo(); });
+    // SysProcStat
+    m_sysProcStat->update();
+
+    return true;
+  });
+
+  m_paceLaneTimer = std::make_shared<Timer>("PaceLaneTimer", [this]() {
+    // SysProcMeminfo
+    m_sysProcMeminfo->update();
+    // SysProcPressure
+    m_sysProcPressure->update();
+
+    return true;
+  });
+
+  m_slowLaneTimer = std::make_shared<Timer>("SlowLaneTimer", [this]() {
+    // ProcAcct
+    m_registry->getProcList().foreach (
+        [](const std::shared_ptr<ProcEntry> &entry) { entry->updateProcAcct(); });
+
+    return true;
+  });
+
+  m_fastLaneTimer->start(fastLaneInterval, true);
+  m_paceLaneTimer->start(paceLaneInterval, true);
+  m_slowLaneTimer->start(slowLaneInterval, true);
+
+  addEventSource(m_fastLaneTimer);
+  addEventSource(m_paceLaneTimer);
+  addEventSource(m_slowLaneTimer);
 }
 
 void Application::startWatchdog(void)

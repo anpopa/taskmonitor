@@ -36,6 +36,12 @@ auto Options::getFor(Key key) -> string const
       return prop.value_or(tkmDefaults.getFor(Defaults::Default::RuntimeDirectory));
     }
     return tkmDefaults.getFor(Defaults::Default::RuntimeDirectory);
+  case Key::ContainersPath:
+    if (hasConfigFile()) {
+      const optional<string> prop = m_configFile->getPropertyValue("monitor", -1, "ContainersPath");
+      return prop.value_or(tkmDefaults.getFor(Defaults::Default::ContainersPath));
+    }
+    return tkmDefaults.getFor(Defaults::Default::ContainersPath);
   case Key::RxBufferSize:
     if (hasConfigFile()) {
       const optional<string> prop = m_configFile->getPropertyValue("monitor", -1, "RxBufferSize");
@@ -54,44 +60,66 @@ auto Options::getFor(Key key) -> string const
       return prop.value_or(tkmDefaults.getFor(Defaults::Default::MsgBufferSize));
     }
     return tkmDefaults.getFor(Defaults::Default::MsgBufferSize);
-  case Key::StatPollInterval:
-    if (hasConfigFile()) {
-      const optional<string> prop = m_configFile->getPropertyValue("sysstat", -1, "PollInterval");
-      return prop.value_or(tkmDefaults.getFor(Defaults::Default::StatPollInterval));
-    }
-    return tkmDefaults.getFor(Defaults::Default::StatPollInterval);
-  case Key::MemPollInterval:
-    if (hasConfigFile()) {
-      const optional<string> prop = m_configFile->getPropertyValue("meminfo", -1, "PollInterval");
-      return prop.value_or(tkmDefaults.getFor(Defaults::Default::MemPollInterval));
-    }
-    return tkmDefaults.getFor(Defaults::Default::MemPollInterval);
-  case Key::ProcPollInterval:
-    if (hasConfigFile()) {
-      const optional<string> prop = m_configFile->getPropertyValue("procacct", -1, "PollInterval");
-      return prop.value_or(tkmDefaults.getFor(Defaults::Default::ProcPollInterval));
-    }
-    return tkmDefaults.getFor(Defaults::Default::ProcPollInterval);
-  case Key::ProcEventPollInterval:
-    if (hasConfigFile()) {
-      const optional<string> prop = m_configFile->getPropertyValue("procevent", -1, "PollInterval");
-      return prop.value_or(tkmDefaults.getFor(Defaults::Default::ProcEventPollInterval));
-    }
-    return tkmDefaults.getFor(Defaults::Default::ProcEventPollInterval);
-  case Key::ReadProcAtInit:
+  case Key::FastLaneInterval:
     if (hasConfigFile()) {
       const optional<string> prop =
-          m_configFile->getPropertyValue("prrocacct", -1, "ReadProcAtInit");
+          m_configFile->getPropertyValue("monitor", -1, "FastLaneInterval");
+
+      try {
+        auto interval =
+            std::stoul(prop.value_or(tkmDefaults.getFor(Defaults::Default::FastLaneInterval)));
+        if (interval < 1000000) {
+          return tkmDefaults.getFor(Defaults::Default::FastLaneInterval);
+        }
+      } catch (...) {
+        return tkmDefaults.getFor(Defaults::Default::FastLaneInterval);
+      }
+
+      return prop.value_or(tkmDefaults.getFor(Defaults::Default::FastLaneInterval));
+    }
+    return tkmDefaults.getFor(Defaults::Default::FastLaneInterval);
+  case Key::PaceLaneInterval:
+    if (hasConfigFile()) {
+      const optional<string> prop =
+          m_configFile->getPropertyValue("monitor", -1, "PaceLaneInterval");
+
+      try {
+        auto interval =
+            std::stoul(prop.value_or(tkmDefaults.getFor(Defaults::Default::PaceLaneInterval)));
+        if (interval < 1000000) {
+          return tkmDefaults.getFor(Defaults::Default::PaceLaneInterval);
+        }
+      } catch (...) {
+        return tkmDefaults.getFor(Defaults::Default::PaceLaneInterval);
+      }
+
+      return prop.value_or(tkmDefaults.getFor(Defaults::Default::PaceLaneInterval));
+    }
+    return tkmDefaults.getFor(Defaults::Default::FastLaneInterval);
+  case Key::SlowLaneInterval:
+    if (hasConfigFile()) {
+      const optional<string> prop =
+          m_configFile->getPropertyValue("monitor", -1, "SlowLaneInterval");
+
+      try {
+        auto interval =
+            std::stoul(prop.value_or(tkmDefaults.getFor(Defaults::Default::SlowLaneInterval)));
+        if (interval < 1000000) {
+          return tkmDefaults.getFor(Defaults::Default::SlowLaneInterval);
+        }
+      } catch (...) {
+        return tkmDefaults.getFor(Defaults::Default::SlowLaneInterval);
+      }
+
+      return prop.value_or(tkmDefaults.getFor(Defaults::Default::SlowLaneInterval));
+    }
+    return tkmDefaults.getFor(Defaults::Default::FastLaneInterval);
+  case Key::ReadProcAtInit:
+    if (hasConfigFile()) {
+      const optional<string> prop = m_configFile->getPropertyValue("monitor", -1, "ReadProcAtInit");
       return prop.value_or(tkmDefaults.getFor(Defaults::Default::ReadProcAtInit));
     }
     return tkmDefaults.getFor(Defaults::Default::ReadProcAtInit);
-  case Key::PressurePollInterval:
-    if (hasConfigFile()) {
-      const optional<string> prop =
-          m_configFile->getPropertyValue("presure", -1, "PressurePollInterval");
-      return prop.value_or(tkmDefaults.getFor(Defaults::Default::PressurePollInterval));
-    }
-    return tkmDefaults.getFor(Defaults::Default::PressurePollInterval);
   case Key::EnableTCPServer:
     if (hasConfigFile()) {
       const optional<string> prop =

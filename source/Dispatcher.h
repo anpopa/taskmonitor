@@ -32,10 +32,12 @@ class Dispatcher : public std::enable_shared_from_this<Dispatcher>
 public:
   enum class Action {
     GetProcAcct,
+    GetProcInfo,
     GetProcEventStats,
     GetSysProcMeminfo,
     GetSysProcStat,
-    GetSysProcPressure
+    GetSysProcPressure,
+    GetContextInfo
   };
 
   typedef struct Request {

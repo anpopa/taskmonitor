@@ -12,6 +12,7 @@
 #include "Registry.h"
 #include "Application.h"
 
+#include <cstdint>
 #include <filesystem>
 #include <fstream>
 #include <iostream>
@@ -19,21 +20,22 @@
 #include <streambuf>
 
 #include "../bswinfra/source/KeyFile.h"
+#include "ContextEntry.h"
+#include "Helpers.h"
 
 namespace tkm::monitor
 {
 
-static bool doCollectAndSend(const std::shared_ptr<Registry> mgr, const Registry::Request &rq);
+static bool doCollectAndSendProcAcct(const std::shared_ptr<Registry> mgr,
+                                     const Registry::Request &rq);
+static bool doCollectAndSendProcInfo(const std::shared_ptr<Registry> mgr,
+                                     const Registry::Request &rq);
+static bool doCollectAndSendContextInfo(const std::shared_ptr<Registry> mgr,
+                                        const Registry::Request &rq);
 
 Registry::Registry(const std::shared_ptr<Options> options)
 : m_options(options)
 {
-  try {
-    m_usecPollInterval = std::stol(m_options->getFor(Options::Key::ProcPollInterval));
-  } catch (...) {
-    throw std::runtime_error("Fail process ProcPollInterval");
-  }
-
   m_queue = std::make_shared<AsyncQueue<Request>>(
       "RegistryEventQueue", [this](const Request &request) { return requestHandler(request); });
 }
@@ -55,8 +57,12 @@ void Registry::enableEvents()
 auto Registry::requestHandler(const Request &request) -> bool
 {
   switch (request.action) {
-  case Registry::Action::CollectAndSend:
-    return doCollectAndSend(getShared(), request);
+  case Registry::Action::CollectAndSendProcAcct:
+    return doCollectAndSendProcAcct(getShared(), request);
+  case Registry::Action::CollectAndSendProcInfo:
+    return doCollectAndSendProcInfo(getShared(), request);
+  case Registry::Action::CollectAndSendContextInfo:
+    return doCollectAndSendContextInfo(getShared(), request);
   default:
     break;
   }
@@ -90,23 +96,19 @@ void Registry::initFromProc(void)
       }
 
       if (!isBlacklisted(procName)) {
-        logDebug() << "Add process monitoring for pid=" << pid << " name=" << procName;
-        std::shared_ptr<ProcEntry> entry = std::make_shared<ProcEntry>(pid, procName);
-        entry->startMonitoring(m_usecPollInterval);
-        m_list.append(entry);
+        createProcessEntry(pid, procName);
       }
     }
   }
 
-  // Commit our updated list
-  m_list.commit();
+  m_procList.commit();
 }
 
-auto Registry::getEntry(int pid) -> const std::shared_ptr<ProcEntry>
+auto Registry::getProcEntry(int pid) -> const std::shared_ptr<ProcEntry>
 {
   std::shared_ptr<ProcEntry> retEntry = nullptr;
 
-  m_list.foreach ([this, pid, &retEntry](const std::shared_ptr<ProcEntry> &entry) {
+  m_procList.foreach ([this, pid, &retEntry](const std::shared_ptr<ProcEntry> &entry) {
     if (entry->getPid() == pid) {
       retEntry = entry;
     }
@@ -115,11 +117,11 @@ auto Registry::getEntry(int pid) -> const std::shared_ptr<ProcEntry>
   return retEntry;
 }
 
-auto Registry::getEntry(const std::string &name) -> const std::shared_ptr<ProcEntry>
+auto Registry::getProcEntry(const std::string &name) -> const std::shared_ptr<ProcEntry>
 {
   std::shared_ptr<ProcEntry> retEntry = nullptr;
 
-  m_list.foreach ([this, &name, &retEntry](const std::shared_ptr<ProcEntry> &entry) {
+  m_procList.foreach ([this, &name, &retEntry](const std::shared_ptr<ProcEntry> &entry) {
     if (entry->getName() == name) {
       retEntry = entry;
     }
@@ -128,11 +130,11 @@ auto Registry::getEntry(const std::string &name) -> const std::shared_ptr<ProcEn
   return retEntry;
 }
 
-void Registry::addEntry(int pid)
+void Registry::addProcEntry(int pid)
 {
   auto found = false;
 
-  m_list.foreach ([this, &found, pid](const std::shared_ptr<ProcEntry> &entry) {
+  m_procList.foreach ([this, &found, pid](const std::shared_ptr<ProcEntry> &entry) {
     if (entry->getPid() == pid) {
       found = true;
     }
@@ -149,35 +151,31 @@ void Registry::addEntry(int pid)
     }
 
     if (!isBlacklisted(procName)) {
-      logDebug() << "Add process monitoring for pid=" << pid << " name=" << procName;
-      std::shared_ptr<ProcEntry> entry = std::make_shared<ProcEntry>(pid, procName);
-      entry->startMonitoring(m_usecPollInterval);
-      m_list.append(entry);
-      m_list.commit();
+      createProcessEntry(pid, procName);
     }
   }
 }
 
-void Registry::remEntry(int pid)
+void Registry::remProcEntry(int pid)
 {
-  m_list.foreach ([this, pid](const std::shared_ptr<ProcEntry> &entry) {
+  m_procList.foreach ([this, pid](const std::shared_ptr<ProcEntry> &entry) {
     if (entry->getPid() == pid) {
       logDebug() << "Found entry to remove with pid " << pid;
-      m_list.remove(entry);
+      m_procList.remove(entry);
     }
   });
-  m_list.commit();
+  m_procList.commit();
 }
 
-void Registry::remEntry(std::string &name)
+void Registry::remProcEntry(std::string &name)
 {
-  m_list.foreach ([this, &name](const std::shared_ptr<ProcEntry> &entry) {
+  m_procList.foreach ([this, &name](const std::shared_ptr<ProcEntry> &entry) {
     if (entry->getName() == name) {
       logDebug() << "Found entry to remove with pid " << entry->getPid();
-      m_list.remove(entry);
+      m_procList.remove(entry);
     }
   });
-  m_list.commit();
+  m_procList.commit();
 }
 
 bool Registry::isBlacklisted(const std::string &name)
@@ -225,17 +223,59 @@ auto Registry::getProcNameForPID(int pid) -> std::string
       throw std::runtime_error("Fail to parse /proc/<pid>/status file");
     }
 
-    return tokens[1];
+    std::string name{tokens[1]};
+    for (int i = 2; i < tokens.size(); i++) {
+      name.append(" " + tokens[i]);
+    }
+
+    return name;
   }
 
   logError() << "Failed to parse status file for pid " << pid;
   throw std::runtime_error("Fail to find the process name");
 }
 
-static bool doCollectAndSend(const std::shared_ptr<Registry> mgr, const Registry::Request &rq)
+void Registry::createProcessEntry(int pid, const std::string &name)
 {
+  std::shared_ptr<ProcEntry> procEntry = nullptr;
+  uint64_t interval = 1000000;
 
-  mgr->getRegistryList().foreach ([&rq](const std::shared_ptr<ProcEntry> &entry) {
+  try {
+    procEntry = std::make_shared<ProcEntry>(pid, name);
+    interval = std::stoul(m_options->getFor(Options::Key::FastLaneInterval));
+  } catch (std::exception &e) {
+    logError() << "Cannot create ProcEntry object for pid=" << pid << " name=" << name
+               << ". Reason=" << e.what();
+    return;
+  }
+
+  // ProcInfo is on fast lane
+  procEntry->setUpdateProcInfoInterval(interval);
+
+  logDebug() << "Add process monitoring for pid=" << pid << " name=" << name
+             << " context=" << procEntry->getInfo().ctx_name();
+  m_procList.append(procEntry);
+  m_procList.commit();
+
+  bool found = false;
+  m_contextList.foreach ([&found, &procEntry](const std::shared_ptr<ContextEntry> &ctxEntry) {
+    if (procEntry->getContextId() == ctxEntry->getContextId()) {
+      found = true;
+    }
+  });
+
+  if (!found) {
+    std::shared_ptr<ContextEntry> ctxEntry = std::make_shared<ContextEntry>(
+        procEntry->getInfo().ctx_id(), procEntry->getInfo().ctx_name());
+    m_contextList.append(ctxEntry);
+    m_contextList.commit();
+  }
+}
+
+static bool doCollectAndSendProcAcct(const std::shared_ptr<Registry> mgr,
+                                     const Registry::Request &rq)
+{
+  mgr->getProcList().foreach ([&rq](const std::shared_ptr<ProcEntry> &entry) {
     tkm::msg::monitor::Data data;
 
     data.set_what(tkm::msg::monitor::Data_What_ProcAcct);
@@ -249,6 +289,76 @@ static bool doCollectAndSend(const std::shared_ptr<Registry> mgr, const Registry
     data.mutable_payload()->PackFrom(entry->getAcct());
     rq.collector->sendData(data);
   });
+
+  return true;
+}
+
+static bool doCollectAndSendProcInfo(const std::shared_ptr<Registry> mgr,
+                                     const Registry::Request &rq)
+{
+  mgr->getProcList().foreach ([&rq](const std::shared_ptr<ProcEntry> &entry) {
+    tkm::msg::monitor::Data data;
+
+    data.set_what(tkm::msg::monitor::Data_What_ProcInfo);
+
+    struct timespec currentTime;
+    clock_gettime(CLOCK_REALTIME, &currentTime);
+    data.set_system_time_sec(currentTime.tv_sec);
+    clock_gettime(CLOCK_MONOTONIC, &currentTime);
+    data.set_monotonic_time_sec(currentTime.tv_sec);
+
+    data.mutable_payload()->PackFrom(entry->getInfo());
+    rq.collector->sendData(data);
+  });
+
+  return true;
+}
+
+static bool doCollectAndSendContextInfo(const std::shared_ptr<Registry> mgr,
+                                        const Registry::Request &rq)
+{
+  // Update Context data
+  mgr->getContextList().foreach ([&mgr, &rq](const std::shared_ptr<ContextEntry> &ctxEntry) {
+    // Reset data
+    ctxEntry->resetData();
+
+    bool found = false;
+    mgr->getProcList().foreach ([&mgr, &ctxEntry, &found](
+                                    const std::shared_ptr<ProcEntry> &procEntry) {
+      if (ctxEntry->getContextId() == procEntry->getContextId()) {
+        auto totalCPUTime = ctxEntry->getInfo().total_cpu_time() + procEntry->getInfo().cpu_time();
+        ctxEntry->getInfo().set_total_cpu_time(totalCPUTime);
+        auto totalCPUPercent =
+            ctxEntry->getInfo().total_cpu_percent() + procEntry->getInfo().cpu_percent();
+        ctxEntry->getInfo().set_total_cpu_percent(totalCPUPercent);
+        auto totalMEMrss = ctxEntry->getInfo().total_mem_vmrss() + procEntry->getInfo().mem_vmrss();
+        ctxEntry->getInfo().set_total_mem_vmrss(totalMEMrss);
+        found = true;
+      }
+    });
+
+    // If no process belongs to the context we remove the context
+    if (!found) {
+      mgr->getContextList().remove(ctxEntry);
+    }
+  });
+  mgr->getContextList().commit();
+
+  mgr->getContextList().foreach ([&rq](const std::shared_ptr<ContextEntry> &entry) {
+    tkm::msg::monitor::Data data;
+
+    data.set_what(tkm::msg::monitor::Data_What_ContextInfo);
+
+    struct timespec currentTime;
+    clock_gettime(CLOCK_REALTIME, &currentTime);
+    data.set_system_time_sec(currentTime.tv_sec);
+    clock_gettime(CLOCK_MONOTONIC, &currentTime);
+    data.set_monotonic_time_sec(currentTime.tv_sec);
+
+    data.mutable_payload()->PackFrom(entry->getInfo());
+    rq.collector->sendData(data);
+  });
+
   return true;
 }
 

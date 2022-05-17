@@ -15,6 +15,7 @@
 #include <memory>
 #include <string>
 
+#include "ContextEntry.h"
 #include "ICollector.h"
 #include "Options.h"
 #include "ProcEntry.h"
@@ -30,7 +31,7 @@ namespace tkm::monitor
 class Registry : public std::enable_shared_from_this<Registry>
 {
 public:
-  enum class Action { CollectAndSend };
+  enum class Action { CollectAndSendProcAcct, CollectAndSendProcInfo, CollectAndSendContextInfo };
   typedef struct Request {
     Action action;
     std::shared_ptr<ICollector> collector;
@@ -48,14 +49,18 @@ public:
   auto getShared() -> std::shared_ptr<Registry> { return shared_from_this(); }
   void initFromProc(void);
 
-  void addEntry(int pid);
-  void remEntry(int pid);
-  void remEntry(std::string &name);
-  auto getEntry(int pid) -> const std::shared_ptr<ProcEntry>;
-  auto getEntry(const std::string &name) -> const std::shared_ptr<ProcEntry>;
-  auto getRegistryList(void) -> bswi::util::SafeList<std::shared_ptr<ProcEntry>> &
+  void addProcEntry(int pid);
+  void remProcEntry(int pid);
+  void remProcEntry(std::string &name);
+  auto getProcEntry(int pid) -> const std::shared_ptr<ProcEntry>;
+  auto getProcEntry(const std::string &name) -> const std::shared_ptr<ProcEntry>;
+  auto getProcList(void) -> bswi::util::SafeList<std::shared_ptr<ProcEntry>> &
   {
-    return m_list;
+    return m_procList;
+  }
+  auto getContextList(void) -> bswi::util::SafeList<std::shared_ptr<ContextEntry>> &
+  {
+    return m_contextList;
   }
 
   auto pushRequest(Registry::Request &request) -> int;
@@ -65,12 +70,13 @@ private:
   bool requestHandler(const Request &request);
   auto getProcNameForPID(int pid) -> std::string;
   bool isBlacklisted(const std::string &name);
+  void createProcessEntry(int pid, const std::string &name);
 
 private:
-  bswi::util::SafeList<std::shared_ptr<ProcEntry>> m_list{"RegistryList"};
+  bswi::util::SafeList<std::shared_ptr<ContextEntry>> m_contextList{"RegistryContextList"};
+  bswi::util::SafeList<std::shared_ptr<ProcEntry>> m_procList{"RegistryProcList"};
   std::shared_ptr<AsyncQueue<Request>> m_queue = nullptr;
   std::shared_ptr<Options> m_options = nullptr;
-  unsigned int m_usecPollInterval = 0;
 };
 
 } // namespace tkm::monitor

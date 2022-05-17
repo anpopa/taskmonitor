@@ -14,6 +14,7 @@ set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" "${BSWINFRA_DIR}/cmake
 
 message (STATUS "Module paths: ${CMAKE_MODULE_PATH}")
 
+option(WITH_LXC "Build with LXC container support" N)
 option(WITH_SYSTEMD "Build with systemd watchdog and journald support" Y)
 option(WITH_INSTALL_CONFIG "Install default taskmonitor.conf on target" Y)
 option(WITH_INSTALL_LICENSE "Install license file on target" Y)
@@ -104,6 +105,13 @@ pkg_check_modules     (LIBNLGENL libnl-genl-3.0 REQUIRED)
 include_directories   (${LIBNLGENL_INCLUDE_DIRS})
 set                   (LIBS ${LIBS} ${LIBNLGENL_LIBRARIES})
 
+if(WITH_LXC)
+    pkg_check_modules     (LIBLXC lxc>=3.0 REQUIRED)
+    include_directories   (${LIBLXC_INCLUDE_DIRS})
+    set                   (LIBS ${LIBS} ${LIBLXC_LIBRARIES})
+	add_compile_options   ("-DWITH_LXC")
+endif()
+
 if(WITH_SYSTEMD)
     pkg_check_modules     (LIBSYSTEMD libsystemd REQUIRED)
     include_directories   (${LIBSYSTEMD_INCLUDE_DIRS})
@@ -158,6 +166,7 @@ endif()
 
 # Status reporting
 message (STATUS "CMAKE_BUILD_TYPE: "     ${CMAKE_BUILD_TYPE})
+message (STATUS "WITH_LXC: "             ${WITH_LXC})
 message (STATUS "WITH_SYSTEMD: "         ${WITH_SYSTEMD})
 message (STATUS "WITH_INSTALL_CONFIG: "  ${WITH_INSTALL_CONFIG})
 message (STATUS "WITH_INSTALL_LICENSE: " ${WITH_INSTALL_LICENSE})

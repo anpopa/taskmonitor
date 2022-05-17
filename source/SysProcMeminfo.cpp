@@ -31,18 +31,8 @@ static bool doCollectAndSend(const std::shared_ptr<SysProcMeminfo> mgr,
 SysProcMeminfo::SysProcMeminfo(const std::shared_ptr<Options> options)
 : m_options(options)
 {
-  try {
-    m_usecInterval = std::stol(m_options->getFor(Options::Key::MemPollInterval));
-  } catch (...) {
-    throw std::runtime_error("Fail process MemPollInterval");
-  }
-
   m_queue = std::make_shared<AsyncQueue<Request>>(
       "SysProcMeminfoQueue", [this](const Request &request) { return requestHandler(request); });
-  m_timer = std::make_shared<Timer>("SysProcMeminfoTimer", [this]() {
-    SysProcMeminfo::Request request = {.action = SysProcMeminfo::Action::UpdateStats};
-    return requestHandler(request);
-  });
 }
 
 auto SysProcMeminfo::pushRequest(Request &request) -> int
@@ -52,26 +42,42 @@ auto SysProcMeminfo::pushRequest(Request &request) -> int
 
 void SysProcMeminfo::enableEvents()
 {
-  // Module queue
   App()->addEventSource(m_queue);
+}
 
-  // Update timer
-  m_timer->start(m_usecInterval, true);
-  App()->addEventSource(m_timer);
+bool SysProcMeminfo::update()
+{
+  if (getUpdatePending()) {
+    return true;
+  }
+
+  SysProcMeminfo::Request request = {.action = SysProcMeminfo::Action::UpdateStats};
+  bool status = requestHandler(request);
+
+  if (status) {
+    setUpdatePending(true);
+  }
+
+  return status;
 }
 
 auto SysProcMeminfo::requestHandler(const Request &request) -> bool
 {
+  bool status = false;
+
   switch (request.action) {
   case SysProcMeminfo::Action::UpdateStats:
-    return doUpdateStats(getShared(), request);
+    status = doUpdateStats(getShared(), request);
+    setUpdatePending(false);
+    break;
   case SysProcMeminfo::Action::CollectAndSend:
-    return doCollectAndSend(getShared(), request);
+    status = doCollectAndSend(getShared(), request);
+    break;
   default:
+    logError() << "Unknown action request";
     break;
   }
 
-  logError() << "Unknown action request";
   return false;
 }
 

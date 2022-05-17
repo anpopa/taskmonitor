@@ -9,6 +9,7 @@ set(BINARY_SRC
     ProcEvent.cpp
     Application.cpp
     ProcEntry.cpp
+    ContextEntry.cpp
     Registry.cpp
     TCPCollector.cpp
     TCPServer.cpp

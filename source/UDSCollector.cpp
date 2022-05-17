@@ -98,6 +98,7 @@ UDSCollector::UDSCollector(int fd)
       bswi::event::IPollable::Events::Level,
       bswi::event::IEventSource::Priority::Normal);
 
+  // For UDSCollector we don't sent ProcAcct so we skip incProcAcctCollectorCounter()
   setFinalize([this]() { logInfo() << "Ended connection with collector: " << getFD(); });
 }
 
@@ -137,13 +138,19 @@ static bool doCreateSession(const std::shared_ptr<UDSCollector> collector,
   sessionInfo.set_lifecycle_id("na");
   try {
     sessionInfo.set_proc_acct_poll_interval(
-        std::stol(App()->getOptions()->getFor(Options::Key::ProcPollInterval)));
+        std::stol(App()->getOptions()->getFor(Options::Key::SlowLaneInterval)));
+    sessionInfo.set_proc_info_poll_interval(
+        std::stol(App()->getOptions()->getFor(Options::Key::FastLaneInterval)));
+    sessionInfo.set_proc_event_poll_interval(
+        std::stol(App()->getOptions()->getFor(Options::Key::PaceLaneInterval)));
     sessionInfo.set_sys_proc_stat_poll_interval(
-        std::stol(App()->getOptions()->getFor(Options::Key::StatPollInterval)));
+        std::stol(App()->getOptions()->getFor(Options::Key::FastLaneInterval)));
     sessionInfo.set_sys_proc_meminfo_poll_interval(
-        std::stol(App()->getOptions()->getFor(Options::Key::MemPollInterval)));
+        std::stol(App()->getOptions()->getFor(Options::Key::PaceLaneInterval)));
     sessionInfo.set_sys_proc_pressure_poll_interval(
-        std::stol(App()->getOptions()->getFor(Options::Key::PressurePollInterval)));
+        std::stol(App()->getOptions()->getFor(Options::Key::PaceLaneInterval)));
+    sessionInfo.set_context_information_poll_interval(
+        std::stol(App()->getOptions()->getFor(Options::Key::PaceLaneInterval)));
   } catch (...) {
     throw std::runtime_error("Fail to process session poll interval data");
   }
