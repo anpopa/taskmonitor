@@ -70,6 +70,7 @@ TCPCollector::TCPCollector(int fd)
           tkm::msg::collector::Request collectorMessage;
           envelope.mesg().UnpackTo(&collectorMessage);
 
+          status = true;
           switch (collectorMessage.type()) {
           case tkm::msg::collector::Request_Type_CreateSession:
             status = doCreateSession(getShared(), collectorMessage);
@@ -85,6 +86,7 @@ TCPCollector::TCPCollector(int fd)
             break;
           case tkm::msg::collector::Request_Type_GetSysProcMeminfo:
             status = doGetSysProcMeminfo(getShared(), collectorMessage);
+            status = true;
             break;
           case tkm::msg::collector::Request_Type_GetSysProcStat:
             status = doGetSysProcStat(getShared(), collectorMessage);
@@ -96,10 +98,10 @@ TCPCollector::TCPCollector(int fd)
             status = doGetContextInfo(getShared(), collectorMessage);
             break;
           default:
+            logDebug() << "Unknown type " << collectorMessage.type();
             status = false;
             break;
           }
-
         } while (status);
 
         return status;

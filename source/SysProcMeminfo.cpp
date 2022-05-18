@@ -52,7 +52,7 @@ bool SysProcMeminfo::update()
   }
 
   SysProcMeminfo::Request request = {.action = SysProcMeminfo::Action::UpdateStats};
-  bool status = requestHandler(request);
+  bool status = pushRequest(request);
 
   if (status) {
     setUpdatePending(true);
@@ -78,7 +78,7 @@ auto SysProcMeminfo::requestHandler(const Request &request) -> bool
     break;
   }
 
-  return false;
+  return status;
 }
 
 static bool doUpdateStats(const std::shared_ptr<SysProcMeminfo> mgr,

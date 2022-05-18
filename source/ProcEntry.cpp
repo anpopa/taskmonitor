@@ -96,8 +96,7 @@ void ProcEntry::initInfoData(void)
     m_info.set_ppid(static_cast<uint32_t>(std::stoul(tokens[3 + afterNameOffset])));
 
     auto cpuTime =
-        std::stoul(tokens[13 + afterNameOffset]) + std::stoul(tokens[14 + afterNameOffset]) +
-        std::stoul(tokens[15 + afterNameOffset]) + std::stoul(tokens[16 + afterNameOffset]);
+        std::stoul(tokens[13 + afterNameOffset]) + std::stoul(tokens[14 + afterNameOffset]);
     m_info.set_cpu_time(cpuTime);
   }
 
@@ -134,12 +133,13 @@ bool ProcEntry::updateInfoData(void)
     auto afterNameOffset = tokens.size() - 52;
     uint64_t oldCPUTime = m_info.cpu_time();
     uint64_t newCPUTime =
-        std::stoul(tokens[13 + afterNameOffset]) + std::stoul(tokens[14 + afterNameOffset]) +
-        std::stoul(tokens[15 + afterNameOffset]) + std::stoul(tokens[16 + afterNameOffset]);
+        std::stoul(tokens[13 + afterNameOffset]) + std::stoul(tokens[14 + afterNameOffset]);
 
     m_info.set_cpu_time(newCPUTime);
-    m_info.set_cpu_percent(((newCPUTime - oldCPUTime) * 100) / m_updateProcInfoInterval);
-    m_info.set_mem_vmrss(std::stoul(tokens[23]) * ::sysconf(_SC_PAGE_SIZE));
+
+    // Our intervals are in nanoseconds so we muliply by ns in s
+    m_info.set_cpu_percent(((newCPUTime - oldCPUTime) * 1000000) / m_updateProcInfoInterval);
+    m_info.set_mem_vmrss(std::stoul(tokens[23]) * ::sysconf(_SC_PAGESIZE) / 1024);
   }
 
   return true;

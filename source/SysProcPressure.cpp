@@ -132,7 +132,7 @@ bool SysProcPressure::update()
   }
 
   SysProcPressure::Request request = {.action = SysProcPressure::Action::UpdateStats};
-  bool status = requestHandler(request);
+  bool status = pushRequest(request);
 
   if (status) {
     setUpdatePending(true);

@@ -10,6 +10,7 @@
  */
 
 #include "Helpers.h"
+#include "Logger.h"
 
 #include <cstring>
 #include <filesystem>
@@ -222,22 +223,21 @@ bool readCollectorDescriptor(int fd, tkm::msg::collector::Descriptor &descriptor
 
 auto readLink(std::string const &path) -> std::string
 {
-  char buff[PATH_MAX];
+  char buff[PATH_MAX] = {0};
   ssize_t len = ::readlink(path.c_str(), buff, sizeof(buff) - 1);
 
-  if (len != -1) {
-    buff[len] = '\0';
+  if (len > 0) {
     return std::string(buff);
   }
 
-  throw std::runtime_error("Failed to readlink for: " + path);
+  return std::string("NA");
 }
 
 auto getContextId(pid_t pid) -> uint64_t
 {
   std::stringstream ctxStr;
 
-  for (int i = 0; i < 7; i++) {
+  for (int i = 0; i < 10; i++) {
     std::string procPath{};
 
     switch (i) {
@@ -256,17 +256,32 @@ auto getContextId(pid_t pid) -> uint64_t
     case 4: /* pid */
       procPath = "/proc/" + std::to_string(pid) + "/ns/pid";
       break;
-    case 5: /* user */
+    case 5: /* pid_for_children */
+      procPath = "/proc/" + std::to_string(pid) + "/ns/pid_for_children";
+      break;
+    case 6: /* time */
+      procPath = "/proc/" + std::to_string(pid) + "/ns/time";
+      break;
+    case 7: /* time_for_children */
+      procPath = "/proc/" + std::to_string(pid) + "/ns/time_for_children";
+      break;
+    case 8: /* user */
       procPath = "/proc/" + std::to_string(pid) + "/ns/user";
       break;
-    case 6: /* uts */
+    case 9: /* uts */
       procPath = "/proc/" + std::to_string(pid) + "/ns/uts";
       break;
     default: /* never reached */
       break;
     }
 
-    ctxStr << readLink(procPath);
+    if (std::filesystem::exists(procPath)) {
+      ctxStr << readLink(procPath);
+    }
+  }
+
+  if (ctxStr.str().length() == 0) {
+    logDebug() << "Invalid ctxStr";
   }
 
   return jnkHsh(ctxStr.str().c_str());
