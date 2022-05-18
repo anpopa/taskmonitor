@@ -34,7 +34,7 @@ public:
     GetProcAcct,
     GetProcInfo,
     GetProcEventStats,
-    GetSysProcMeminfo,
+    GetSysProcMemInfo,
     GetSysProcStat,
     GetSysProcPressure,
     GetContextInfo

@@ -16,8 +16,9 @@ set(BINARY_SRC
     UDSCollector.cpp
     UDSServer.cpp
     SysProcStat.cpp
-    SysProcMeminfo.cpp
+    SysProcMemInfo.cpp
     SysProcPressure.cpp
+    SysProcDiskStats.cpp
     Main.cpp
     )
 add_executable(${BINARY_NAME} ${BINARY_SRC})

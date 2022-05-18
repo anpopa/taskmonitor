@@ -78,11 +78,14 @@ Application::Application(const string &name, const string &description, const st
   m_sysProcStat = std::make_shared<SysProcStat>(m_options);
   m_sysProcStat->enableEvents();
 
-  m_sysProcMeminfo = std::make_shared<SysProcMeminfo>(m_options);
-  m_sysProcMeminfo->enableEvents();
+  m_sysProcMemInfo = std::make_shared<SysProcMemInfo>(m_options);
+  m_sysProcMemInfo->enableEvents();
 
   m_sysProcPressure = std::make_shared<SysProcPressure>(m_options);
   m_sysProcPressure->enableEvents();
+
+  m_sysProcDiskStats = std::make_shared<SysProcDiskStats>(m_options);
+  m_sysProcDiskStats->enableEvents();
 
   m_dispatcher = std::make_unique<Dispatcher>(m_options);
   m_dispatcher->enableEvents();
@@ -124,8 +127,8 @@ void Application::enableUpdateLanes(void)
   });
 
   m_paceLaneTimer = std::make_shared<Timer>("PaceLaneTimer", [this]() {
-    // SysProcMeminfo
-    m_sysProcMeminfo->update();
+    // SysProcMemInfo
+    m_sysProcMemInfo->update();
     // SysProcPressure
     m_sysProcPressure->update();
 
@@ -136,6 +139,8 @@ void Application::enableUpdateLanes(void)
     // ProcAcct
     m_registry->getProcList().foreach (
         [](const std::shared_ptr<ProcEntry> &entry) { entry->updateProcAcct(); });
+    // SysProcDiskStats
+    m_sysProcDiskStats->update();
 
     return true;
   });

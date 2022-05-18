@@ -30,7 +30,7 @@ static bool doGetProcInfo(const std::shared_ptr<TCPCollector> collector,
                           const tkm::msg::collector::Request &rq);
 static bool doGetProcEventStats(const std::shared_ptr<TCPCollector> collector,
                                 const tkm::msg::collector::Request &rq);
-static bool doGetSysProcMeminfo(const std::shared_ptr<TCPCollector> collector,
+static bool doGetSysProcMemInfo(const std::shared_ptr<TCPCollector> collector,
                                 const tkm::msg::collector::Request &rq);
 static bool doGetSysProcStat(const std::shared_ptr<TCPCollector> collector,
                              const tkm::msg::collector::Request &rq);
@@ -84,8 +84,8 @@ TCPCollector::TCPCollector(int fd)
           case tkm::msg::collector::Request_Type_GetProcEventStats:
             status = doGetProcEventStats(getShared(), collectorMessage);
             break;
-          case tkm::msg::collector::Request_Type_GetSysProcMeminfo:
-            status = doGetSysProcMeminfo(getShared(), collectorMessage);
+          case tkm::msg::collector::Request_Type_GetSysProcMemInfo:
+            status = doGetSysProcMemInfo(getShared(), collectorMessage);
             status = true;
             break;
           case tkm::msg::collector::Request_Type_GetSysProcStat:
@@ -162,6 +162,8 @@ static bool doCreateSession(const std::shared_ptr<TCPCollector> collector,
         std::stol(App()->getOptions()->getFor(Options::Key::FastLaneInterval)));
     sessionInfo.set_sys_proc_meminfo_poll_interval(
         std::stol(App()->getOptions()->getFor(Options::Key::PaceLaneInterval)));
+    sessionInfo.set_sys_proc_diskstats_poll_interval(
+        std::stol(App()->getOptions()->getFor(Options::Key::SlowLaneInterval)));
     sessionInfo.set_sys_proc_pressure_poll_interval(
         std::stol(App()->getOptions()->getFor(Options::Key::PaceLaneInterval)));
     sessionInfo.set_context_information_poll_interval(
@@ -204,10 +206,10 @@ static bool doGetProcEventStats(const std::shared_ptr<TCPCollector> collector,
   return App()->getDispatcher()->pushRequest(req);
 }
 
-static bool doGetSysProcMeminfo(const std::shared_ptr<TCPCollector> collector,
+static bool doGetSysProcMemInfo(const std::shared_ptr<TCPCollector> collector,
                                 const tkm::msg::collector::Request &rq)
 {
-  Dispatcher::Request req = {.action = Dispatcher::Action::GetSysProcMeminfo,
+  Dispatcher::Request req = {.action = Dispatcher::Action::GetSysProcMemInfo,
                              .collector = collector};
   return App()->getDispatcher()->pushRequest(req);
 }

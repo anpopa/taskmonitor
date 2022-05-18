@@ -1,0 +1,72 @@
+/*-
+ * SPDX-License-Identifier: MIT
+ *-
+ * @date      2021-2022
+ * @author    Alin Popa <alin.popa@fxdata.ro>
+ * @copyright MIT
+ * @brief     SysProcMemInfo Class
+ * @details   Collect and report information from /proc/meminfo
+ *-
+ */
+
+#pragma once
+
+#include <memory>
+#include <time.h>
+#include <unistd.h>
+
+#include "ICollector.h"
+#include "Monitor.pb.h"
+#include "Options.h"
+
+#include "../bswinfra/source/AsyncQueue.h"
+
+using namespace bswi::event;
+
+namespace tkm::monitor
+{
+class SysProcMemInfo : public std::enable_shared_from_this<SysProcMemInfo>
+{
+public:
+  enum class Action { UpdateStats, CollectAndSend };
+  typedef struct Request {
+    Action action;
+    std::shared_ptr<ICollector> collector;
+  } Request;
+
+public:
+  explicit SysProcMemInfo(const std::shared_ptr<Options> options);
+  ~SysProcMemInfo() = default;
+
+public:
+  SysProcMemInfo(SysProcMemInfo const &) = delete;
+  void operator=(SysProcMemInfo const &) = delete;
+
+public:
+  auto getShared() -> std::shared_ptr<SysProcMemInfo> { return shared_from_this(); }
+  auto getProcMemInfo() -> tkm::msg::monitor::SysProcMemInfo & { return m_memInfo; }
+  auto pushRequest(SysProcMemInfo::Request &request) -> int;
+  void enableEvents();
+
+  void setUpdateInterval(uint64_t interval)
+  {
+    if (interval > 0) {
+      m_updateInterval = interval;
+    }
+  }
+  bool update(void);
+  bool getUpdatePending(void) { return m_updatePending; }
+  void setUpdatePending(bool state) { m_updatePending = state; }
+
+private:
+  bool requestHandler(const Request &request);
+
+private:
+  std::shared_ptr<AsyncQueue<Request>> m_queue = nullptr;
+  std::shared_ptr<Options> m_options = nullptr;
+  tkm::msg::monitor::SysProcMemInfo m_memInfo;
+  uint64_t m_updateInterval = 1000000;
+  bool m_updatePending = false;
+};
+
+} // namespace tkm::monitor

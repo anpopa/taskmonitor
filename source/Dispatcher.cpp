@@ -18,7 +18,7 @@
 #include "ProcEntry.h"
 
 #include "Registry.h"
-#include "SysProcMeminfo.h"
+#include "SysProcMemInfo.h"
 #include "SysProcPressure.h"
 #include "SysProcStat.h"
 
@@ -31,7 +31,7 @@ namespace tkm::monitor
 static bool doGetProcAcct(const shared_ptr<Dispatcher> disp, const Dispatcher::Request &rq);
 static bool doGetProcInfo(const shared_ptr<Dispatcher> disp, const Dispatcher::Request &rq);
 static bool doGetProcEventStats(const shared_ptr<Dispatcher> disp, const Dispatcher::Request &rq);
-static bool doGetSysProcMeminfo(const shared_ptr<Dispatcher> disp, const Dispatcher::Request &rq);
+static bool doGetSysProcMemInfo(const shared_ptr<Dispatcher> disp, const Dispatcher::Request &rq);
 static bool doGetSysProcStat(const shared_ptr<Dispatcher> disp, const Dispatcher::Request &rq);
 static bool doGetSysProcPsi(const shared_ptr<Dispatcher> disp, const Dispatcher::Request &rq);
 static bool doGetContextInfo(const shared_ptr<Dispatcher> disp, const Dispatcher::Request &rq);
@@ -62,8 +62,8 @@ auto Dispatcher::requestHandler(const Request &request) -> bool
     return doGetProcInfo(getShared(), request);
   case Dispatcher::Action::GetProcEventStats:
     return doGetProcEventStats(getShared(), request);
-  case Dispatcher::Action::GetSysProcMeminfo:
-    return doGetSysProcMeminfo(getShared(), request);
+  case Dispatcher::Action::GetSysProcMemInfo:
+    return doGetSysProcMemInfo(getShared(), request);
   case Dispatcher::Action::GetSysProcStat:
     return doGetSysProcStat(getShared(), request);
   case Dispatcher::Action::GetSysProcPressure:
@@ -106,11 +106,11 @@ static bool doGetProcEventStats(const shared_ptr<Dispatcher> disp, const Dispatc
   return App()->getProcEvent()->pushRequest(regrq);
 }
 
-static bool doGetSysProcMeminfo(const shared_ptr<Dispatcher> disp, const Dispatcher::Request &rq)
+static bool doGetSysProcMemInfo(const shared_ptr<Dispatcher> disp, const Dispatcher::Request &rq)
 {
-  SysProcMeminfo::Request regrq = {.action = SysProcMeminfo::Action::CollectAndSend,
+  SysProcMemInfo::Request regrq = {.action = SysProcMemInfo::Action::CollectAndSend,
                                    .collector = rq.collector};
-  return App()->getSysProcMeminfo()->pushRequest(regrq);
+  return App()->getSysProcMemInfo()->pushRequest(regrq);
 }
 
 static bool doGetSysProcStat(const shared_ptr<Dispatcher> disp, const Dispatcher::Request &rq)

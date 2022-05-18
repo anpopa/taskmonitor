@@ -4,12 +4,12 @@
  * @date      2021-2022
  * @author    Alin Popa <alin.popa@fxdata.ro>
  * @copyright MIT
- * @brief     SysProcMeminfos Class
+ * @brief     SysProcMemInfo Class
  * @details   Collect and report information from /proc/meminfo
  *-
  */
 
-#include "SysProcMeminfo.h"
+#include "SysProcMemInfo.h"
 #include "Application.h"
 #include "Monitor.pb.h"
 
@@ -23,35 +23,35 @@
 namespace tkm::monitor
 {
 
-static bool doUpdateStats(const std::shared_ptr<SysProcMeminfo> mgr,
-                          const SysProcMeminfo::Request &request);
-static bool doCollectAndSend(const std::shared_ptr<SysProcMeminfo> mgr,
-                             const SysProcMeminfo::Request &request);
+static bool doUpdateStats(const std::shared_ptr<SysProcMemInfo> mgr,
+                          const SysProcMemInfo::Request &request);
+static bool doCollectAndSend(const std::shared_ptr<SysProcMemInfo> mgr,
+                             const SysProcMemInfo::Request &request);
 
-SysProcMeminfo::SysProcMeminfo(const std::shared_ptr<Options> options)
+SysProcMemInfo::SysProcMemInfo(const std::shared_ptr<Options> options)
 : m_options(options)
 {
   m_queue = std::make_shared<AsyncQueue<Request>>(
-      "SysProcMeminfoQueue", [this](const Request &request) { return requestHandler(request); });
+      "SysProcMemInfoQueue", [this](const Request &request) { return requestHandler(request); });
 }
 
-auto SysProcMeminfo::pushRequest(Request &request) -> int
+auto SysProcMemInfo::pushRequest(Request &request) -> int
 {
   return m_queue->push(request);
 }
 
-void SysProcMeminfo::enableEvents()
+void SysProcMemInfo::enableEvents()
 {
   App()->addEventSource(m_queue);
 }
 
-bool SysProcMeminfo::update()
+bool SysProcMemInfo::update()
 {
   if (getUpdatePending()) {
     return true;
   }
 
-  SysProcMeminfo::Request request = {.action = SysProcMeminfo::Action::UpdateStats};
+  SysProcMemInfo::Request request = {.action = SysProcMemInfo::Action::UpdateStats};
   bool status = pushRequest(request);
 
   if (status) {
@@ -61,16 +61,16 @@ bool SysProcMeminfo::update()
   return status;
 }
 
-auto SysProcMeminfo::requestHandler(const Request &request) -> bool
+auto SysProcMemInfo::requestHandler(const Request &request) -> bool
 {
   bool status = false;
 
   switch (request.action) {
-  case SysProcMeminfo::Action::UpdateStats:
+  case SysProcMemInfo::Action::UpdateStats:
     status = doUpdateStats(getShared(), request);
     setUpdatePending(false);
     break;
-  case SysProcMeminfo::Action::CollectAndSend:
+  case SysProcMemInfo::Action::CollectAndSend:
     status = doCollectAndSend(getShared(), request);
     break;
   default:
@@ -81,8 +81,8 @@ auto SysProcMeminfo::requestHandler(const Request &request) -> bool
   return status;
 }
 
-static bool doUpdateStats(const std::shared_ptr<SysProcMeminfo> mgr,
-                          const SysProcMeminfo::Request &request)
+static bool doUpdateStats(const std::shared_ptr<SysProcMemInfo> mgr,
+                          const SysProcMemInfo::Request &request)
 {
   std::ifstream memInfoStream{"/proc/meminfo"};
 
@@ -177,12 +177,12 @@ static bool doUpdateStats(const std::shared_ptr<SysProcMeminfo> mgr,
   return true;
 }
 
-static bool doCollectAndSend(const std::shared_ptr<SysProcMeminfo> mgr,
-                             const SysProcMeminfo::Request &request)
+static bool doCollectAndSend(const std::shared_ptr<SysProcMemInfo> mgr,
+                             const SysProcMemInfo::Request &request)
 {
   tkm::msg::monitor::Data data;
 
-  data.set_what(tkm::msg::monitor::Data_What_SysProcMeminfo);
+  data.set_what(tkm::msg::monitor::Data_What_SysProcMemInfo);
 
   struct timespec currentTime;
   clock_gettime(CLOCK_REALTIME, &currentTime);

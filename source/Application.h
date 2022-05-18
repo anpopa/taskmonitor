@@ -21,7 +21,8 @@
 #include "ProcAcct.h"
 #include "ProcEvent.h"
 #include "Registry.h"
-#include "SysProcMeminfo.h"
+#include "SysProcDiskStats.h"
+#include "SysProcMemInfo.h"
 #include "SysProcPressure.h"
 #include "SysProcStat.h"
 #include "TCPServer.h"
@@ -65,7 +66,11 @@ public:
   auto getProcAcct(void) -> const std::shared_ptr<ProcAcct> { return m_procAcct; }
   auto getProcEvent(void) -> const std::shared_ptr<ProcEvent> { return m_procEvent; }
   auto getSysProcStat(void) -> const std::shared_ptr<SysProcStat> { return m_sysProcStat; }
-  auto getSysProcMeminfo(void) -> const std::shared_ptr<SysProcMeminfo> { return m_sysProcMeminfo; }
+  auto getSysProcMemInfo(void) -> const std::shared_ptr<SysProcMemInfo> { return m_sysProcMemInfo; }
+  auto getSysProcDiskStats(void) -> const std::shared_ptr<SysProcDiskStats>
+  {
+    return m_sysProcDiskStats;
+  }
   auto getSysProcPressure(void) -> const std::shared_ptr<SysProcPressure>
   {
     return m_sysProcPressure;
@@ -97,7 +102,8 @@ private:
   std::shared_ptr<Dispatcher> m_dispatcher = nullptr;
   std::shared_ptr<Registry> m_registry = nullptr;
   std::shared_ptr<SysProcStat> m_sysProcStat = nullptr;
-  std::shared_ptr<SysProcMeminfo> m_sysProcMeminfo = nullptr;
+  std::shared_ptr<SysProcMemInfo> m_sysProcMemInfo = nullptr;
+  std::shared_ptr<SysProcDiskStats> m_sysProcDiskStats = nullptr;
   std::shared_ptr<SysProcPressure> m_sysProcPressure = nullptr;
   std::atomic<unsigned short> m_procAcctCollectorCounter = 0;
 

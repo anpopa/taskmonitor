@@ -4,8 +4,8 @@
  * @date      2021-2022
  * @author    Alin Popa <alin.popa@fxdata.ro>
  * @copyright MIT
- * @brief     SysProcMeminfo Class
- * @details   Collect and report information from /proc/meminfo
+ * @brief     SysProcDiskStats Class
+ * @details   Collect and report information from /proc/diskstats
  *-
  */
 
@@ -25,7 +25,7 @@ using namespace bswi::event;
 
 namespace tkm::monitor
 {
-class SysProcMeminfo : public std::enable_shared_from_this<SysProcMeminfo>
+class SysProcDiskStats : public std::enable_shared_from_this<SysProcDiskStats>
 {
 public:
   enum class Action { UpdateStats, CollectAndSend };
@@ -35,17 +35,17 @@ public:
   } Request;
 
 public:
-  explicit SysProcMeminfo(const std::shared_ptr<Options> options);
-  ~SysProcMeminfo() = default;
+  explicit SysProcDiskStats(const std::shared_ptr<Options> options);
+  ~SysProcDiskStats() = default;
 
 public:
-  SysProcMeminfo(SysProcMeminfo const &) = delete;
-  void operator=(SysProcMeminfo const &) = delete;
+  SysProcDiskStats(SysProcDiskStats const &) = delete;
+  void operator=(SysProcDiskStats const &) = delete;
 
 public:
-  auto getShared() -> std::shared_ptr<SysProcMeminfo> { return shared_from_this(); }
-  auto getProcMemInfo() -> tkm::msg::monitor::SysProcMeminfo & { return m_memInfo; }
-  auto pushRequest(SysProcMeminfo::Request &request) -> int;
+  auto getShared() -> std::shared_ptr<SysProcDiskStats> { return shared_from_this(); }
+  auto getProcDiskStats() -> tkm::msg::monitor::SysProcDiskStats & { return m_diskStats; }
+  auto pushRequest(SysProcDiskStats::Request &request) -> int;
   void enableEvents();
 
   void setUpdateInterval(uint64_t interval)
@@ -64,7 +64,7 @@ private:
 private:
   std::shared_ptr<AsyncQueue<Request>> m_queue = nullptr;
   std::shared_ptr<Options> m_options = nullptr;
-  tkm::msg::monitor::SysProcMeminfo m_memInfo;
+  tkm::msg::monitor::SysProcDiskStats m_diskStats;
   uint64_t m_updateInterval = 1000000;
   bool m_updatePending = false;
 };
