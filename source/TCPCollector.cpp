@@ -32,6 +32,8 @@ static bool doGetProcEventStats(const std::shared_ptr<TCPCollector> collector,
                                 const tkm::msg::collector::Request &rq);
 static bool doGetSysProcMemInfo(const std::shared_ptr<TCPCollector> collector,
                                 const tkm::msg::collector::Request &rq);
+static bool doGetSysProcDiskStats(const std::shared_ptr<TCPCollector> collector,
+                                  const tkm::msg::collector::Request &rq);
 static bool doGetSysProcStat(const std::shared_ptr<TCPCollector> collector,
                              const tkm::msg::collector::Request &rq);
 static bool doGetSysProcPressure(const std::shared_ptr<TCPCollector> collector,
@@ -86,7 +88,9 @@ TCPCollector::TCPCollector(int fd)
             break;
           case tkm::msg::collector::Request_Type_GetSysProcMemInfo:
             status = doGetSysProcMemInfo(getShared(), collectorMessage);
-            status = true;
+            break;
+          case tkm::msg::collector::Request_Type_GetSysProcDiskStats:
+            status = doGetSysProcDiskStats(getShared(), collectorMessage);
             break;
           case tkm::msg::collector::Request_Type_GetSysProcStat:
             status = doGetSysProcStat(getShared(), collectorMessage);
@@ -210,6 +214,14 @@ static bool doGetSysProcMemInfo(const std::shared_ptr<TCPCollector> collector,
                                 const tkm::msg::collector::Request &rq)
 {
   Dispatcher::Request req = {.action = Dispatcher::Action::GetSysProcMemInfo,
+                             .collector = collector};
+  return App()->getDispatcher()->pushRequest(req);
+}
+
+static bool doGetSysProcDiskStats(const std::shared_ptr<TCPCollector> collector,
+                                  const tkm::msg::collector::Request &rq)
+{
+  Dispatcher::Request req = {.action = Dispatcher::Action::GetSysProcDiskStats,
                              .collector = collector};
   return App()->getDispatcher()->pushRequest(req);
 }

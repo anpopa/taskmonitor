@@ -18,6 +18,7 @@
 #include "ProcEntry.h"
 
 #include "Registry.h"
+#include "SysProcDiskStats.h"
 #include "SysProcMemInfo.h"
 #include "SysProcPressure.h"
 #include "SysProcStat.h"
@@ -32,6 +33,7 @@ static bool doGetProcAcct(const shared_ptr<Dispatcher> disp, const Dispatcher::R
 static bool doGetProcInfo(const shared_ptr<Dispatcher> disp, const Dispatcher::Request &rq);
 static bool doGetProcEventStats(const shared_ptr<Dispatcher> disp, const Dispatcher::Request &rq);
 static bool doGetSysProcMemInfo(const shared_ptr<Dispatcher> disp, const Dispatcher::Request &rq);
+static bool doGetSysProcDiskStats(const shared_ptr<Dispatcher> disp, const Dispatcher::Request &rq);
 static bool doGetSysProcStat(const shared_ptr<Dispatcher> disp, const Dispatcher::Request &rq);
 static bool doGetSysProcPsi(const shared_ptr<Dispatcher> disp, const Dispatcher::Request &rq);
 static bool doGetContextInfo(const shared_ptr<Dispatcher> disp, const Dispatcher::Request &rq);
@@ -64,6 +66,8 @@ auto Dispatcher::requestHandler(const Request &request) -> bool
     return doGetProcEventStats(getShared(), request);
   case Dispatcher::Action::GetSysProcMemInfo:
     return doGetSysProcMemInfo(getShared(), request);
+  case Dispatcher::Action::GetSysProcDiskStats:
+    return doGetSysProcDiskStats(getShared(), request);
   case Dispatcher::Action::GetSysProcStat:
     return doGetSysProcStat(getShared(), request);
   case Dispatcher::Action::GetSysProcPressure:
@@ -111,6 +115,13 @@ static bool doGetSysProcMemInfo(const shared_ptr<Dispatcher> disp, const Dispatc
   SysProcMemInfo::Request regrq = {.action = SysProcMemInfo::Action::CollectAndSend,
                                    .collector = rq.collector};
   return App()->getSysProcMemInfo()->pushRequest(regrq);
+}
+
+static bool doGetSysProcDiskStats(const shared_ptr<Dispatcher> disp, const Dispatcher::Request &rq)
+{
+  SysProcDiskStats::Request regrq = {.action = SysProcDiskStats::Action::CollectAndSend,
+                                     .collector = rq.collector};
+  return App()->getSysProcDiskStats()->pushRequest(regrq);
 }
 
 static bool doGetSysProcStat(const shared_ptr<Dispatcher> disp, const Dispatcher::Request &rq)

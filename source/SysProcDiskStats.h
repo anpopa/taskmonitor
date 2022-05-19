@@ -11,6 +11,7 @@
 
 #pragma once
 
+#include <cstdint>
 #include <memory>
 #include <time.h>
 #include <unistd.h>
@@ -20,11 +21,31 @@
 #include "Options.h"
 
 #include "../bswinfra/source/AsyncQueue.h"
+#include "../bswinfra/source/SafeList.h"
 
 using namespace bswi::event;
 
 namespace tkm::monitor
 {
+struct DiskStat : public std::enable_shared_from_this<DiskStat> {
+public:
+  explicit DiskStat(const std::string &name, uint32_t major, uint32_t minor)
+  {
+    m_data.set_major(major);
+    m_data.set_minor(minor);
+    m_data.set_name(name);
+  };
+  ~DiskStat() = default;
+
+public:
+  DiskStat(DiskStat const &) = delete;
+  void operator=(DiskStat const &) = delete;
+  auto getData(void) -> tkm::msg::monitor::SysProcDiskStats & { return m_data; }
+
+private:
+  tkm::msg::monitor::SysProcDiskStats m_data;
+};
+
 class SysProcDiskStats : public std::enable_shared_from_this<SysProcDiskStats>
 {
 public:
@@ -44,7 +65,7 @@ public:
 
 public:
   auto getShared() -> std::shared_ptr<SysProcDiskStats> { return shared_from_this(); }
-  auto getProcDiskStats() -> tkm::msg::monitor::SysProcDiskStats & { return m_diskStats; }
+  auto getDiskStatList() -> bswi::util::SafeList<std::shared_ptr<DiskStat>> & { return m_disks; }
   auto pushRequest(SysProcDiskStats::Request &request) -> int;
   void enableEvents();
 
@@ -62,6 +83,7 @@ private:
   bool requestHandler(const Request &request);
 
 private:
+  bswi::util::SafeList<std::shared_ptr<DiskStat>> m_disks{"DiskStatList"};
   std::shared_ptr<AsyncQueue<Request>> m_queue = nullptr;
   std::shared_ptr<Options> m_options = nullptr;
   tkm::msg::monitor::SysProcDiskStats m_diskStats;

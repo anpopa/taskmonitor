@@ -105,18 +105,42 @@ static bool doUpdateStats(const std::shared_ptr<SysProcDiskStats> mgr,
       return false;
     }
 
-    mgr->getProcDiskStats().set_major(std::stoul(tokens[0]));
-    mgr->getProcDiskStats().set_minor(std::stoul(tokens[1]));
-    mgr->getProcDiskStats().set_name(tokens[2]);
-    mgr->getProcDiskStats().set_reads_completed(std::stoul(tokens[3]));
-    mgr->getProcDiskStats().set_reads_merged(std::stoul(tokens[4]));
-    mgr->getProcDiskStats().set_reads_spent_ms(std::stoul(tokens[6]));
-    mgr->getProcDiskStats().set_writes_completed(std::stoul(tokens[7]));
-    mgr->getProcDiskStats().set_writes_merged(std::stoul(tokens[8]));
-    mgr->getProcDiskStats().set_writes_spent_ms(std::stoul(tokens[10]));
-    mgr->getProcDiskStats().set_io_in_progress(std::stoul(tokens[11]));
-    mgr->getProcDiskStats().set_io_spent_ms(std::stoul(tokens[12]));
-    mgr->getProcDiskStats().set_io_weighted_ms(std::stoul(tokens[13]));
+    auto major = std::stoul(tokens[0]);
+    auto minor = std::stoul(tokens[1]);
+
+    auto updateDiskStatEntry = [&tokens, &major, &minor](const std::shared_ptr<DiskStat> &entry) {
+      entry->getData().set_major(major);
+      entry->getData().set_minor(minor);
+      entry->getData().set_name(tokens[2]);
+      entry->getData().set_reads_completed(std::stoul(tokens[3]));
+      entry->getData().set_reads_merged(std::stoul(tokens[4]));
+      entry->getData().set_reads_spent_ms(std::stoul(tokens[6]));
+      entry->getData().set_writes_completed(std::stoul(tokens[7]));
+      entry->getData().set_writes_merged(std::stoul(tokens[8]));
+      entry->getData().set_writes_spent_ms(std::stoul(tokens[10]));
+      entry->getData().set_io_in_progress(std::stoul(tokens[11]));
+      entry->getData().set_io_spent_ms(std::stoul(tokens[12]));
+      entry->getData().set_io_weighted_ms(std::stoul(tokens[13]));
+    };
+
+    auto found = false;
+    mgr->getDiskStatList().foreach ([&tokens, &found, &major, &minor, updateDiskStatEntry](
+                                        const std::shared_ptr<DiskStat> &entry) {
+      if ((entry->getData().major() == major) && (entry->getData().minor() == minor)) {
+        updateDiskStatEntry(entry);
+        found = true;
+      }
+    });
+
+    if (!found) {
+      std::shared_ptr<DiskStat> entry =
+          std::make_shared<DiskStat>(tokens[2], std::stoul(tokens[0]), std::stoul(tokens[1]));
+
+      logInfo() << "Adding new diskstat entry '" << entry->getData().name() << "' for statistics";
+      mgr->getDiskStatList().append(entry);
+      mgr->getDiskStatList().commit();
+      updateDiskStatEntry(entry);
+    }
   }
 
   return true;
@@ -125,18 +149,20 @@ static bool doUpdateStats(const std::shared_ptr<SysProcDiskStats> mgr,
 static bool doCollectAndSend(const std::shared_ptr<SysProcDiskStats> mgr,
                              const SysProcDiskStats::Request &request)
 {
-  tkm::msg::monitor::Data data;
+  mgr->getDiskStatList().foreach ([&request](const std::shared_ptr<DiskStat> &entry) {
+    tkm::msg::monitor::Data data;
 
-  data.set_what(tkm::msg::monitor::Data_What_SysProcDiskStats);
+    data.set_what(tkm::msg::monitor::Data_What_SysProcDiskStats);
 
-  struct timespec currentTime;
-  clock_gettime(CLOCK_REALTIME, &currentTime);
-  data.set_system_time_sec(currentTime.tv_sec);
-  clock_gettime(CLOCK_MONOTONIC, &currentTime);
-  data.set_monotonic_time_sec(currentTime.tv_sec);
+    struct timespec currentTime;
+    clock_gettime(CLOCK_REALTIME, &currentTime);
+    data.set_system_time_sec(currentTime.tv_sec);
+    clock_gettime(CLOCK_MONOTONIC, &currentTime);
+    data.set_monotonic_time_sec(currentTime.tv_sec);
 
-  data.mutable_payload()->PackFrom(mgr->getProcDiskStats());
-  request.collector->sendData(data);
+    data.mutable_payload()->PackFrom(entry->getData());
+    request.collector->sendData(data);
+  });
 
   return true;
 }
