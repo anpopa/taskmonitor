@@ -12,6 +12,7 @@
 #pragma once
 
 #include <atomic>
+#include <cstdint>
 #include <cstdlib>
 #include <string>
 
@@ -91,7 +92,9 @@ public:
 
 private:
   void startWatchdog(void);
-  void enableUpdateLanes(void);
+  void enableUpdateLanes(uint64_t fastLaneInterval,
+                         uint64_t paceLaneInterval,
+                         uint64_t slowLaneInterval);
 
 private:
   std::shared_ptr<Options> m_options = nullptr;

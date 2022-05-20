@@ -42,6 +42,25 @@ Application::Application(const string &name, const string &description, const st
   appInstance = this;
 
   m_options = std::make_shared<Options>(configFile);
+  uint64_t fastLaneInterval, paceLaneInterval, slowLaneInterval;
+
+  try {
+    fastLaneInterval = std::stoul(m_options->getFor(Options::Key::FastLaneInterval));
+  } catch (...) {
+    fastLaneInterval = std::stoul(tkmDefaults.getFor(Defaults::Default::FastLaneInterval));
+  }
+
+  try {
+    paceLaneInterval = std::stoul(m_options->getFor(Options::Key::PaceLaneInterval));
+  } catch (...) {
+    paceLaneInterval = std::stoul(tkmDefaults.getFor(Defaults::Default::PaceLaneInterval));
+  }
+
+  try {
+    slowLaneInterval = std::stoul(m_options->getFor(Options::Key::SlowLaneInterval));
+  } catch (...) {
+    slowLaneInterval = std::stoul(tkmDefaults.getFor(Defaults::Default::SlowLaneInterval));
+  }
 
   if (m_options->getFor(Options::Key::EnableTCPServer) == "true") {
     m_netServer = std::make_shared<TCPServer>(m_options);
@@ -77,46 +96,32 @@ Application::Application(const string &name, const string &description, const st
   m_registry->enableEvents();
 
   m_sysProcStat = std::make_shared<SysProcStat>(m_options);
+  m_sysProcStat->setUpdateInterval(fastLaneInterval);
   m_sysProcStat->enableEvents();
 
   m_sysProcMemInfo = std::make_shared<SysProcMemInfo>(m_options);
+  m_sysProcStat->setUpdateInterval(paceLaneInterval);
   m_sysProcMemInfo->enableEvents();
 
   m_sysProcPressure = std::make_shared<SysProcPressure>(m_options);
+  m_sysProcStat->setUpdateInterval(paceLaneInterval);
   m_sysProcPressure->enableEvents();
 
   m_sysProcDiskStats = std::make_shared<SysProcDiskStats>(m_options);
+  m_sysProcStat->setUpdateInterval(slowLaneInterval);
   m_sysProcDiskStats->enableEvents();
 
   m_dispatcher = std::make_unique<Dispatcher>(m_options);
   m_dispatcher->enableEvents();
 
-  enableUpdateLanes();
+  enableUpdateLanes(fastLaneInterval, paceLaneInterval, slowLaneInterval);
   startWatchdog();
 }
 
-void Application::enableUpdateLanes(void)
+void Application::enableUpdateLanes(uint64_t fastLaneInterval,
+                                    uint64_t paceLaneInterval,
+                                    uint64_t slowLaneInterval)
 {
-  uint64_t fastLaneInterval, paceLaneInterval, slowLaneInterval;
-
-  try {
-    fastLaneInterval = std::stoul(m_options->getFor(Options::Key::FastLaneInterval));
-  } catch (...) {
-    fastLaneInterval = std::stoul(tkmDefaults.getFor(Defaults::Default::FastLaneInterval));
-  }
-
-  try {
-    paceLaneInterval = std::stoul(m_options->getFor(Options::Key::PaceLaneInterval));
-  } catch (...) {
-    paceLaneInterval = std::stoul(tkmDefaults.getFor(Defaults::Default::PaceLaneInterval));
-  }
-
-  try {
-    slowLaneInterval = std::stoul(m_options->getFor(Options::Key::SlowLaneInterval));
-  } catch (...) {
-    slowLaneInterval = std::stoul(tkmDefaults.getFor(Defaults::Default::SlowLaneInterval));
-  }
-
   m_fastLaneTimer = std::make_shared<Timer>("FastLaneTimer", [this]() {
     // ProcInfo
     m_registry->getProcList().foreach (
