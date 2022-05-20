@@ -95,7 +95,7 @@ auto Options::getFor(Key key) -> string const
 
       return prop.value_or(tkmDefaults.getFor(Defaults::Default::PaceLaneInterval));
     }
-    return tkmDefaults.getFor(Defaults::Default::FastLaneInterval);
+    return tkmDefaults.getFor(Defaults::Default::PaceLaneInterval);
   case Key::SlowLaneInterval:
     if (hasConfigFile()) {
       const optional<string> prop =
@@ -113,7 +113,7 @@ auto Options::getFor(Key key) -> string const
 
       return prop.value_or(tkmDefaults.getFor(Defaults::Default::SlowLaneInterval));
     }
-    return tkmDefaults.getFor(Defaults::Default::FastLaneInterval);
+    return tkmDefaults.getFor(Defaults::Default::SlowLaneInterval);
   case Key::ReadProcAtInit:
     if (hasConfigFile()) {
       const optional<string> prop = m_configFile->getPropertyValue("monitor", -1, "ReadProcAtInit");

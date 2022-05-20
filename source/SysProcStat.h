@@ -57,7 +57,7 @@ private:
 
 private:
   tkm::msg::monitor::CPUStat m_data;
-  uint64_t m_usecInterval = 0;
+  uint64_t m_usecInterval = 1000000;
   uint64_t m_lastUserJiffies = 0;
   uint64_t m_lastSystemJiffies = 0;
   int m_totalPercent = 0;

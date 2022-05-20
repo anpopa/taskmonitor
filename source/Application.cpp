@@ -100,15 +100,15 @@ Application::Application(const string &name, const string &description, const st
   m_sysProcStat->enableEvents();
 
   m_sysProcMemInfo = std::make_shared<SysProcMemInfo>(m_options);
-  m_sysProcStat->setUpdateInterval(paceLaneInterval);
+  m_sysProcMemInfo->setUpdateInterval(paceLaneInterval);
   m_sysProcMemInfo->enableEvents();
 
   m_sysProcPressure = std::make_shared<SysProcPressure>(m_options);
-  m_sysProcStat->setUpdateInterval(paceLaneInterval);
+  m_sysProcPressure->setUpdateInterval(paceLaneInterval);
   m_sysProcPressure->enableEvents();
 
   m_sysProcDiskStats = std::make_shared<SysProcDiskStats>(m_options);
-  m_sysProcStat->setUpdateInterval(slowLaneInterval);
+  m_sysProcDiskStats->setUpdateInterval(slowLaneInterval);
   m_sysProcDiskStats->enableEvents();
 
   m_dispatcher = std::make_unique<Dispatcher>(m_options);
