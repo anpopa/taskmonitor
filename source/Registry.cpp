@@ -26,6 +26,8 @@
 namespace tkm::monitor
 {
 
+static bool doCommitProcList(const std::shared_ptr<Registry> mgr, const Registry::Request &rq);
+static bool doCommitContextList(const std::shared_ptr<Registry> mgr, const Registry::Request &rq);
 static bool doCollectAndSendProcAcct(const std::shared_ptr<Registry> mgr,
                                      const Registry::Request &rq);
 static bool doCollectAndSendProcInfo(const std::shared_ptr<Registry> mgr,
@@ -57,6 +59,10 @@ void Registry::enableEvents()
 auto Registry::requestHandler(const Request &request) -> bool
 {
   switch (request.action) {
+  case Registry::Action::CommitProcList:
+    return doCommitProcList(getShared(), request);
+  case Registry::Action::CommitContextList:
+    return doCommitContextList(getShared(), request);
   case Registry::Action::CollectAndSendProcAcct:
     return doCollectAndSendProcAcct(getShared(), request);
   case Registry::Action::CollectAndSendProcInfo:
@@ -100,8 +106,6 @@ void Registry::initFromProc(void)
       }
     }
   }
-
-  m_procList.commit();
 }
 
 auto Registry::getProcEntry(int pid) -> const std::shared_ptr<ProcEntry>
@@ -164,7 +168,9 @@ void Registry::remProcEntry(int pid)
       m_procList.remove(entry);
     }
   });
-  m_procList.commit();
+
+  Registry::Request rq = {.action = Registry::Action::CommitProcList};
+  pushRequest(rq);
 }
 
 void Registry::remProcEntry(std::string &name)
@@ -175,7 +181,9 @@ void Registry::remProcEntry(std::string &name)
       m_procList.remove(entry);
     }
   });
-  m_procList.commit();
+
+  Registry::Request rq = {.action = Registry::Action::CommitProcList};
+  pushRequest(rq);
 }
 
 bool Registry::isBlacklisted(const std::string &name)
@@ -255,7 +263,9 @@ void Registry::createProcessEntry(int pid, const std::string &name)
   logDebug() << "Add process monitoring for pid=" << pid << " name=" << name
              << " context=" << procEntry->getInfo().ctx_name();
   m_procList.append(procEntry);
-  m_procList.commit();
+
+  Registry::Request rq = {.action = Registry::Action::CommitProcList};
+  pushRequest(rq);
 
   bool found = false;
   m_contextList.foreach ([&found, &procEntry](const std::shared_ptr<ContextEntry> &ctxEntry) {
@@ -268,8 +278,22 @@ void Registry::createProcessEntry(int pid, const std::string &name)
     std::shared_ptr<ContextEntry> ctxEntry = std::make_shared<ContextEntry>(
         procEntry->getInfo().ctx_id(), procEntry->getInfo().ctx_name());
     m_contextList.append(ctxEntry);
-    m_contextList.commit();
+
+    Registry::Request rq = {.action = Registry::Action::CommitContextList};
+    pushRequest(rq);
   }
+}
+
+static bool doCommitProcList(const std::shared_ptr<Registry> mgr, const Registry::Request &rq)
+{
+  mgr->getProcList().commit();
+  return true;
+}
+
+static bool doCommitContextList(const std::shared_ptr<Registry> mgr, const Registry::Request &rq)
+{
+  mgr->getContextList().commit();
+  return true;
 }
 
 static bool doCollectAndSendProcAcct(const std::shared_ptr<Registry> mgr,
@@ -342,7 +366,8 @@ static bool doCollectAndSendContextInfo(const std::shared_ptr<Registry> mgr,
       mgr->getContextList().remove(ctxEntry);
     }
   });
-  mgr->getContextList().commit();
+  Registry::Request crq = {.action = Registry::Action::CommitContextList};
+  mgr->pushRequest(crq);
 
   mgr->getContextList().foreach ([&rq](const std::shared_ptr<ContextEntry> &entry) {
     tkm::msg::monitor::Data data;

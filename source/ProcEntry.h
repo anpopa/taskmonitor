@@ -16,6 +16,8 @@
 #include <memory>
 #include <string>
 
+#include "../bswinfra/source/Logger.h"
+
 namespace tkm::monitor
 {
 

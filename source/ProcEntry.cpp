@@ -74,7 +74,7 @@ void ProcEntry::initInfoData(void)
   std::ifstream statStream{"/proc/" + std::to_string(m_pid) + "/stat"};
 
   if (!statStream.is_open()) {
-    throw std::runtime_error("Fail to open /proc/" + std::to_string(m_pid) + "stat file");
+    throw std::runtime_error("Fail to open /proc/" + std::to_string(m_pid) + "/stat file");
   }
 
   std::string line;

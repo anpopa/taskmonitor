@@ -10,6 +10,7 @@
  */
 
 #include "Application.h"
+#include "Defaults.h"
 #include "ProcEntry.h"
 #include <cstdint>
 #include <memory>
@@ -101,19 +102,19 @@ void Application::enableUpdateLanes(void)
   try {
     fastLaneInterval = std::stoul(m_options->getFor(Options::Key::FastLaneInterval));
   } catch (...) {
-    fastLaneInterval = 1000000;
+    fastLaneInterval = std::stoul(tkmDefaults.getFor(Defaults::Default::FastLaneInterval));
   }
 
   try {
     paceLaneInterval = std::stoul(m_options->getFor(Options::Key::PaceLaneInterval));
   } catch (...) {
-    paceLaneInterval = 1000000;
+    paceLaneInterval = std::stoul(tkmDefaults.getFor(Defaults::Default::PaceLaneInterval));
   }
 
   try {
     slowLaneInterval = std::stoul(m_options->getFor(Options::Key::SlowLaneInterval));
   } catch (...) {
-    slowLaneInterval = 1000000;
+    slowLaneInterval = std::stoul(tkmDefaults.getFor(Defaults::Default::SlowLaneInterval));
   }
 
   m_fastLaneTimer = std::make_shared<Timer>("FastLaneTimer", [this]() {

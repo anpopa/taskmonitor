@@ -31,7 +31,13 @@ namespace tkm::monitor
 class Registry : public std::enable_shared_from_this<Registry>
 {
 public:
-  enum class Action { CollectAndSendProcAcct, CollectAndSendProcInfo, CollectAndSendContextInfo };
+  enum class Action {
+    CommitProcList,
+    CommitContextList,
+    CollectAndSendProcAcct,
+    CollectAndSendProcInfo,
+    CollectAndSendContextInfo
+  };
   typedef struct Request {
     Action action;
     std::shared_ptr<ICollector> collector;
