@@ -17,7 +17,7 @@
 #include "Dispatcher.h"
 #include "ProcEntry.h"
 
-#include "Registry.h"
+#include "ProcRegistry.h"
 #include "SysProcDiskStats.h"
 #include "SysProcMemInfo.h"
 #include "SysProcPressure.h"
@@ -84,23 +84,23 @@ auto Dispatcher::requestHandler(const Request &request) -> bool
 
 static bool doGetProcAcct(const shared_ptr<Dispatcher> disp, const Dispatcher::Request &rq)
 {
-  Registry::Request regrq = {.action = Registry::Action::CollectAndSendProcAcct,
-                             .collector = rq.collector};
-  return App()->getRegistry()->pushRequest(regrq);
+  ProcRegistry::Request regrq = {.action = ProcRegistry::Action::CollectAndSendProcAcct,
+                                 .collector = rq.collector};
+  return App()->getProcRegistry()->pushRequest(regrq);
 }
 
 static bool doGetProcInfo(const shared_ptr<Dispatcher> disp, const Dispatcher::Request &rq)
 {
-  Registry::Request regrq = {.action = Registry::Action::CollectAndSendProcInfo,
-                             .collector = rq.collector};
-  return App()->getRegistry()->pushRequest(regrq);
+  ProcRegistry::Request regrq = {.action = ProcRegistry::Action::CollectAndSendProcInfo,
+                                 .collector = rq.collector};
+  return App()->getProcRegistry()->pushRequest(regrq);
 }
 
 static bool doGetContextInfo(const shared_ptr<Dispatcher> disp, const Dispatcher::Request &rq)
 {
-  Registry::Request regrq = {.action = Registry::Action::CollectAndSendContextInfo,
-                             .collector = rq.collector};
-  return App()->getRegistry()->pushRequest(regrq);
+  ProcRegistry::Request regrq = {.action = ProcRegistry::Action::CollectAndSendContextInfo,
+                                 .collector = rq.collector};
+  return App()->getProcRegistry()->pushRequest(regrq);
 }
 
 static bool doGetProcEventStats(const shared_ptr<Dispatcher> disp, const Dispatcher::Request &rq)

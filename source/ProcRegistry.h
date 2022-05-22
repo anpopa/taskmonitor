@@ -4,7 +4,7 @@
  * @date      2021-2022
  * @author    Alin Popa <alin.popa@fxdata.ro>
  * @copyright MIT
- * @brief     Registry Class
+ * @brief     ProcRegistry Class
  * @details   ProcEntry registry
  *-
  */
@@ -17,6 +17,7 @@
 
 #include "ContextEntry.h"
 #include "ICollector.h"
+#include "IDataSource.h"
 #include "Options.h"
 #include "ProcEntry.h"
 
@@ -28,7 +29,7 @@ using namespace bswi::event;
 namespace tkm::monitor
 {
 
-class Registry : public std::enable_shared_from_this<Registry>
+class ProcRegistry : public IDataSource, public std::enable_shared_from_this<ProcRegistry>
 {
 public:
   enum class Action {
@@ -44,15 +45,15 @@ public:
   } Request;
 
 public:
-  explicit Registry(const std::shared_ptr<Options> options);
-  ~Registry() = default;
+  explicit ProcRegistry(const std::shared_ptr<Options> options);
+  ~ProcRegistry() = default;
 
 public:
-  Registry(Registry const &) = delete;
-  void operator=(Registry const &) = delete;
+  ProcRegistry(ProcRegistry const &) = delete;
+  void operator=(ProcRegistry const &) = delete;
 
 public:
-  auto getShared() -> std::shared_ptr<Registry> { return shared_from_this(); }
+  auto getShared() -> std::shared_ptr<ProcRegistry> { return shared_from_this(); }
   void initFromProc(void);
 
   void addProcEntry(int pid);
@@ -69,7 +70,9 @@ public:
     return m_contextList;
   }
 
-  auto pushRequest(Registry::Request &request) -> int;
+  auto pushRequest(ProcRegistry::Request &request) -> int;
+  bool update(UpdateLane lane) final;
+  bool update(void) final;
   void enableEvents();
 
 private:
@@ -79,8 +82,8 @@ private:
   void createProcessEntry(int pid, const std::string &name);
 
 private:
-  bswi::util::SafeList<std::shared_ptr<ContextEntry>> m_contextList{"RegistryContextList"};
-  bswi::util::SafeList<std::shared_ptr<ProcEntry>> m_procList{"RegistryProcList"};
+  bswi::util::SafeList<std::shared_ptr<ContextEntry>> m_contextList{"ProcRegistryContextList"};
+  bswi::util::SafeList<std::shared_ptr<ProcEntry>> m_procList{"ProcRegistryProcList"};
   std::shared_ptr<AsyncQueue<Request>> m_queue = nullptr;
   std::shared_ptr<Options> m_options = nullptr;
 };

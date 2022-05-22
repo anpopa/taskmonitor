@@ -10,7 +10,7 @@ set(BINARY_SRC
     Application.cpp
     ProcEntry.cpp
     ContextEntry.cpp
-    Registry.cpp
+    ProcRegistry.cpp
     TCPCollector.cpp
     TCPServer.cpp
     UDSCollector.cpp

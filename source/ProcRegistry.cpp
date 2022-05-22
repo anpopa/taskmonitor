@@ -4,12 +4,12 @@
  * @date      2021-2022
  * @author    Alin Popa <alin.popa@fxdata.ro>
  * @copyright MIT
- * @brief     Registry Class
+ * @brief     ProcRegistry Class
  * @details   ProcEntry registry
  *-
  */
 
-#include "Registry.h"
+#include "ProcRegistry.h"
 #include "Application.h"
 
 #include <cstdint>
@@ -21,33 +21,36 @@
 
 #include "../bswinfra/source/KeyFile.h"
 #include "ContextEntry.h"
+#include "Defaults.h"
 #include "Helpers.h"
 
 namespace tkm::monitor
 {
 
-static bool doCommitProcList(const std::shared_ptr<Registry> mgr, const Registry::Request &rq);
-static bool doCommitContextList(const std::shared_ptr<Registry> mgr, const Registry::Request &rq);
-static bool doCollectAndSendProcAcct(const std::shared_ptr<Registry> mgr,
-                                     const Registry::Request &rq);
-static bool doCollectAndSendProcInfo(const std::shared_ptr<Registry> mgr,
-                                     const Registry::Request &rq);
-static bool doCollectAndSendContextInfo(const std::shared_ptr<Registry> mgr,
-                                        const Registry::Request &rq);
+static bool doCommitProcList(const std::shared_ptr<ProcRegistry> mgr,
+                             const ProcRegistry::Request &rq);
+static bool doCommitContextList(const std::shared_ptr<ProcRegistry> mgr,
+                                const ProcRegistry::Request &rq);
+static bool doCollectAndSendProcAcct(const std::shared_ptr<ProcRegistry> mgr,
+                                     const ProcRegistry::Request &rq);
+static bool doCollectAndSendProcInfo(const std::shared_ptr<ProcRegistry> mgr,
+                                     const ProcRegistry::Request &rq);
+static bool doCollectAndSendContextInfo(const std::shared_ptr<ProcRegistry> mgr,
+                                        const ProcRegistry::Request &rq);
 
-Registry::Registry(const std::shared_ptr<Options> options)
+ProcRegistry::ProcRegistry(const std::shared_ptr<Options> options)
 : m_options(options)
 {
   m_queue = std::make_shared<AsyncQueue<Request>>(
-      "RegistryEventQueue", [this](const Request &request) { return requestHandler(request); });
+      "ProcRegistryEventQueue", [this](const Request &request) { return requestHandler(request); });
 }
 
-auto Registry::pushRequest(Request &request) -> int
+auto ProcRegistry::pushRequest(Request &request) -> int
 {
   return m_queue->push(request);
 }
 
-void Registry::enableEvents()
+void ProcRegistry::enableEvents()
 {
   App()->addEventSource(m_queue);
 
@@ -56,18 +59,18 @@ void Registry::enableEvents()
   }
 }
 
-auto Registry::requestHandler(const Request &request) -> bool
+auto ProcRegistry::requestHandler(const Request &request) -> bool
 {
   switch (request.action) {
-  case Registry::Action::CommitProcList:
+  case ProcRegistry::Action::CommitProcList:
     return doCommitProcList(getShared(), request);
-  case Registry::Action::CommitContextList:
+  case ProcRegistry::Action::CommitContextList:
     return doCommitContextList(getShared(), request);
-  case Registry::Action::CollectAndSendProcAcct:
+  case ProcRegistry::Action::CollectAndSendProcAcct:
     return doCollectAndSendProcAcct(getShared(), request);
-  case Registry::Action::CollectAndSendProcInfo:
+  case ProcRegistry::Action::CollectAndSendProcInfo:
     return doCollectAndSendProcInfo(getShared(), request);
-  case Registry::Action::CollectAndSendContextInfo:
+  case ProcRegistry::Action::CollectAndSendContextInfo:
     return doCollectAndSendContextInfo(getShared(), request);
   default:
     break;
@@ -77,7 +80,7 @@ auto Registry::requestHandler(const Request &request) -> bool
   return false;
 }
 
-void Registry::initFromProc(void)
+void ProcRegistry::initFromProc(void)
 {
   std::string path = "/proc";
 
@@ -108,7 +111,7 @@ void Registry::initFromProc(void)
   }
 }
 
-auto Registry::getProcEntry(int pid) -> const std::shared_ptr<ProcEntry>
+auto ProcRegistry::getProcEntry(int pid) -> const std::shared_ptr<ProcEntry>
 {
   std::shared_ptr<ProcEntry> retEntry = nullptr;
 
@@ -121,7 +124,7 @@ auto Registry::getProcEntry(int pid) -> const std::shared_ptr<ProcEntry>
   return retEntry;
 }
 
-auto Registry::getProcEntry(const std::string &name) -> const std::shared_ptr<ProcEntry>
+auto ProcRegistry::getProcEntry(const std::string &name) -> const std::shared_ptr<ProcEntry>
 {
   std::shared_ptr<ProcEntry> retEntry = nullptr;
 
@@ -134,7 +137,7 @@ auto Registry::getProcEntry(const std::string &name) -> const std::shared_ptr<Pr
   return retEntry;
 }
 
-void Registry::addProcEntry(int pid)
+void ProcRegistry::addProcEntry(int pid)
 {
   auto found = false;
 
@@ -160,7 +163,7 @@ void Registry::addProcEntry(int pid)
   }
 }
 
-void Registry::remProcEntry(int pid)
+void ProcRegistry::remProcEntry(int pid)
 {
   m_procList.foreach ([this, pid](const std::shared_ptr<ProcEntry> &entry) {
     if (entry->getPid() == pid) {
@@ -169,11 +172,11 @@ void Registry::remProcEntry(int pid)
     }
   });
 
-  Registry::Request rq = {.action = Registry::Action::CommitProcList};
+  ProcRegistry::Request rq = {.action = ProcRegistry::Action::CommitProcList};
   pushRequest(rq);
 }
 
-void Registry::remProcEntry(std::string &name)
+void ProcRegistry::remProcEntry(std::string &name)
 {
   m_procList.foreach ([this, &name](const std::shared_ptr<ProcEntry> &entry) {
     if (entry->getName() == name) {
@@ -182,11 +185,11 @@ void Registry::remProcEntry(std::string &name)
     }
   });
 
-  Registry::Request rq = {.action = Registry::Action::CommitProcList};
+  ProcRegistry::Request rq = {.action = ProcRegistry::Action::CommitProcList};
   pushRequest(rq);
 }
 
-bool Registry::isBlacklisted(const std::string &name)
+bool ProcRegistry::isBlacklisted(const std::string &name)
 {
   if (m_options->hasConfigFile()) {
     const std::vector<bswi::kf::Property> props =
@@ -201,7 +204,7 @@ bool Registry::isBlacklisted(const std::string &name)
   return false;
 }
 
-auto Registry::getProcNameForPID(int pid) -> std::string
+auto ProcRegistry::getProcNameForPID(int pid) -> std::string
 {
   auto statusPath = std::filesystem::path("/proc") / std::filesystem::path(std::to_string(pid)) /
                     std::filesystem::path("status");
@@ -243,7 +246,7 @@ auto Registry::getProcNameForPID(int pid) -> std::string
   throw std::runtime_error("Fail to find the process name");
 }
 
-void Registry::createProcessEntry(int pid, const std::string &name)
+void ProcRegistry::createProcessEntry(int pid, const std::string &name)
 {
   std::shared_ptr<ProcEntry> procEntry = nullptr;
   uint64_t interval = 1000000;
@@ -257,14 +260,14 @@ void Registry::createProcessEntry(int pid, const std::string &name)
     return;
   }
 
-  // ProcInfo is on fast lane
-  procEntry->setUpdateProcInfoInterval(interval);
+  // ProcInfo is on default ProcRegistry interval
+  procEntry->setUpdateInterval(interval);
 
   logDebug() << "Add process monitoring for pid=" << pid << " name=" << name
              << " context=" << procEntry->getInfo().ctx_name();
   m_procList.append(procEntry);
 
-  Registry::Request rq = {.action = Registry::Action::CommitProcList};
+  ProcRegistry::Request rq = {.action = ProcRegistry::Action::CommitProcList};
   pushRequest(rq);
 
   bool found = false;
@@ -279,25 +282,49 @@ void Registry::createProcessEntry(int pid, const std::string &name)
         procEntry->getInfo().ctx_id(), procEntry->getInfo().ctx_name());
     m_contextList.append(ctxEntry);
 
-    Registry::Request rq = {.action = Registry::Action::CommitContextList};
+    ProcRegistry::Request rq = {.action = ProcRegistry::Action::CommitContextList};
     pushRequest(rq);
   }
 }
 
-static bool doCommitProcList(const std::shared_ptr<Registry> mgr, const Registry::Request &rq)
+bool ProcRegistry::update(UpdateLane lane)
+{
+  if ((lane != UpdateLane::Fast) && (lane != UpdateLane::Slow)) {
+    return true;
+  }
+
+  m_procList.foreach ([&lane](const std::shared_ptr<ProcEntry> &entry) {
+    if (lane == UpdateLane::Slow) {
+      entry->update(tkmDefaults.valFor(Defaults::Val::ProcAcct));
+    }
+    entry->update(tkmDefaults.valFor(Defaults::Val::ProcInfo));
+  });
+
+  return true;
+}
+
+bool ProcRegistry::update(void)
+{
+  m_procList.foreach ([](const std::shared_ptr<ProcEntry> &entry) { entry->update(); });
+  return true;
+}
+
+static bool doCommitProcList(const std::shared_ptr<ProcRegistry> mgr,
+                             const ProcRegistry::Request &rq)
 {
   mgr->getProcList().commit();
   return true;
 }
 
-static bool doCommitContextList(const std::shared_ptr<Registry> mgr, const Registry::Request &rq)
+static bool doCommitContextList(const std::shared_ptr<ProcRegistry> mgr,
+                                const ProcRegistry::Request &rq)
 {
   mgr->getContextList().commit();
   return true;
 }
 
-static bool doCollectAndSendProcAcct(const std::shared_ptr<Registry> mgr,
-                                     const Registry::Request &rq)
+static bool doCollectAndSendProcAcct(const std::shared_ptr<ProcRegistry> mgr,
+                                     const ProcRegistry::Request &rq)
 {
   mgr->getProcList().foreach ([&rq](const std::shared_ptr<ProcEntry> &entry) {
     tkm::msg::monitor::Data data;
@@ -317,8 +344,8 @@ static bool doCollectAndSendProcAcct(const std::shared_ptr<Registry> mgr,
   return true;
 }
 
-static bool doCollectAndSendProcInfo(const std::shared_ptr<Registry> mgr,
-                                     const Registry::Request &rq)
+static bool doCollectAndSendProcInfo(const std::shared_ptr<ProcRegistry> mgr,
+                                     const ProcRegistry::Request &rq)
 {
   mgr->getProcList().foreach ([&rq](const std::shared_ptr<ProcEntry> &entry) {
     tkm::msg::monitor::Data data;
@@ -338,8 +365,8 @@ static bool doCollectAndSendProcInfo(const std::shared_ptr<Registry> mgr,
   return true;
 }
 
-static bool doCollectAndSendContextInfo(const std::shared_ptr<Registry> mgr,
-                                        const Registry::Request &rq)
+static bool doCollectAndSendContextInfo(const std::shared_ptr<ProcRegistry> mgr,
+                                        const ProcRegistry::Request &rq)
 {
   // Update Context data
   mgr->getContextList().foreach ([&mgr, &rq](const std::shared_ptr<ContextEntry> &ctxEntry) {
@@ -366,7 +393,7 @@ static bool doCollectAndSendContextInfo(const std::shared_ptr<Registry> mgr,
       mgr->getContextList().remove(ctxEntry);
     }
   });
-  Registry::Request crq = {.action = Registry::Action::CommitContextList};
+  ProcRegistry::Request crq = {.action = ProcRegistry::Action::CommitContextList};
   mgr->pushRequest(crq);
 
   mgr->getContextList().foreach ([&rq](const std::shared_ptr<ContextEntry> &entry) {

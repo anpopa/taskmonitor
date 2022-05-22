@@ -17,6 +17,7 @@
 #include <unistd.h>
 
 #include "ICollector.h"
+#include "IDataSource.h"
 #include "Monitor.pb.h"
 #include "Options.h"
 
@@ -66,7 +67,7 @@ private:
   int m_sysHZ = 0;
 };
 
-class SysProcStat : public std::enable_shared_from_this<SysProcStat>
+class SysProcStat : public IDataSource, public std::enable_shared_from_this<SysProcStat>
 {
 public:
   enum class Action { UpdateStats, CollectAndSend };
@@ -89,17 +90,8 @@ public:
   auto getCPUStatList() -> bswi::util::SafeList<std::shared_ptr<CPUStat>> & { return m_cpus; }
   auto pushRequest(SysProcStat::Request &request) -> int;
   void enableEvents();
-
-  auto getUpdateInterval() -> uint64_t { return m_updateInterval; };
-  void setUpdateInterval(uint64_t interval)
-  {
-    if (interval > 0) {
-      m_updateInterval = interval;
-    }
-  }
-  bool update(void);
-  bool getUpdatePending(void) { return m_updatePending; }
-  void setUpdatePending(bool state) { m_updatePending = state; }
+  bool update(void) final;
+  ;
 
 private:
   bool requestHandler(const Request &request);
@@ -108,8 +100,6 @@ private:
   bswi::util::SafeList<std::shared_ptr<CPUStat>> m_cpus{"StatCPUList"};
   std::shared_ptr<AsyncQueue<Request>> m_queue = nullptr;
   std::shared_ptr<Options> m_options = nullptr;
-  uint64_t m_updateInterval = 1000000;
-  bool m_updatePending = false;
 };
 
 } // namespace tkm::monitor

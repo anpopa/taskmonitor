@@ -17,6 +17,7 @@
 #include <unistd.h>
 
 #include "ICollector.h"
+#include "IDataSource.h"
 #include "Monitor.pb.h"
 #include "Options.h"
 
@@ -46,7 +47,7 @@ private:
   tkm::msg::monitor::SysProcDiskStats m_data;
 };
 
-class SysProcDiskStats : public std::enable_shared_from_this<SysProcDiskStats>
+class SysProcDiskStats : public IDataSource, public std::enable_shared_from_this<SysProcDiskStats>
 {
 public:
   enum class Action { UpdateStats, CollectAndSend };
@@ -68,16 +69,7 @@ public:
   auto getDiskStatList() -> bswi::util::SafeList<std::shared_ptr<DiskStat>> & { return m_disks; }
   auto pushRequest(SysProcDiskStats::Request &request) -> int;
   void enableEvents();
-
-  void setUpdateInterval(uint64_t interval)
-  {
-    if (interval > 0) {
-      m_updateInterval = interval;
-    }
-  }
-  bool update(void);
-  bool getUpdatePending(void) { return m_updatePending; }
-  void setUpdatePending(bool state) { m_updatePending = state; }
+  bool update(void) final;
 
 private:
   bool requestHandler(const Request &request);
@@ -87,8 +79,6 @@ private:
   std::shared_ptr<AsyncQueue<Request>> m_queue = nullptr;
   std::shared_ptr<Options> m_options = nullptr;
   tkm::msg::monitor::SysProcDiskStats m_diskStats;
-  uint64_t m_updateInterval = 1000000;
-  bool m_updatePending = false;
 };
 
 } // namespace tkm::monitor

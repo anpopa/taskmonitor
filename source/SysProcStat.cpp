@@ -76,7 +76,7 @@ void SysProcStat::enableEvents()
   App()->addEventSource(m_queue);
 }
 
-bool SysProcStat::update()
+bool SysProcStat::update(void)
 {
   if (getUpdatePending()) {
     return true;

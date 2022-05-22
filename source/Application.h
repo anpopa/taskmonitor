@@ -18,10 +18,11 @@
 
 #include "Defaults.h"
 #include "Dispatcher.h"
+#include "IDataSource.h"
 #include "Options.h"
 #include "ProcAcct.h"
 #include "ProcEvent.h"
-#include "Registry.h"
+#include "ProcRegistry.h"
 #include "SysProcDiskStats.h"
 #include "SysProcMemInfo.h"
 #include "SysProcPressure.h"
@@ -30,6 +31,7 @@
 #include "UDSServer.h"
 
 #include "../bswinfra/source/IApplication.h"
+#include "../bswinfra/source/SafeList.h"
 #include "../bswinfra/source/Timer.h"
 
 using namespace bswi::event;
@@ -63,7 +65,7 @@ public:
   auto getTCPServer(void) -> const std::shared_ptr<TCPServer> { return m_netServer; }
   auto getUDSServer(void) -> const std::shared_ptr<UDSServer> { return m_udsServer; }
   auto getDispatcher(void) -> const std::shared_ptr<Dispatcher> { return m_dispatcher; }
-  auto getRegistry(void) -> const std::shared_ptr<Registry> { return m_registry; }
+  auto getProcRegistry(void) -> const std::shared_ptr<ProcRegistry> { return m_procRegistry; }
   auto getProcAcct(void) -> const std::shared_ptr<ProcAcct> { return m_procAcct; }
   auto getProcEvent(void) -> const std::shared_ptr<ProcEvent> { return m_procEvent; }
   auto getSysProcStat(void) -> const std::shared_ptr<SysProcStat> { return m_sysProcStat; }
@@ -103,7 +105,7 @@ private:
   std::shared_ptr<ProcAcct> m_procAcct = nullptr;
   std::shared_ptr<ProcEvent> m_procEvent = nullptr;
   std::shared_ptr<Dispatcher> m_dispatcher = nullptr;
-  std::shared_ptr<Registry> m_registry = nullptr;
+  std::shared_ptr<ProcRegistry> m_procRegistry = nullptr;
   std::shared_ptr<SysProcStat> m_sysProcStat = nullptr;
   std::shared_ptr<SysProcMemInfo> m_sysProcMemInfo = nullptr;
   std::shared_ptr<SysProcDiskStats> m_sysProcDiskStats = nullptr;
@@ -111,6 +113,7 @@ private:
   std::atomic<unsigned short> m_procAcctCollectorCounter = 0;
 
 private:
+  bswi::util::SafeList<std::shared_ptr<IDataSource>> m_dataSources{"DataSourceList"};
   std::shared_ptr<Timer> m_fastLaneTimer = nullptr;
   std::shared_ptr<Timer> m_paceLaneTimer = nullptr;
   std::shared_ptr<Timer> m_slowLaneTimer = nullptr;

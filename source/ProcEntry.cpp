@@ -11,6 +11,7 @@
 
 #include "ProcEntry.h"
 #include "Application.h"
+#include "Defaults.h"
 #include "Helpers.h"
 #include "ProcAcct.h"
 #include <cstdint>
@@ -40,12 +41,8 @@ bool ProcEntry::updateProcAcct(void)
 
   setUpdateProcAcctPending(true);
   if (!App()->getProcAcct()->requestTaskAcct(m_pid)) {
-    App()->getRegistry()->remProcEntry(m_pid);
+    App()->getProcRegistry()->remProcEntry(m_pid);
     return false;
-  }
-
-  if (!updateInfoData()) {
-    App()->getRegistry()->remProcEntry(m_pid);
   }
 
   return true;
@@ -53,16 +50,16 @@ bool ProcEntry::updateProcAcct(void)
 
 bool ProcEntry::updateProcInfo(void)
 {
-  if (getUpdateProcInfoPending()) {
+  if (getUpdatePending()) {
     return true;
   }
 
-  setUpdateProcInfoPending(true);
+  setUpdatePending(true);
   auto status = updateInfoData();
-  setUpdateProcInfoPending(false);
+  setUpdatePending(false);
 
   if (!status) {
-    App()->getRegistry()->remProcEntry(m_pid);
+    App()->getProcRegistry()->remProcEntry(m_pid);
     return false;
   }
 
@@ -138,11 +135,28 @@ bool ProcEntry::updateInfoData(void)
     m_info.set_cpu_time(newCPUTime);
 
     // Our intervals are in nanoseconds so we muliply by ns in s
-    m_info.set_cpu_percent(((newCPUTime - oldCPUTime) * 1000000) / m_updateProcInfoInterval);
+    m_info.set_cpu_percent(((newCPUTime - oldCPUTime) * 1000000) / getUpdateInterval());
     m_info.set_mem_vmrss(std::stoul(tokens[23]) * ::sysconf(_SC_PAGESIZE) / 1024);
   }
 
   return true;
+}
+
+bool ProcEntry::update(const std::string &sourceName)
+{
+  if (tkmDefaults.valFor(Defaults::Val::ProcAcct) == sourceName) {
+    return updateProcAcct();
+  }
+  return updateProcInfo();
+}
+
+bool ProcEntry::update(void)
+{
+  auto status = updateProcInfo();
+  if (status) {
+    status = updateProcAcct();
+  }
+  return status;
 }
 
 } // namespace tkm::monitor

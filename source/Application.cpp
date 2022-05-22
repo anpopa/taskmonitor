@@ -11,6 +11,7 @@
 
 #include "Application.h"
 #include "Defaults.h"
+#include "IDataSource.h"
 #include "ProcEntry.h"
 #include <cstdint>
 #include <memory>
@@ -86,31 +87,48 @@ Application::Application(const string &name, const string &description, const st
     }
   }
 
+  // Create and initialize NetLink modules
   m_procAcct = std::make_shared<ProcAcct>(m_options);
   m_procAcct->enableEvents();
 
   m_procEvent = std::make_shared<ProcEvent>(m_options);
   m_procEvent->enableEvents();
 
-  m_registry = std::make_shared<Registry>(m_options);
-  m_registry->enableEvents();
+  // Create and initialize data sources
+  m_procRegistry = std::make_shared<ProcRegistry>(m_options);
+  m_procRegistry->setUpdateLane(IDataSource::UpdateLane::Any);
+  m_procRegistry->setUpdateInterval(fastLaneInterval);
+  m_procRegistry->enableEvents();
+  m_dataSources.append(m_procRegistry);
 
   m_sysProcStat = std::make_shared<SysProcStat>(m_options);
+  m_sysProcStat->setUpdateLane(IDataSource::UpdateLane::Fast);
   m_sysProcStat->setUpdateInterval(fastLaneInterval);
   m_sysProcStat->enableEvents();
+  m_dataSources.append(m_sysProcStat);
 
   m_sysProcMemInfo = std::make_shared<SysProcMemInfo>(m_options);
+  m_sysProcMemInfo->setUpdateLane(IDataSource::UpdateLane::Pace);
   m_sysProcMemInfo->setUpdateInterval(paceLaneInterval);
   m_sysProcMemInfo->enableEvents();
+  m_dataSources.append(m_sysProcMemInfo);
 
   m_sysProcPressure = std::make_shared<SysProcPressure>(m_options);
+  m_sysProcPressure->setUpdateLane(IDataSource::UpdateLane::Pace);
   m_sysProcPressure->setUpdateInterval(paceLaneInterval);
   m_sysProcPressure->enableEvents();
+  m_dataSources.append(m_sysProcPressure);
 
   m_sysProcDiskStats = std::make_shared<SysProcDiskStats>(m_options);
+  m_sysProcDiskStats->setUpdateLane(IDataSource::UpdateLane::Slow);
   m_sysProcDiskStats->setUpdateInterval(slowLaneInterval);
   m_sysProcDiskStats->enableEvents();
+  m_dataSources.append(m_sysProcDiskStats);
 
+  // Commit our final data source list
+  m_dataSources.commit();
+
+  // Create and init dispatcher module
   m_dispatcher = std::make_unique<Dispatcher>(m_options);
   m_dispatcher->enableEvents();
 
@@ -123,31 +141,35 @@ void Application::enableUpdateLanes(uint64_t fastLaneInterval,
                                     uint64_t slowLaneInterval)
 {
   m_fastLaneTimer = std::make_shared<Timer>("FastLaneTimer", [this]() {
-    // ProcInfo
-    m_registry->getProcList().foreach (
-        [](const std::shared_ptr<ProcEntry> &entry) { entry->updateProcInfo(); });
-    // SysProcStat
-    m_sysProcStat->update();
-
+    m_dataSources.foreach ([this](const std::shared_ptr<IDataSource> &entry) {
+      if (entry->getUpdateLane() == IDataSource::UpdateLane::Fast) {
+        entry->update();
+      } else if (entry->getUpdateLane() == IDataSource::UpdateLane::Any) {
+        entry->update(IDataSource::UpdateLane::Fast);
+      }
+    });
     return true;
   });
 
   m_paceLaneTimer = std::make_shared<Timer>("PaceLaneTimer", [this]() {
-    // SysProcMemInfo
-    m_sysProcMemInfo->update();
-    // SysProcPressure
-    m_sysProcPressure->update();
-
+    m_dataSources.foreach ([this](const std::shared_ptr<IDataSource> &entry) {
+      if (entry->getUpdateLane() == IDataSource::UpdateLane::Pace) {
+        entry->update();
+      } else if (entry->getUpdateLane() == IDataSource::UpdateLane::Any) {
+        entry->update(IDataSource::UpdateLane::Pace);
+      }
+    });
     return true;
   });
 
   m_slowLaneTimer = std::make_shared<Timer>("SlowLaneTimer", [this]() {
-    // ProcAcct
-    m_registry->getProcList().foreach (
-        [](const std::shared_ptr<ProcEntry> &entry) { entry->updateProcAcct(); });
-    // SysProcDiskStats
-    m_sysProcDiskStats->update();
-
+    m_dataSources.foreach ([this](const std::shared_ptr<IDataSource> &entry) {
+      if (entry->getUpdateLane() == IDataSource::UpdateLane::Slow) {
+        entry->update();
+      } else if (entry->getUpdateLane() == IDataSource::UpdateLane::Any) {
+        entry->update(IDataSource::UpdateLane::Slow);
+      }
+    });
     return true;
   });
 

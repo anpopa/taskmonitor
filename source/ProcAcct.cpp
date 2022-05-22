@@ -37,7 +37,7 @@ using std::string;
 
 static void processDelayAcct(struct taskstats *t)
 {
-  auto entry = App()->getRegistry()->getProcEntry(t->ac_pid);
+  auto entry = App()->getProcRegistry()->getProcEntry(t->ac_pid);
 
   if (entry == nullptr) {
     logError() << "Stat entry with PID " << t->ac_pid << " not in registry";

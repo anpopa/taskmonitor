@@ -15,6 +15,7 @@
 #include <unistd.h>
 
 #include "ICollector.h"
+#include "IDataSource.h"
 #include "Monitor.pb.h"
 #include "Options.h"
 
@@ -47,7 +48,7 @@ private:
   std::string m_name;
 };
 
-class SysProcPressure : public std::enable_shared_from_this<SysProcPressure>
+class SysProcPressure : public IDataSource, public std::enable_shared_from_this<SysProcPressure>
 {
 public:
 public:
@@ -73,16 +74,7 @@ public:
     return m_entries;
   }
   void enableEvents();
-
-  void setUpdateInterval(uint64_t interval)
-  {
-    if (interval > 0) {
-      m_updateInterval = interval;
-    }
-  }
-  bool update(void);
-  bool getUpdatePending(void) { return m_updatePending; }
-  void setUpdatePending(bool state) { m_updatePending = state; }
+  bool update(void) final;
 
 private:
   bool requestHandler(const Request &request);
@@ -92,8 +84,6 @@ private:
   std::shared_ptr<AsyncQueue<Request>> m_queue = nullptr;
   std::shared_ptr<Options> m_options = nullptr;
   tkm::msg::monitor::SysProcPressure m_psiData;
-  uint64_t m_updateInterval = 1000000;
-  bool m_updatePending = false;
 };
 
 } // namespace tkm::monitor

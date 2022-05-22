@@ -43,6 +43,8 @@ public:
     UDSServerStartOnSignal,
   };
 
+  enum class Val { True, False, ProcAcct, ProcInfo };
+
   Defaults()
   {
     m_table.insert(std::pair<Default, std::string>(Default::Version, "@GIT_SHA1@"));
@@ -64,12 +66,19 @@ public:
     m_table.insert(std::pair<Default, std::string>(Default::UDSServerSocketPath,
                                                    "/run/taskmonitor/taskmonitor.sock"));
     m_table.insert(std::pair<Default, std::string>(Default::UDSServerStartIfPath, "none"));
+
+    m_vals.insert(std::pair<Val, std::string>(Val::True, "True"));
+    m_vals.insert(std::pair<Val, std::string>(Val::False, "False"));
+    m_vals.insert(std::pair<Val, std::string>(Val::ProcAcct, "ProcAcct"));
+    m_vals.insert(std::pair<Val, std::string>(Val::ProcInfo, "ProcInfo"));
   }
 
   auto getFor(Default key) -> std::string & { return m_table.at(key); }
+  auto valFor(Val key) -> std::string & { return m_vals.at(key); }
 
 private:
   std::map<Default, std::string> m_table;
+  std::map<Val, std::string> m_vals;
 };
 
 static Defaults tkmDefaults{};

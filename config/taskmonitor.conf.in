@@ -7,15 +7,19 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 [monitor]
 RuntimeDirectory=/run/taskmonitor
+; Internal socket buffer sizes
 RxBufferSize=1048576
 TxBufferSize=1048576
 MsgBufferSize=1048576
+; Lanes time intervals
 FastLaneInterval=1000000
 PaceLaneInterval=5000000
 SlowLaneInterval=10000000
+; Generic options
 ReadProcAtInit=true
 EnableTCPServer=true
 EnableUDSServer=false
+; LXC path if LXC support is enabled
 ContainersPath=/var/lib/lxc
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
