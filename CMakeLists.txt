@@ -109,7 +109,7 @@ if(WITH_LXC)
     pkg_check_modules     (LIBLXC lxc>=3.0 REQUIRED)
     include_directories   (${LIBLXC_INCLUDE_DIRS})
     set                   (LIBS ${LIBS} ${LIBLXC_LIBRARIES})
-	add_compile_options   ("-DWITH_LXC")
+    add_compile_options   ("-DWITH_LXC")
 endif()
 
 if(WITH_SYSTEMD)
