@@ -30,20 +30,21 @@ public:
     MsgBufferSize,
     EnableTCPServer,
     EnableUDSServer,
-    FastLaneInterval,
-    PaceLaneInterval,
-    SlowLaneInterval,
+    ProdModeFastLaneInt,
+    ProdModePaceLaneInt,
+    ProdModeSlowLaneInt,
+    ProfModeFastLaneInt,
+    ProfModePaceLaneInt,
+    ProfModeSlowLaneInt,
+    ProfModeIfPath,
+    SelfLowerPriority,
     ReadProcAtInit,
     TCPServerAddress,
     TCPServerPort,
-    TCPServerStartIfPath,
-    TCPServerStartOnSignal,
     UDSServerSocketPath,
-    UDSServerStartIfPath,
-    UDSServerStartOnSignal,
   };
 
-  enum class Val { True, False, ProcAcct, ProcInfo };
+  enum class Val { True, False, None, ProcAcct, ProcInfo };
 
   Defaults()
   {
@@ -54,21 +55,25 @@ public:
     m_table.insert(std::pair<Default, std::string>(Default::RxBufferSize, "1048576"));
     m_table.insert(std::pair<Default, std::string>(Default::TxBufferSize, "1048576"));
     m_table.insert(std::pair<Default, std::string>(Default::MsgBufferSize, "1048576"));
-    m_table.insert(std::pair<Default, std::string>(Default::FastLaneInterval, "1000000"));
-    m_table.insert(std::pair<Default, std::string>(Default::PaceLaneInterval, "5000000"));
-    m_table.insert(std::pair<Default, std::string>(Default::SlowLaneInterval, "10000000"));
+    m_table.insert(std::pair<Default, std::string>(Default::ProdModeFastLaneInt, "10000000"));
+    m_table.insert(std::pair<Default, std::string>(Default::ProdModePaceLaneInt, "30000000"));
+    m_table.insert(std::pair<Default, std::string>(Default::ProdModeSlowLaneInt, "60000000"));
+    m_table.insert(std::pair<Default, std::string>(Default::ProfModeFastLaneInt, "1000000"));
+    m_table.insert(std::pair<Default, std::string>(Default::ProfModePaceLaneInt, "5000000"));
+    m_table.insert(std::pair<Default, std::string>(Default::ProfModeSlowLaneInt, "10000000"));
+    m_table.insert(std::pair<Default, std::string>(Default::ProfModeIfPath, "none"));
+    m_table.insert(std::pair<Default, std::string>(Default::SelfLowerPriority, "true"));
     m_table.insert(std::pair<Default, std::string>(Default::ReadProcAtInit, "true"));
     m_table.insert(std::pair<Default, std::string>(Default::EnableTCPServer, "true"));
     m_table.insert(std::pair<Default, std::string>(Default::EnableUDSServer, "false"));
     m_table.insert(std::pair<Default, std::string>(Default::TCPServerAddress, "localhost"));
     m_table.insert(std::pair<Default, std::string>(Default::TCPServerPort, "3357"));
-    m_table.insert(std::pair<Default, std::string>(Default::TCPServerStartIfPath, "none"));
     m_table.insert(std::pair<Default, std::string>(Default::UDSServerSocketPath,
                                                    "/run/taskmonitor/taskmonitor.sock"));
-    m_table.insert(std::pair<Default, std::string>(Default::UDSServerStartIfPath, "none"));
 
-    m_vals.insert(std::pair<Val, std::string>(Val::True, "True"));
-    m_vals.insert(std::pair<Val, std::string>(Val::False, "False"));
+    m_vals.insert(std::pair<Val, std::string>(Val::True, "true"));
+    m_vals.insert(std::pair<Val, std::string>(Val::False, "false"));
+    m_vals.insert(std::pair<Val, std::string>(Val::None, "none"));
     m_vals.insert(std::pair<Val, std::string>(Val::ProcAcct, "ProcAcct"));
     m_vals.insert(std::pair<Val, std::string>(Val::ProcInfo, "ProcInfo"));
   }

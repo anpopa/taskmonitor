@@ -253,7 +253,6 @@ void ProcRegistry::createProcessEntry(int pid, const std::string &name)
 
   try {
     procEntry = std::make_shared<ProcEntry>(pid, name);
-    interval = std::stoul(m_options->getFor(Options::Key::FastLaneInterval));
   } catch (std::exception &e) {
     logError() << "Cannot create ProcEntry object for pid=" << pid << " name=" << name
                << ". Reason=" << e.what();
@@ -261,7 +260,7 @@ void ProcRegistry::createProcessEntry(int pid, const std::string &name)
   }
 
   // ProcInfo is on default ProcRegistry interval
-  procEntry->setUpdateInterval(interval);
+  procEntry->setUpdateInterval(getUpdateInterval());
 
   logDebug() << "Add process monitoring for pid=" << pid << " name=" << name
              << " context=" << procEntry->getInfo().ctx_name();
@@ -289,15 +288,17 @@ void ProcRegistry::createProcessEntry(int pid, const std::string &name)
 
 bool ProcRegistry::update(UpdateLane lane)
 {
-  if ((lane != UpdateLane::Fast) && (lane != UpdateLane::Slow)) {
+  // We update ProcInfo data on Pace interval and ProcAcct on Slow interval
+  if ((lane != UpdateLane::Pace) && (lane != UpdateLane::Slow)) {
     return true;
   }
 
   m_procList.foreach ([&lane](const std::shared_ptr<ProcEntry> &entry) {
     if (lane == UpdateLane::Slow) {
       entry->update(tkmDefaults.valFor(Defaults::Val::ProcAcct));
+    } else {
+      entry->update(tkmDefaults.valFor(Defaults::Val::ProcInfo));
     }
-    entry->update(tkmDefaults.valFor(Defaults::Val::ProcInfo));
   });
 
   return true;

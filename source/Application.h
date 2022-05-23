@@ -84,9 +84,13 @@ public:
     return m_options->getConfigFile();
   }
 
-  void incProcAcctCollectorCounter() { m_procAcctCollectorCounter++; }
-  void decProcAcctCollectorCounter() { m_procAcctCollectorCounter--; }
-  auto getProcAcctCollectorCounter() -> unsigned short { return m_procAcctCollectorCounter; }
+  void incProcAcctCollectorCounter(void) { m_procAcctCollectorCounter++; }
+  void decProcAcctCollectorCounter(void) { m_procAcctCollectorCounter--; }
+  auto getProcAcctCollectorCounter(void) -> unsigned short { return m_procAcctCollectorCounter; }
+
+  auto getFastLaneInterval(void) -> uint64_t { return m_fastLaneInterval; }
+  auto getPaceLaneInterval(void) -> uint64_t { return m_paceLaneInterval; }
+  auto getSlowLaneInterval(void) -> uint64_t { return m_slowLaneInterval; }
 
 public:
   Application(Application const &) = delete;
@@ -94,9 +98,7 @@ public:
 
 private:
   void startWatchdog(void);
-  void enableUpdateLanes(uint64_t fastLaneInterval,
-                         uint64_t paceLaneInterval,
-                         uint64_t slowLaneInterval);
+  void enableUpdateLanes(void);
 
 private:
   std::shared_ptr<Options> m_options = nullptr;
@@ -117,6 +119,9 @@ private:
   std::shared_ptr<Timer> m_fastLaneTimer = nullptr;
   std::shared_ptr<Timer> m_paceLaneTimer = nullptr;
   std::shared_ptr<Timer> m_slowLaneTimer = nullptr;
+  uint64_t m_fastLaneInterval = 10000000;
+  uint64_t m_paceLaneInterval = 30000000;
+  uint64_t m_slowLaneInterval = 60000000;
 
 private:
   static Application *appInstance;

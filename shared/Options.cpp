@@ -60,60 +60,127 @@ auto Options::getFor(Key key) -> string const
       return prop.value_or(tkmDefaults.getFor(Defaults::Default::MsgBufferSize));
     }
     return tkmDefaults.getFor(Defaults::Default::MsgBufferSize);
-  case Key::FastLaneInterval:
+  case Key::ProdModeFastLaneInt:
     if (hasConfigFile()) {
       const optional<string> prop =
-          m_configFile->getPropertyValue("monitor", -1, "FastLaneInterval");
+          m_configFile->getPropertyValue("production-mode", -1, "FastLaneInterval");
 
       try {
         auto interval =
-            std::stoul(prop.value_or(tkmDefaults.getFor(Defaults::Default::FastLaneInterval)));
+            std::stoul(prop.value_or(tkmDefaults.getFor(Defaults::Default::ProdModeFastLaneInt)));
         if (interval < 1000000) {
-          return tkmDefaults.getFor(Defaults::Default::FastLaneInterval);
+          return tkmDefaults.getFor(Defaults::Default::ProdModeFastLaneInt);
         }
       } catch (...) {
-        return tkmDefaults.getFor(Defaults::Default::FastLaneInterval);
+        return tkmDefaults.getFor(Defaults::Default::ProdModeFastLaneInt);
       }
 
-      return prop.value_or(tkmDefaults.getFor(Defaults::Default::FastLaneInterval));
+      return prop.value_or(tkmDefaults.getFor(Defaults::Default::ProdModeFastLaneInt));
     }
-    return tkmDefaults.getFor(Defaults::Default::FastLaneInterval);
-  case Key::PaceLaneInterval:
+    return tkmDefaults.getFor(Defaults::Default::ProdModeFastLaneInt);
+  case Key::ProdModePaceLaneInt:
     if (hasConfigFile()) {
       const optional<string> prop =
-          m_configFile->getPropertyValue("monitor", -1, "PaceLaneInterval");
+          m_configFile->getPropertyValue("production-mode", -1, "PaceLaneInterval");
 
       try {
         auto interval =
-            std::stoul(prop.value_or(tkmDefaults.getFor(Defaults::Default::PaceLaneInterval)));
+            std::stoul(prop.value_or(tkmDefaults.getFor(Defaults::Default::ProdModePaceLaneInt)));
         if (interval < 1000000) {
-          return tkmDefaults.getFor(Defaults::Default::PaceLaneInterval);
+          return tkmDefaults.getFor(Defaults::Default::ProdModePaceLaneInt);
         }
       } catch (...) {
-        return tkmDefaults.getFor(Defaults::Default::PaceLaneInterval);
+        return tkmDefaults.getFor(Defaults::Default::ProdModePaceLaneInt);
       }
 
-      return prop.value_or(tkmDefaults.getFor(Defaults::Default::PaceLaneInterval));
+      return prop.value_or(tkmDefaults.getFor(Defaults::Default::ProdModePaceLaneInt));
     }
-    return tkmDefaults.getFor(Defaults::Default::PaceLaneInterval);
-  case Key::SlowLaneInterval:
+    return tkmDefaults.getFor(Defaults::Default::ProdModePaceLaneInt);
+  case Key::ProdModeSlowLaneInt:
     if (hasConfigFile()) {
       const optional<string> prop =
-          m_configFile->getPropertyValue("monitor", -1, "SlowLaneInterval");
+          m_configFile->getPropertyValue("production-mode", -1, "SlowLaneInterval");
 
       try {
         auto interval =
-            std::stoul(prop.value_or(tkmDefaults.getFor(Defaults::Default::SlowLaneInterval)));
+            std::stoul(prop.value_or(tkmDefaults.getFor(Defaults::Default::ProdModeSlowLaneInt)));
         if (interval < 1000000) {
-          return tkmDefaults.getFor(Defaults::Default::SlowLaneInterval);
+          return tkmDefaults.getFor(Defaults::Default::ProdModeSlowLaneInt);
         }
       } catch (...) {
-        return tkmDefaults.getFor(Defaults::Default::SlowLaneInterval);
+        return tkmDefaults.getFor(Defaults::Default::ProdModeSlowLaneInt);
       }
 
-      return prop.value_or(tkmDefaults.getFor(Defaults::Default::SlowLaneInterval));
+      return prop.value_or(tkmDefaults.getFor(Defaults::Default::ProdModeSlowLaneInt));
     }
-    return tkmDefaults.getFor(Defaults::Default::SlowLaneInterval);
+    return tkmDefaults.getFor(Defaults::Default::ProdModeSlowLaneInt);
+  case Key::ProfModeFastLaneInt:
+    if (hasConfigFile()) {
+      const optional<string> prop =
+          m_configFile->getPropertyValue("profiling-mode", -1, "FastLaneInterval");
+
+      try {
+        auto interval =
+            std::stoul(prop.value_or(tkmDefaults.getFor(Defaults::Default::ProfModeFastLaneInt)));
+        if (interval < 1000000) {
+          return tkmDefaults.getFor(Defaults::Default::ProfModeFastLaneInt);
+        }
+      } catch (...) {
+        return tkmDefaults.getFor(Defaults::Default::ProfModeFastLaneInt);
+      }
+
+      return prop.value_or(tkmDefaults.getFor(Defaults::Default::ProfModeFastLaneInt));
+    }
+    return tkmDefaults.getFor(Defaults::Default::ProfModeFastLaneInt);
+  case Key::ProfModePaceLaneInt:
+    if (hasConfigFile()) {
+      const optional<string> prop =
+          m_configFile->getPropertyValue("profiling-mode", -1, "PaceLaneInterval");
+
+      try {
+        auto interval =
+            std::stoul(prop.value_or(tkmDefaults.getFor(Defaults::Default::ProfModePaceLaneInt)));
+        if (interval < 1000000) {
+          return tkmDefaults.getFor(Defaults::Default::ProfModePaceLaneInt);
+        }
+      } catch (...) {
+        return tkmDefaults.getFor(Defaults::Default::ProfModePaceLaneInt);
+      }
+
+      return prop.value_or(tkmDefaults.getFor(Defaults::Default::ProfModePaceLaneInt));
+    }
+    return tkmDefaults.getFor(Defaults::Default::ProfModePaceLaneInt);
+  case Key::ProfModeSlowLaneInt:
+    if (hasConfigFile()) {
+      const optional<string> prop =
+          m_configFile->getPropertyValue("profiling-mode", -1, "SlowLaneInterval");
+
+      try {
+        auto interval =
+            std::stoul(prop.value_or(tkmDefaults.getFor(Defaults::Default::ProfModeSlowLaneInt)));
+        if (interval < 1000000) {
+          return tkmDefaults.getFor(Defaults::Default::ProfModeSlowLaneInt);
+        }
+      } catch (...) {
+        return tkmDefaults.getFor(Defaults::Default::ProfModeSlowLaneInt);
+      }
+
+      return prop.value_or(tkmDefaults.getFor(Defaults::Default::ProfModeSlowLaneInt));
+    }
+    return tkmDefaults.getFor(Defaults::Default::ProfModeSlowLaneInt);
+  case Key::ProfModeIfPath:
+    if (hasConfigFile()) {
+      const optional<string> prop = m_configFile->getPropertyValue("monitor", -1, "ProfModeIfPath");
+      return prop.value_or(tkmDefaults.getFor(Defaults::Default::ProfModeIfPath));
+    }
+    return tkmDefaults.getFor(Defaults::Default::ProfModeIfPath);
+  case Key::SelfLowerPriority:
+    if (hasConfigFile()) {
+      const optional<string> prop =
+          m_configFile->getPropertyValue("monitor", -1, "SelfLowerPriority");
+      return prop.value_or(tkmDefaults.getFor(Defaults::Default::SelfLowerPriority));
+    }
+    return tkmDefaults.getFor(Defaults::Default::SelfLowerPriority);
   case Key::ReadProcAtInit:
     if (hasConfigFile()) {
       const optional<string> prop = m_configFile->getPropertyValue("monitor", -1, "ReadProcAtInit");
@@ -147,24 +214,12 @@ auto Options::getFor(Key key) -> string const
       return prop.value_or(tkmDefaults.getFor(Defaults::Default::TCPServerPort));
     }
     return tkmDefaults.getFor(Defaults::Default::TCPServerPort);
-  case Key::TCPServerStartIfPath:
-    if (hasConfigFile()) {
-      const optional<string> prop = m_configFile->getPropertyValue("tcpserver", -1, "StartIfPath");
-      return prop.value_or(tkmDefaults.getFor(Defaults::Default::TCPServerStartIfPath));
-    }
-    return tkmDefaults.getFor(Defaults::Default::TCPServerStartIfPath);
   case Key::UDSServerSocketPath:
     if (hasConfigFile()) {
       const optional<string> prop = m_configFile->getPropertyValue("udsserver", -1, "SocketPath");
       return prop.value_or(tkmDefaults.getFor(Defaults::Default::UDSServerSocketPath));
     }
     return tkmDefaults.getFor(Defaults::Default::UDSServerSocketPath);
-  case Key::UDSServerStartIfPath:
-    if (hasConfigFile()) {
-      const optional<string> prop = m_configFile->getPropertyValue("udsserver", -1, "StartIfPath");
-      return prop.value_or(tkmDefaults.getFor(Defaults::Default::UDSServerStartIfPath));
-    }
-    return tkmDefaults.getFor(Defaults::Default::UDSServerStartIfPath);
   default:
     logError() << "Unknown option key";
     break;

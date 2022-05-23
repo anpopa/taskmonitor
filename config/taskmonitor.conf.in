@@ -7,20 +7,31 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 [monitor]
 RuntimeDirectory=/run/taskmonitor
-; Internal socket buffer sizes
 RxBufferSize=1048576
 TxBufferSize=1048576
 MsgBufferSize=1048576
-; Lanes time intervals
-FastLaneInterval=1000000
-PaceLaneInterval=5000000
-SlowLaneInterval=10000000
-; Generic options
+SelfLowerPriority=true
 ReadProcAtInit=true
 EnableTCPServer=true
 EnableUDSServer=false
-; LXC path if LXC support is enabled
 ContainersPath=/var/lib/lxc
+ProfModeIfPath=none
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Production mode options
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+[production-mode]
+FastLaneInterval=10000000
+PaceLaneInterval=30000000
+SlowLaneInterval=60000000
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Proiling mode options
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+[profiling-mode]
+FastLaneInterval=1000000
+PaceLaneInterval=5000000
+SlowLaneInterval=10000000
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; TCPServer options
@@ -28,14 +39,12 @@ ContainersPath=/var/lib/lxc
 [tcpserver]
 ServerAddress=any
 ServerPort=3357
-StartIfPath=none
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; UDSServer options
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 [udsserver]
 SocketPath=/run/taskmonitor/taskmonitor.sock
-StartIfPath=none
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Monitoring blacklist for process accounting

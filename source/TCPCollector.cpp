@@ -156,22 +156,14 @@ static bool doCreateSession(const std::shared_ptr<TCPCollector> collector,
   // TODO: Don't know how to get LC ID yet
   sessionInfo.set_lifecycle_id("na");
   try {
-    sessionInfo.set_proc_acct_poll_interval(
-        std::stol(App()->getOptions()->getFor(Options::Key::SlowLaneInterval)));
-    sessionInfo.set_proc_info_poll_interval(
-        std::stol(App()->getOptions()->getFor(Options::Key::FastLaneInterval)));
-    sessionInfo.set_proc_event_poll_interval(
-        std::stol(App()->getOptions()->getFor(Options::Key::PaceLaneInterval)));
-    sessionInfo.set_sys_proc_stat_poll_interval(
-        std::stol(App()->getOptions()->getFor(Options::Key::FastLaneInterval)));
-    sessionInfo.set_sys_proc_meminfo_poll_interval(
-        std::stol(App()->getOptions()->getFor(Options::Key::PaceLaneInterval)));
-    sessionInfo.set_sys_proc_diskstats_poll_interval(
-        std::stol(App()->getOptions()->getFor(Options::Key::SlowLaneInterval)));
-    sessionInfo.set_sys_proc_pressure_poll_interval(
-        std::stol(App()->getOptions()->getFor(Options::Key::PaceLaneInterval)));
-    sessionInfo.set_context_information_poll_interval(
-        std::stol(App()->getOptions()->getFor(Options::Key::PaceLaneInterval)));
+    sessionInfo.set_proc_acct_poll_interval(App()->getSlowLaneInterval());
+    sessionInfo.set_proc_info_poll_interval(App()->getPaceLaneInterval());
+    sessionInfo.set_proc_event_poll_interval(App()->getPaceLaneInterval());
+    sessionInfo.set_sys_proc_stat_poll_interval(App()->getFastLaneInterval());
+    sessionInfo.set_sys_proc_meminfo_poll_interval(App()->getFastLaneInterval());
+    sessionInfo.set_sys_proc_diskstats_poll_interval(App()->getPaceLaneInterval());
+    sessionInfo.set_sys_proc_pressure_poll_interval(App()->getPaceLaneInterval());
+    sessionInfo.set_context_information_poll_interval(App()->getPaceLaneInterval());
   } catch (...) {
     throw std::runtime_error("Fail to process session poll interval data");
   }

@@ -43,29 +43,27 @@ Application::Application(const string &name, const string &description, const st
   appInstance = this;
 
   m_options = std::make_shared<Options>(configFile);
-  uint64_t fastLaneInterval, paceLaneInterval, slowLaneInterval;
 
-  try {
-    fastLaneInterval = std::stoul(m_options->getFor(Options::Key::FastLaneInterval));
-  } catch (...) {
-    fastLaneInterval = std::stoul(tkmDefaults.getFor(Defaults::Default::FastLaneInterval));
+  // Set update lanes intervals based on runtime mode
+  m_fastLaneInterval = std::stoul(m_options->getFor(Options::Key::ProdModeFastLaneInt));
+  m_paceLaneInterval = std::stoul(m_options->getFor(Options::Key::ProdModePaceLaneInt));
+  m_slowLaneInterval = std::stoul(m_options->getFor(Options::Key::ProdModeSlowLaneInt));
+
+  auto profCond = m_options->getFor(Options::Key::ProfModeIfPath);
+  if (profCond != tkmDefaults.valFor(Defaults::Val::None)) {
+    if (std::filesystem::exists(profCond)) {
+      m_fastLaneInterval = std::stoul(m_options->getFor(Options::Key::ProfModeFastLaneInt));
+      m_paceLaneInterval = std::stoul(m_options->getFor(Options::Key::ProfModePaceLaneInt));
+      m_slowLaneInterval = std::stoul(m_options->getFor(Options::Key::ProfModeSlowLaneInt));
+      logInfo() << "Profiling mode enabled";
+    }
   }
 
-  try {
-    paceLaneInterval = std::stoul(m_options->getFor(Options::Key::PaceLaneInterval));
-  } catch (...) {
-    paceLaneInterval = std::stoul(tkmDefaults.getFor(Defaults::Default::PaceLaneInterval));
-  }
+  logDebug() << "Update lanes interval fast=" << m_fastLaneInterval
+             << " pace=" << m_paceLaneInterval << " slow=" << m_slowLaneInterval;
 
-  try {
-    slowLaneInterval = std::stoul(m_options->getFor(Options::Key::SlowLaneInterval));
-  } catch (...) {
-    slowLaneInterval = std::stoul(tkmDefaults.getFor(Defaults::Default::SlowLaneInterval));
-  }
-
-  if (m_options->getFor(Options::Key::EnableTCPServer) == "true") {
+  if (m_options->getFor(Options::Key::EnableTCPServer) == tkmDefaults.valFor(Defaults::Val::True)) {
     m_netServer = std::make_shared<TCPServer>(m_options);
-
     if (shouldStartTCPServer(m_options)) {
       try {
         m_netServer->bindAndListen();
@@ -75,15 +73,12 @@ Application::Application(const string &name, const string &description, const st
     }
   }
 
-  if (m_options->getFor(Options::Key::EnableUDSServer) == "true") {
+  if (m_options->getFor(Options::Key::EnableUDSServer) == tkmDefaults.valFor(Defaults::Val::True)) {
     m_udsServer = std::make_shared<UDSServer>(m_options);
-
-    if (shouldStartUDSServer(m_options)) {
-      try {
-        m_udsServer->start();
-      } catch (std::exception &e) {
-        logError() << "Fail to start UDS server. Exception: " << e.what();
-      }
+    try {
+      m_udsServer->start();
+    } catch (std::exception &e) {
+      logError() << "Fail to start UDS server. Exception: " << e.what();
     }
   }
 
@@ -97,31 +92,31 @@ Application::Application(const string &name, const string &description, const st
   // Create and initialize data sources
   m_procRegistry = std::make_shared<ProcRegistry>(m_options);
   m_procRegistry->setUpdateLane(IDataSource::UpdateLane::Any);
-  m_procRegistry->setUpdateInterval(fastLaneInterval);
+  m_procRegistry->setUpdateInterval(m_paceLaneInterval);
   m_procRegistry->enableEvents();
   m_dataSources.append(m_procRegistry);
 
   m_sysProcStat = std::make_shared<SysProcStat>(m_options);
   m_sysProcStat->setUpdateLane(IDataSource::UpdateLane::Fast);
-  m_sysProcStat->setUpdateInterval(fastLaneInterval);
+  m_sysProcStat->setUpdateInterval(m_fastLaneInterval);
   m_sysProcStat->enableEvents();
   m_dataSources.append(m_sysProcStat);
 
   m_sysProcMemInfo = std::make_shared<SysProcMemInfo>(m_options);
-  m_sysProcMemInfo->setUpdateLane(IDataSource::UpdateLane::Pace);
-  m_sysProcMemInfo->setUpdateInterval(paceLaneInterval);
+  m_sysProcMemInfo->setUpdateLane(IDataSource::UpdateLane::Fast);
+  m_sysProcMemInfo->setUpdateInterval(m_fastLaneInterval);
   m_sysProcMemInfo->enableEvents();
   m_dataSources.append(m_sysProcMemInfo);
 
   m_sysProcPressure = std::make_shared<SysProcPressure>(m_options);
   m_sysProcPressure->setUpdateLane(IDataSource::UpdateLane::Pace);
-  m_sysProcPressure->setUpdateInterval(paceLaneInterval);
+  m_sysProcPressure->setUpdateInterval(m_paceLaneInterval);
   m_sysProcPressure->enableEvents();
   m_dataSources.append(m_sysProcPressure);
 
   m_sysProcDiskStats = std::make_shared<SysProcDiskStats>(m_options);
-  m_sysProcDiskStats->setUpdateLane(IDataSource::UpdateLane::Slow);
-  m_sysProcDiskStats->setUpdateInterval(slowLaneInterval);
+  m_sysProcDiskStats->setUpdateLane(IDataSource::UpdateLane::Pace);
+  m_sysProcDiskStats->setUpdateInterval(m_paceLaneInterval);
   m_sysProcDiskStats->enableEvents();
   m_dataSources.append(m_sysProcDiskStats);
 
@@ -132,13 +127,17 @@ Application::Application(const string &name, const string &description, const st
   m_dispatcher = std::make_unique<Dispatcher>(m_options);
   m_dispatcher->enableEvents();
 
-  enableUpdateLanes(fastLaneInterval, paceLaneInterval, slowLaneInterval);
+  enableUpdateLanes();
   startWatchdog();
+
+  // After init we can lower or priority if configured
+  if (m_options->getFor(Options::Key::SelfLowerPriority) ==
+      tkmDefaults.valFor(Defaults::Val::True)) {
+    ::nice(19);
+  }
 }
 
-void Application::enableUpdateLanes(uint64_t fastLaneInterval,
-                                    uint64_t paceLaneInterval,
-                                    uint64_t slowLaneInterval)
+void Application::enableUpdateLanes(void)
 {
   m_fastLaneTimer = std::make_shared<Timer>("FastLaneTimer", [this]() {
     m_dataSources.foreach ([this](const std::shared_ptr<IDataSource> &entry) {
@@ -173,10 +172,9 @@ void Application::enableUpdateLanes(uint64_t fastLaneInterval,
     return true;
   });
 
-  m_fastLaneTimer->start(fastLaneInterval, true);
-  m_paceLaneTimer->start(paceLaneInterval, true);
-  m_slowLaneTimer->start(slowLaneInterval, true);
-
+  m_fastLaneTimer->start(m_fastLaneInterval, true);
+  m_paceLaneTimer->start(m_paceLaneInterval, true);
+  m_slowLaneTimer->start(m_slowLaneInterval, true);
   addEventSource(m_fastLaneTimer);
   addEventSource(m_paceLaneTimer);
   addEventSource(m_slowLaneTimer);
@@ -218,28 +216,13 @@ void Application::startWatchdog(void)
 
 static bool shouldStartTCPServer(const std::shared_ptr<tkm::monitor::Options> opts)
 {
-  if (opts->getFor(Options::Key::TCPServerStartIfPath) != "none") {
-    std::filesystem::path condPath(opts->getFor(Options::Key::TCPServerStartIfPath));
-    if (std::filesystem::exists(condPath)) {
+  auto profCond = opts->getFor(Options::Key::ProfModeIfPath);
+  if (profCond != tkmDefaults.valFor(Defaults::Val::None)) {
+    if (std::filesystem::exists(profCond)) {
       return true;
     }
-    return false;
   }
-
-  return true;
-}
-
-static bool shouldStartUDSServer(const std::shared_ptr<tkm::monitor::Options> opts)
-{
-  if (opts->getFor(Options::Key::TCPServerStartIfPath) != "none") {
-    std::filesystem::path condPath(opts->getFor(Options::Key::TCPServerStartIfPath));
-    if (std::filesystem::exists(condPath)) {
-      return true;
-    }
-    return false;
-  }
-
-  return true;
+  return false;
 }
 
 } // namespace tkm::monitor
