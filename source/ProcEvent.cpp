@@ -37,8 +37,26 @@ ProcEvent::ProcEvent(const std::shared_ptr<Options> options)
 : Pollable("ProcEvent")
 , m_options(options)
 {
+  int txBufferSize, rxBufferSize;
+  int err = NLE_SUCCESS;
+
+  try {
+    txBufferSize = std::stoi(m_options->getFor(Options::Key::TxBufferSize));
+    rxBufferSize = std::stoi(m_options->getFor(Options::Key::RxBufferSize));
+  } catch (std::exception &e) {
+    throw std::runtime_error("Invalid TX/RX buffer size in configuration");
+  }
+
   if ((m_sockFd = socket(PF_NETLINK, SOCK_DGRAM, NETLINK_CONNECTOR)) == -1) {
     throw std::runtime_error("Fail to create netlink socket");
+  }
+
+  if (setsockopt(m_sockFd, SOL_SOCKET, SO_RCVBUF, &rxBufferSize, sizeof(rxBufferSize)) == -1) {
+    throw std::runtime_error("Fail to set netlink rx socket buffer size");
+  }
+
+  if (setsockopt(m_sockFd, SOL_SOCKET, SO_SNDBUF, &txBufferSize, sizeof(txBufferSize)) == -1) {
+    throw std::runtime_error("Fail to set netlink tx socket buffer size");
   }
 
   m_addr.nl_family = AF_NETLINK;
@@ -64,7 +82,7 @@ ProcEvent::ProcEvent(const std::shared_ptr<Options> options)
         if (rc == 0) {
           return true;
         } else if (rc == -1) {
-          logError() << "Netlink process receive error";
+          logError() << "NetLink process receive error: " << ::strerror(errno);
           return false;
         }
 

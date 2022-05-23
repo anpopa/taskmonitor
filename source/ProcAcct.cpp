@@ -137,10 +137,7 @@ ProcAcct::ProcAcct(const std::shared_ptr<Options> options)
     txBufferSize = std::stoul(m_options->getFor(Options::Key::TxBufferSize));
     rxBufferSize = std::stoul(m_options->getFor(Options::Key::RxBufferSize));
   } catch (std::exception &e) {
-    logWarn() << "Invalid buffer size in config. Exception: " << e.what() << ". Use defaults";
-    msgBufferSize = 1048576;
-    txBufferSize = 1048576;
-    rxBufferSize = 1048576;
+    throw std::runtime_error("Invalid TX/RX/MSG buffer size in configuration");
   }
 
   m_nlSock = nl_socket_alloc();
