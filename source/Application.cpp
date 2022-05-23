@@ -37,6 +37,8 @@ static bool shouldStartUDSServer(const std::shared_ptr<tkm::monitor::Options> op
 Application::Application(const string &name, const string &description, const string &configFile)
 : bswi::app::IApplication(name, description)
 {
+  bool profModeEnabled = false;
+
   if (Application::appInstance != nullptr) {
     throw bswi::except::SingleInstance();
   }
@@ -44,19 +46,23 @@ Application::Application(const string &name, const string &description, const st
 
   m_options = std::make_shared<Options>(configFile);
 
-  // Set update lanes intervals based on runtime mode
-  m_fastLaneInterval = std::stoul(m_options->getFor(Options::Key::ProdModeFastLaneInt));
-  m_paceLaneInterval = std::stoul(m_options->getFor(Options::Key::ProdModePaceLaneInt));
-  m_slowLaneInterval = std::stoul(m_options->getFor(Options::Key::ProdModeSlowLaneInt));
-
   auto profCond = m_options->getFor(Options::Key::ProfModeIfPath);
   if (profCond != tkmDefaults.valFor(Defaults::Val::None)) {
     if (std::filesystem::exists(profCond)) {
-      m_fastLaneInterval = std::stoul(m_options->getFor(Options::Key::ProfModeFastLaneInt));
-      m_paceLaneInterval = std::stoul(m_options->getFor(Options::Key::ProfModePaceLaneInt));
-      m_slowLaneInterval = std::stoul(m_options->getFor(Options::Key::ProfModeSlowLaneInt));
       logInfo() << "Profiling mode enabled";
+      profModeEnabled = true;
     }
+  }
+
+  // Set update lanes intervals based on runtime mode
+  if (profModeEnabled) {
+    m_fastLaneInterval = std::stoul(m_options->getFor(Options::Key::ProfModeFastLaneInt));
+    m_paceLaneInterval = std::stoul(m_options->getFor(Options::Key::ProfModePaceLaneInt));
+    m_slowLaneInterval = std::stoul(m_options->getFor(Options::Key::ProfModeSlowLaneInt));
+  } else {
+    m_fastLaneInterval = std::stoul(m_options->getFor(Options::Key::ProdModeFastLaneInt));
+    m_paceLaneInterval = std::stoul(m_options->getFor(Options::Key::ProdModePaceLaneInt));
+    m_slowLaneInterval = std::stoul(m_options->getFor(Options::Key::ProdModeSlowLaneInt));
   }
 
   logDebug() << "Update lanes interval fast=" << m_fastLaneInterval
@@ -127,13 +133,18 @@ Application::Application(const string &name, const string &description, const st
   m_dispatcher = std::make_unique<Dispatcher>(m_options);
   m_dispatcher->enableEvents();
 
+  // Create and start lanes timers
   enableUpdateLanes();
+
+  // Enable watchdog timer
   startWatchdog();
 
-  // After init we can lower or priority if configured
-  if (m_options->getFor(Options::Key::SelfLowerPriority) ==
-      tkmDefaults.valFor(Defaults::Val::True)) {
-    ::nice(19);
+  // After init we can lower or priority if configured in production mode
+  if (!profModeEnabled) {
+    if (m_options->getFor(Options::Key::SelfLowerPriority) ==
+        tkmDefaults.valFor(Defaults::Val::True)) {
+      ::nice(19);
+    }
   }
 }
 

@@ -6,48 +6,74 @@
 ; Monitor configuration options
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 [monitor]
+; Set program runtime directory
 RuntimeDirectory=/run/taskmonitor
-RxBufferSize=1048576
-TxBufferSize=1048576
+; Set rx sockets buffer size
+RxBufferSize=524288
+; Set tx sockets buffer size
+TxBufferSize=524288
+; Set libnl msg buffer size
 MsgBufferSize=1048576
+; Lower service priority value after init in production mode
 SelfLowerPriority=true
+; Read existing processes when service starts and create ProcEntries
 ReadProcAtInit=true
+; Enable TCP server module
 EnableTCPServer=true
+; Enable UDP server module
 EnableUDSServer=false
+; LXC containers path if WITH_LXC feature is enabled
 ContainersPath=/var/lib/lxc
-ProfModeIfPath=none
+; Set a path to determine at runtime profiling mode. If path exists profiling
+; mode is set. If set to 'none' or path does not exist production mode is
+; selected by default
+ProfModeIfPath=/run/taskmonitor
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Production mode options
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 [production-mode]
+; Set FastLane time interval in nanoseconds. Minimium value is 1000000 (1 sec)
 FastLaneInterval=10000000
+; Set PaceLane time interval in nanoseconds. Minimium value is 1000000 (1 sec)
 PaceLaneInterval=30000000
+; Set SlowLane time interval in nanoseconds. Minimium value is 1000000 (1 sec)
 SlowLaneInterval=60000000
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; Proiling mode options
+; Profiling mode options
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 [profiling-mode]
+; Set FastLane time interval in nanoseconds. Minimium value is 1000000 (1 sec)
 FastLaneInterval=1000000
+; Set PaceLane time interval in nanoseconds. Minimium value is 1000000 (1 sec)
 PaceLaneInterval=5000000
+; Set SlowLane time interval in nanoseconds. Minimium value is 1000000 (1 sec)
 SlowLaneInterval=10000000
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; TCPServer options
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 [tcpserver]
+; Set network address TCPServer module should bind and listen the server port.
+; If set to 'any' will bind to all addresses
 ServerAddress=any
+; Set TCPServer port to listen for connections. Default 3357
 ServerPort=3357
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; UDSServer options
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 [udsserver]
+; Set UDSServer filesystem socket path
 SocketPath=/run/taskmonitor/taskmonitor.sock
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Monitoring blacklist for process accounting
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Each line is matched by string compare with process name (aka. comm)
+; The format is <string>=ignore. If one of the line proprieties matches the PID
+; will not be monitored for ProcInfo or ProcAcct
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 [blacklist]
 kworker=ignore
