@@ -163,6 +163,33 @@ void ProcRegistry::addProcEntry(int pid)
   }
 }
 
+void ProcRegistry::updProcEntry(int pid)
+{
+  m_procList.foreach ([this, pid](const std::shared_ptr<ProcEntry> &entry) {
+    if (entry->getPid() == pid) {
+      std::string procName;
+
+      try {
+        procName = getProcNameForPID(pid);
+      } catch (...) {
+        logWarn() << "Proc entry removed before entry updated";
+        return;
+      }
+
+      if (entry->getName() == procName) {
+        return;
+      }
+
+      if (isBlacklisted(procName)) {
+        m_procList.remove(entry);
+      } else {
+        entry->setName(procName);
+      }
+    }
+  });
+  m_procList.commit(); // sync commit
+}
+
 void ProcRegistry::remProcEntry(int pid)
 {
   m_procList.foreach ([this, pid](const std::shared_ptr<ProcEntry> &entry) {
@@ -200,7 +227,6 @@ bool ProcRegistry::isBlacklisted(const std::string &name)
       }
     }
   }
-
   return false;
 }
 
@@ -249,7 +275,6 @@ auto ProcRegistry::getProcNameForPID(int pid) -> std::string
 void ProcRegistry::createProcessEntry(int pid, const std::string &name)
 {
   std::shared_ptr<ProcEntry> procEntry = nullptr;
-  uint64_t interval = 1000000;
 
   try {
     procEntry = std::make_shared<ProcEntry>(pid, name);
@@ -265,9 +290,7 @@ void ProcRegistry::createProcessEntry(int pid, const std::string &name)
   logDebug() << "Add process monitoring for pid=" << pid << " name=" << name
              << " context=" << procEntry->getInfo().ctx_name();
   m_procList.append(procEntry);
-
-  ProcRegistry::Request rq = {.action = ProcRegistry::Action::CommitProcList};
-  pushRequest(rq);
+  m_procList.commit(); // sync commit
 
   bool found = false;
   m_contextList.foreach ([&found, &procEntry](const std::shared_ptr<ContextEntry> &ctxEntry) {
@@ -280,9 +303,7 @@ void ProcRegistry::createProcessEntry(int pid, const std::string &name)
     std::shared_ptr<ContextEntry> ctxEntry = std::make_shared<ContextEntry>(
         procEntry->getInfo().ctx_id(), procEntry->getInfo().ctx_name());
     m_contextList.append(ctxEntry);
-
-    ProcRegistry::Request rq = {.action = ProcRegistry::Action::CommitContextList};
-    pushRequest(rq);
+    m_contextList.commit(); // sync commit
   }
 }
 

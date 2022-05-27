@@ -108,6 +108,7 @@ ProcEvent::ProcEvent(const std::shared_ptr<Options> options)
                     << " child_pid=" << nlcn_msg.proc_ev.event_data.fork.child_pid
                     << " child_tgid=" << nlcn_msg.proc_ev.event_data.fork.child_tgid;
           m_eventData.set_fork_count(m_eventData.fork_count() + 1);
+          App()->getProcRegistry()->addProcEntry(nlcn_msg.proc_ev.event_data.fork.child_pid);
           break;
         }
         case proc_event::what::PROC_EVENT_EXEC: {
@@ -115,7 +116,7 @@ ProcEvent::ProcEvent(const std::shared_ptr<Options> options)
                     << " process_pid=" << nlcn_msg.proc_ev.event_data.exec.process_pid
                     << " process_tgid=" << nlcn_msg.proc_ev.event_data.exec.process_tgid;
           m_eventData.set_exec_count(m_eventData.exec_count() + 1);
-          App()->getProcRegistry()->addProcEntry(nlcn_msg.proc_ev.event_data.exec.process_pid);
+          App()->getProcRegistry()->updProcEntry(nlcn_msg.proc_ev.event_data.exec.process_pid);
           break;
         }
         case proc_event::what::PROC_EVENT_UID: {

@@ -44,6 +44,11 @@ public:
   void setInfo(tkm::msg::monitor::ProcInfo &info) { m_info.CopyFrom(info); }
 
   auto getName(void) -> std::string & { return m_name; }
+  void setName(const std::string &name)
+  {
+    m_name = name;
+    m_info.set_comm(name);
+  }
   auto getPid(void) -> int { return m_pid; }
   auto getContextId(void) -> uint64_t { return m_info.ctx_id(); }
 

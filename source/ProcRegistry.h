@@ -57,6 +57,7 @@ public:
   void initFromProc(void);
 
   void addProcEntry(int pid);
+  void updProcEntry(int pid);
   void remProcEntry(int pid);
   void remProcEntry(std::string &name);
   auto getProcEntry(int pid) -> const std::shared_ptr<ProcEntry>;
