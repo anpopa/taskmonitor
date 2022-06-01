@@ -143,7 +143,7 @@ Application::Application(const string &name, const string &description, const st
   if (!profModeEnabled) {
     if (m_options->getFor(Options::Key::SelfLowerPriority) ==
         tkmDefaults.valFor(Defaults::Val::True)) {
-      ::nice(19);
+      (void)::nice(19);
     }
   }
 }
