@@ -44,59 +44,59 @@ static void processDelayAcct(struct taskstats *t)
     return;
   }
 
-  tkm::msg::monitor::ProcAcct acct;
+  entry->getAcct().set_ac_comm(t->ac_comm);
+  entry->getAcct().set_ac_uid(t->ac_uid);
+  entry->getAcct().set_ac_gid(t->ac_gid);
+  entry->getAcct().set_ac_pid(t->ac_pid);
+  entry->getAcct().set_ac_ppid(t->ac_ppid);
+  entry->getAcct().set_ac_utime(t->ac_utime);
+  entry->getAcct().set_ac_stime(t->ac_stime);
 
-  acct.set_ac_comm(t->ac_comm);
-  acct.set_ac_uid(t->ac_uid);
-  acct.set_ac_gid(t->ac_gid);
-  acct.set_ac_pid(t->ac_pid);
-  acct.set_ac_ppid(t->ac_ppid);
-  acct.set_ac_utime(t->ac_utime);
-  acct.set_ac_stime(t->ac_stime);
+  entry->getAcct().mutable_cpu()->set_cpu_count(t->cpu_count);
+  entry->getAcct().mutable_cpu()->set_cpu_run_real_total(t->cpu_run_real_total);
+  entry->getAcct().mutable_cpu()->set_cpu_run_virtual_total(t->cpu_run_virtual_total);
+  entry->getAcct().mutable_cpu()->set_cpu_delay_total(t->cpu_run_virtual_total);
+  entry->getAcct().mutable_cpu()->set_cpu_delay_average(
+      average_ms((double) t->cpu_delay_total, t->cpu_count));
 
-  acct.mutable_cpu()->set_cpu_count(t->cpu_count);
-  acct.mutable_cpu()->set_cpu_run_real_total(t->cpu_run_real_total);
-  acct.mutable_cpu()->set_cpu_run_virtual_total(t->cpu_run_virtual_total);
-  acct.mutable_cpu()->set_cpu_delay_total(t->cpu_run_virtual_total);
-  acct.mutable_cpu()->set_cpu_delay_average(average_ms((double) t->cpu_delay_total, t->cpu_count));
+  entry->getAcct().mutable_mem()->set_coremem(t->coremem);
+  entry->getAcct().mutable_mem()->set_virtmem(t->virtmem);
+  entry->getAcct().mutable_mem()->set_hiwater_rss(t->hiwater_rss);
+  entry->getAcct().mutable_mem()->set_hiwater_vm(t->hiwater_vm);
 
-  acct.mutable_mem()->set_coremem(t->coremem);
-  acct.mutable_mem()->set_virtmem(t->virtmem);
-  acct.mutable_mem()->set_hiwater_rss(t->hiwater_rss);
-  acct.mutable_mem()->set_hiwater_vm(t->hiwater_vm);
+  entry->getAcct().mutable_ctx()->set_nvcsw(t->nvcsw);
+  entry->getAcct().mutable_ctx()->set_nivcsw(t->nivcsw);
 
-  acct.mutable_ctx()->set_nvcsw(t->nvcsw);
-  acct.mutable_ctx()->set_nivcsw(t->nivcsw);
+  entry->getAcct().mutable_io()->set_blkio_count(t->blkio_count);
+  entry->getAcct().mutable_io()->set_blkio_delay_total(t->blkio_delay_total);
+  entry->getAcct().mutable_io()->set_blkio_delay_average(
+      average_ms(t->blkio_delay_total, t->blkio_count));
+  entry->getAcct().mutable_io()->set_read_bytes(t->read_bytes);
+  entry->getAcct().mutable_io()->set_write_bytes(t->write_bytes);
+  entry->getAcct().mutable_io()->set_read_char(t->read_char);
+  entry->getAcct().mutable_io()->set_write_char(t->write_char);
+  entry->getAcct().mutable_io()->set_read_syscalls(t->read_syscalls);
+  entry->getAcct().mutable_io()->set_write_syscalls(t->write_syscalls);
 
-  acct.mutable_io()->set_blkio_count(t->blkio_count);
-  acct.mutable_io()->set_blkio_delay_total(t->blkio_delay_total);
-  acct.mutable_io()->set_blkio_delay_average(average_ms(t->blkio_delay_total, t->blkio_count));
-  acct.mutable_io()->set_read_bytes(t->read_bytes);
-  acct.mutable_io()->set_write_bytes(t->write_bytes);
-  acct.mutable_io()->set_read_char(t->read_char);
-  acct.mutable_io()->set_write_char(t->write_char);
-  acct.mutable_io()->set_read_syscalls(t->read_syscalls);
-  acct.mutable_io()->set_write_syscalls(t->write_syscalls);
+  entry->getAcct().mutable_swp()->set_swapin_count(t->swapin_count);
+  entry->getAcct().mutable_swp()->set_swapin_delay_total(t->swapin_delay_total);
+  entry->getAcct().mutable_swp()->set_swapin_delay_average(
+      average_ms(t->swapin_delay_total, t->swapin_count));
 
-  acct.mutable_swp()->set_swapin_count(t->swapin_count);
-  acct.mutable_swp()->set_swapin_delay_total(t->swapin_delay_total);
-  acct.mutable_swp()->set_swapin_delay_average(average_ms(t->swapin_delay_total, t->swapin_count));
-
-  acct.mutable_reclaim()->set_freepages_count(t->freepages_count);
-  acct.mutable_reclaim()->set_freepages_delay_total(t->freepages_delay_total);
-  acct.mutable_reclaim()->set_freepages_delay_average(
+  entry->getAcct().mutable_reclaim()->set_freepages_count(t->freepages_count);
+  entry->getAcct().mutable_reclaim()->set_freepages_delay_total(t->freepages_delay_total);
+  entry->getAcct().mutable_reclaim()->set_freepages_delay_average(
       average_ms(t->freepages_delay_total, t->freepages_count));
 
-  acct.mutable_thrashing()->set_thrashing_count(t->thrashing_count);
-  acct.mutable_thrashing()->set_thrashing_delay_total(t->thrashing_delay_total);
-  acct.mutable_thrashing()->set_thrashing_delay_average(
+  entry->getAcct().mutable_thrashing()->set_thrashing_count(t->thrashing_count);
+  entry->getAcct().mutable_thrashing()->set_thrashing_delay_total(t->thrashing_delay_total);
+  entry->getAcct().mutable_thrashing()->set_thrashing_delay_average(
       average_ms(t->thrashing_delay_total, t->thrashing_count));
 
-  entry->setAcct(acct);
   entry->setUpdateProcAcctPending(false);
 }
 
-int callbackStatisticsMessage(struct nl_msg *nlmsg, void *arg)
+int callbackStatisticsMessage(struct nl_msg *nlmsg, void *)
 {
   struct nlmsghdr *nlhdr;
   struct nlattr *nlattrs[TASKSTATS_TYPE_MAX + 1];
@@ -139,6 +139,8 @@ ProcAcct::ProcAcct(const std::shared_ptr<Options> options)
   } catch (std::exception &e) {
     throw std::runtime_error("Invalid TX/RX/MSG buffer size in configuration");
   }
+  logDebug() << "Netlink buffers msgBufferSize=" << msgBufferSize
+             << " txBufferSize=" << txBufferSize << " rxBufferSize=" << rxBufferSize;
 
   m_nlSock = nl_socket_alloc();
   if (m_nlSock == nullptr) {
@@ -155,6 +157,9 @@ ProcAcct::ProcAcct(const std::shared_ptr<Options> options)
     logError() << "Error setting socket nonblocking: " << nl_geterror(err);
     throw std::runtime_error("Fail to set nonblocking netlink socket");
   }
+
+  // Disable sequence number check since processes might die during updated
+  nl_socket_disable_seq_check(m_nlSock);
 
   m_sockFd = nl_socket_get_fd(m_nlSock);
   if (m_sockFd < 0) {
