@@ -10,8 +10,6 @@ cmake-build-debug/
 # Packages
 packages
 
-*.kdev4
-
 # Node artifact files
 node_modules/
 dist/
