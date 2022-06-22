@@ -170,6 +170,9 @@ ProcAcct::ProcAcct(const std::shared_ptr<Options> options)
     throw std::runtime_error("Fail to set socket msg buffer size");
   }
 
+  // Disable sequence number check since processes might die during updated
+  nl_socket_disable_seq_check(m_nlSock);
+
   if ((m_nlFamily = genl_ctrl_resolve(m_nlSock, TASKSTATS_GENL_NAME)) == 0) {
     logError() << "Error retrieving family id: " << nl_geterror(err);
     throw std::runtime_error("Fail to retirve family id");
