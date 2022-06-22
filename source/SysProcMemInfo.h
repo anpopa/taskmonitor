@@ -37,7 +37,7 @@ public:
 
 public:
   explicit SysProcMemInfo(const std::shared_ptr<Options> options);
-  ~SysProcMemInfo() = default;
+  virtual ~SysProcMemInfo() = default;
 
 public:
   SysProcMemInfo(SysProcMemInfo const &) = delete;

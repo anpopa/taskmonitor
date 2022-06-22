@@ -58,7 +58,7 @@ public:
 
 public:
   explicit SysProcDiskStats(const std::shared_ptr<Options> options);
-  ~SysProcDiskStats() = default;
+  virtual ~SysProcDiskStats() = default;
 
 public:
   SysProcDiskStats(SysProcDiskStats const &) = delete;

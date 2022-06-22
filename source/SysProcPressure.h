@@ -59,7 +59,7 @@ public:
   } Request;
 
   explicit SysProcPressure(const std::shared_ptr<Options> options);
-  ~SysProcPressure() = default;
+  virtual ~SysProcPressure() = default;
 
 public:
   SysProcPressure(SysProcPressure const &) = delete;

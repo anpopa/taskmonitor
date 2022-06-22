@@ -78,7 +78,7 @@ public:
 
 public:
   explicit SysProcStat(const std::shared_ptr<Options> options);
-  ~SysProcStat() = default;
+  virtual ~SysProcStat() = default;
 
 public:
   SysProcStat(SysProcStat const &) = delete;

@@ -40,8 +40,8 @@ public:
   }
   auto getUpdateLane(void) -> UpdateLane { return m_updateLane; }
   void setUpdateLane(UpdateLane lane) { m_updateLane = lane; }
-  virtual bool update(const std::string &sourceName) { return update(); };
-  virtual bool update(UpdateLane lane) { return update(); };
+  virtual bool update(const std::string &) { return update(); };
+  virtual bool update(UpdateLane) { return update(); };
   virtual bool update(void) = 0;
 
 protected:

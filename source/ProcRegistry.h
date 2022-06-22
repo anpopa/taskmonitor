@@ -46,7 +46,7 @@ public:
 
 public:
   explicit ProcRegistry(const std::shared_ptr<Options> options);
-  ~ProcRegistry() = default;
+  virtual ~ProcRegistry() = default;
 
 public:
   ProcRegistry(ProcRegistry const &) = delete;

@@ -26,7 +26,7 @@ class ProcEntry : public IDataSource, public std::enable_shared_from_this<ProcEn
 {
 public:
   explicit ProcEntry(int pid, const std::string &name);
-  ~ProcEntry() = default;
+  virtual ~ProcEntry() = default;
 
 public:
   ProcEntry(ProcEntry const &) = delete;

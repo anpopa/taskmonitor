@@ -32,7 +32,6 @@ namespace tkm::monitor
 Application *Application::appInstance = nullptr;
 
 static bool shouldStartTCPServer(const std::shared_ptr<tkm::monitor::Options> opts);
-static bool shouldStartUDSServer(const std::shared_ptr<tkm::monitor::Options> opts);
 
 Application::Application(const string &name, const string &description, const string &configFile)
 : bswi::app::IApplication(name, description)
@@ -143,7 +142,9 @@ Application::Application(const string &name, const string &description, const st
   if (!profModeEnabled) {
     if (m_options->getFor(Options::Key::SelfLowerPriority) ==
         tkmDefaults.valFor(Defaults::Val::True)) {
-      (void)::nice(19);
+      if (nice(19) == -1) {
+        logWarn() << "Failed to set nice value. Error: " << strerror(errno);
+      }
     }
   }
 }
@@ -151,7 +152,7 @@ Application::Application(const string &name, const string &description, const st
 void Application::enableUpdateLanes(void)
 {
   m_fastLaneTimer = std::make_shared<Timer>("FastLaneTimer", [this]() {
-    m_dataSources.foreach ([this](const std::shared_ptr<IDataSource> &entry) {
+    m_dataSources.foreach ([](const std::shared_ptr<IDataSource> &entry) {
       if (entry->getUpdateLane() == IDataSource::UpdateLane::Fast) {
         entry->update();
       } else if (entry->getUpdateLane() == IDataSource::UpdateLane::Any) {
@@ -162,7 +163,7 @@ void Application::enableUpdateLanes(void)
   });
 
   m_paceLaneTimer = std::make_shared<Timer>("PaceLaneTimer", [this]() {
-    m_dataSources.foreach ([this](const std::shared_ptr<IDataSource> &entry) {
+    m_dataSources.foreach ([](const std::shared_ptr<IDataSource> &entry) {
       if (entry->getUpdateLane() == IDataSource::UpdateLane::Pace) {
         entry->update();
       } else if (entry->getUpdateLane() == IDataSource::UpdateLane::Any) {
@@ -173,7 +174,7 @@ void Application::enableUpdateLanes(void)
   });
 
   m_slowLaneTimer = std::make_shared<Timer>("SlowLaneTimer", [this]() {
-    m_dataSources.foreach ([this](const std::shared_ptr<IDataSource> &entry) {
+    m_dataSources.foreach ([](const std::shared_ptr<IDataSource> &entry) {
       if (entry->getUpdateLane() == IDataSource::UpdateLane::Slow) {
         entry->update();
       } else if (entry->getUpdateLane() == IDataSource::UpdateLane::Any) {
@@ -201,7 +202,7 @@ void Application::startWatchdog(void)
   if (status > 0) {
     logInfo() << "Systemd watchdog enabled with timeout seconds: " << USEC2SEC(usec);
 
-    auto timer = std::make_shared<Timer>("Watchdog", [this]() {
+    auto timer = std::make_shared<Timer>("Watchdog", []() {
       if (sd_notify(0, "WATCHDOG=1") < 0) {
         logWarn() << "Fail to send the heartbeet to systemd";
       } else {
