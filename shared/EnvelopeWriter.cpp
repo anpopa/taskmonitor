@@ -48,7 +48,7 @@ auto EnvelopeWriter::send(const tkm::msg::Envelope &envelope) -> IAsyncEnvelope:
   pbio::ArrayOutputStream outputArray(m_buffer + m_bufferOffset, sizeof(m_buffer) - m_bufferOffset);
   pbio::CodedOutputStream codedOutput(&outputArray);
 
-  auto initialBufferOffset = m_bufferOffset;
+  const auto initialBufferOffset = m_bufferOffset;
   codedOutput.WriteVarint32(envelopeSize);
   m_bufferOffset += sizeof(uint64_t);
 

@@ -47,7 +47,7 @@ public:
   };
 
 public:
-  Options(const std::string &configFile);
+  explicit Options(const std::string &configFile);
 
   auto getFor(Key key) -> std::string const;
   bool hasConfigFile() { return m_configFile != nullptr; }

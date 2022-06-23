@@ -35,9 +35,9 @@ protected:
 };
 
 GTestApplication::GTestApplication()
+: m_app(make_unique<Application>(
+      "TKM", "TaskMonitor Application", tkmDefaults.getFor(Defaults::Default::ConfPath)))
 {
-  m_app = make_unique<Application>(
-      "TKM", "TaskMonitor Application", tkmDefaults.getFor(Defaults::Default::ConfPath));
 }
 
 GTestApplication::~GTestApplication() {}

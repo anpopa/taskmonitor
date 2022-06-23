@@ -34,8 +34,8 @@ public:
 
 public:
   auto getShared(void) -> std::shared_ptr<ProcEntry> { return shared_from_this(); }
-  bool update(const std::string &sourceName);
-  bool update(void);
+  bool update(const std::string &sourceName) override;
+  bool update(void) override;
 
   auto getAcct(void) -> tkm::msg::monitor::ProcAcct & { return m_acct; }
   void setAcct(tkm::msg::monitor::ProcAcct &acct) { m_acct.CopyFrom(acct); }

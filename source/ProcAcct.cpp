@@ -101,7 +101,6 @@ int callbackStatisticsMessage(struct nl_msg *nlmsg, void *)
   struct nlmsghdr *nlhdr;
   struct nlattr *nlattrs[TASKSTATS_TYPE_MAX + 1];
   struct nlattr *nlattr;
-  struct taskstats *stats;
   int rem, answer;
 
   nlhdr = nlmsg_hdr(nlmsg);
@@ -111,7 +110,7 @@ int callbackStatisticsMessage(struct nl_msg *nlmsg, void *)
   }
 
   if ((nlattr = nlattrs[TASKSTATS_TYPE_AGGR_PID]) || (nlattr = nlattrs[TASKSTATS_TYPE_TGID])) {
-    stats = static_cast<struct taskstats *>(
+    struct taskstats *stats = static_cast<struct taskstats *>(
         nla_data(nla_next(static_cast<struct nlattr *>(nla_data(nlattr)), &rem)));
     processDelayAcct(stats);
   } else {

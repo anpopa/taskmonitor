@@ -32,7 +32,7 @@ namespace tkm::monitor
 class TCPServer : public Pollable, public std::enable_shared_from_this<TCPServer>
 {
 public:
-  TCPServer(const std::shared_ptr<Options> options);
+  explicit TCPServer(const std::shared_ptr<Options> options);
   ~TCPServer();
 
 public:

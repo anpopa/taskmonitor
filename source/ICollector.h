@@ -33,11 +33,10 @@ class ICollector : public Pollable
 {
 public:
   explicit ICollector(const std::string &name, int fd)
-  : Pollable(name)
-  , m_fd(fd)
+  : Pollable(name, fd)
+  , m_reader(std::make_unique<EnvelopeReader>(fd))
+  , m_writer(std::make_unique<EnvelopeWriter>(fd))
   {
-    m_reader = std::make_unique<EnvelopeReader>(fd);
-    m_writer = std::make_unique<EnvelopeWriter>(fd);
   }
 
   ~ICollector() { disconnect(); }
@@ -90,9 +89,6 @@ public:
 private:
   std::unique_ptr<EnvelopeReader> m_reader = nullptr;
   std::unique_ptr<EnvelopeWriter> m_writer = nullptr;
-
-protected:
-  int m_fd = -1;
 };
 
 } // namespace tkm::monitor

@@ -50,11 +50,10 @@ static auto getContainerNameForContext(const std::string &contPath, uint64_t ctx
 
 auto base64Encode(unsigned char const *bytes_to_encode, unsigned int in_len) -> std::string
 {
-  std::string ret;
-  int i = 0;
-  int j = 0;
   unsigned char char_array_3[3];
   unsigned char char_array_4[4];
+  std::string ret;
+  int i = 0;
 
   while (in_len--) {
     char_array_3[i++] = *(bytes_to_encode++);
@@ -71,6 +70,8 @@ auto base64Encode(unsigned char const *bytes_to_encode, unsigned int in_len) -> 
   }
 
   if (i) {
+    int j;
+
     for (j = i; j < 3; j++)
       char_array_3[j] = '\0';
 
@@ -91,12 +92,11 @@ auto base64Encode(unsigned char const *bytes_to_encode, unsigned int in_len) -> 
 
 auto base64Decode(std::string const &encoded_string) -> std::string
 {
-  int in_len = encoded_string.size();
-  int i = 0;
-  int j = 0;
-  int in_ = 0;
   unsigned char char_array_4[4], char_array_3[3];
+  int in_len = encoded_string.size();
   std::string ret;
+  int in_ = 0;
+  int i = 0;
 
   while (in_len-- && (encoded_string[in_] != '=') && is_base64(encoded_string[in_])) {
     char_array_4[i++] = encoded_string[in_];
@@ -116,6 +116,8 @@ auto base64Decode(std::string const &encoded_string) -> std::string
   }
 
   if (i) {
+    int j;
+
     for (j = i; j < 4; j++)
       char_array_4[j] = 0;
 
@@ -308,6 +310,7 @@ static auto getContainerNameForContext(const std::string &contPath, uint64_t ctx
       auto pid = container->init_pid(container);
       if (getContextId(pid) == ctxId) {
         contName = std::string(name);
+        found = true;
       }
     }
   }

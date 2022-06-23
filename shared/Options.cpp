@@ -18,8 +18,8 @@ namespace tkm::monitor
 {
 
 Options::Options(const string &configFile)
+: m_configFile(std::make_shared<bswi::kf::KeyFile>(configFile))
 {
-  m_configFile = std::make_shared<bswi::kf::KeyFile>(configFile);
   if (m_configFile->parseFile() != 0) {
     logWarn() << "Fail to parse config file: " << configFile;
     m_configFile.reset();

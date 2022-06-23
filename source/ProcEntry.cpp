@@ -31,7 +31,7 @@ ProcEntry::ProcEntry(int pid, const std::string &name)
 
 bool ProcEntry::updateProcAcct(void)
 {
-  if (App()->getProcAcctCollectorCounter() <= 0) {
+  if (App()->getProcAcctCollectorCounter() == 0) {
     return true;
   }
 
