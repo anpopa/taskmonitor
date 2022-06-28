@@ -33,22 +33,22 @@ ProfModeIfPath=/run/taskmonitor
 ; Production mode options
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 [production-mode]
-; Set FastLane time interval in nanoseconds. Minimium value is 1000000 (1 sec)
+; Set FastLane time interval in microseconds. Minimium value is 1000000 (1 sec)
 FastLaneInterval=10000000
-; Set PaceLane time interval in nanoseconds. Minimium value is 1000000 (1 sec)
+; Set PaceLane time interval in microseconds. Minimium value is 1000000 (1 sec)
 PaceLaneInterval=30000000
-; Set SlowLane time interval in nanoseconds. Minimium value is 1000000 (1 sec)
+; Set SlowLane time interval in microseconds. Minimium value is 1000000 (1 sec)
 SlowLaneInterval=60000000
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Profiling mode options
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 [profiling-mode]
-; Set FastLane time interval in nanoseconds. Minimium value is 1000000 (1 sec)
+; Set FastLane time interval in microseconds. Minimium value is 1000000 (1 sec)
 FastLaneInterval=1000000
-; Set PaceLane time interval in nanoseconds. Minimium value is 1000000 (1 sec)
+; Set PaceLane time interval in microseconds. Minimium value is 1000000 (1 sec)
 PaceLaneInterval=5000000
-; Set SlowLane time interval in nanoseconds. Minimium value is 1000000 (1 sec)
+; Set SlowLane time interval in microseconds. Minimium value is 1000000 (1 sec)
 SlowLaneInterval=10000000
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

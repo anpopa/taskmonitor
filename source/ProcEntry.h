@@ -13,6 +13,7 @@
 
 #include "IDataSource.h"
 #include "Monitor.pb.h"
+#include <chrono>
 #include <cstdint>
 #include <memory>
 #include <string>
@@ -62,6 +63,7 @@ private:
   bool updateProcInfo(void);
 
 private:
+  std::chrono::time_point<std::chrono::steady_clock> m_lastUpdateTime{};
   tkm::msg::monitor::ProcAcct m_acct;
   tkm::msg::monitor::ProcInfo m_info;
   bool m_updateProcAcctPending = false;

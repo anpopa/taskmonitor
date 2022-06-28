@@ -11,8 +11,11 @@
 
 #include "SysProcStat.h"
 #include "Application.h"
+#include "Logger.h"
 #include "Monitor.pb.h"
 
+#include <chrono>
+#include <cstdint>
 #include <fstream>
 #include <iostream>
 #include <memory>
@@ -50,9 +53,20 @@ void CPUStat::updateStats(uint64_t newUserJiffies, uint64_t newSystemJiffies)
   m_lastUserJiffies = newUserJiffies;
   m_lastSystemJiffies = newSystemJiffies;
 
-  m_userPercent = jiffiesToPercent(userJiffiesDiff);
-  m_sysPercent = jiffiesToPercent(sysJiffiesDiff);
-  m_totalPercent = jiffiesToPercent(userJiffiesDiff + sysJiffiesDiff);
+  auto timeNow = std::chrono::steady_clock::now();
+  using USec = std::chrono::microseconds;
+
+  if (m_lastUpdateTime.time_since_epoch().count() == 0) {
+    m_userPercent = m_sysPercent = m_totalPercent = 0;
+    m_lastUpdateTime = timeNow;
+  } else {
+    auto durationUs = std::chrono::duration_cast<USec>(timeNow - m_lastUpdateTime).count();
+    m_lastUpdateTime = timeNow;
+
+    m_userPercent = jiffiesToPercent(userJiffiesDiff, durationUs);
+    m_sysPercent = jiffiesToPercent(sysJiffiesDiff, durationUs);
+    m_totalPercent = jiffiesToPercent(userJiffiesDiff + sysJiffiesDiff, durationUs);
+  }
 
   m_data.set_all(m_totalPercent);
   m_data.set_usr(m_userPercent);
@@ -178,8 +192,7 @@ static bool doUpdateStats(const std::shared_ptr<SysProcStat> mgr,
         });
 
     if (!found) {
-      std::shared_ptr<CPUStat> entry =
-          std::make_shared<CPUStat>(tokens[statCpuNamePos], mgr->getUpdateInterval());
+      std::shared_ptr<CPUStat> entry = std::make_shared<CPUStat>(tokens[statCpuNamePos]);
 
       logInfo() << "Adding new cpu core '" << entry->getName() << "' for statistics";
       mgr->getCPUStatList().append(entry);

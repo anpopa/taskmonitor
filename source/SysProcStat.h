@@ -11,6 +11,7 @@
 
 #pragma once
 
+#include <chrono>
 #include <cstdint>
 #include <ctime>
 #include <time.h>
@@ -31,8 +32,7 @@ namespace tkm::monitor
 
 struct CPUStat : public std::enable_shared_from_this<CPUStat> {
 public:
-  explicit CPUStat(const std::string &name, uint64_t usecInterval)
-  : m_usecInterval(usecInterval)
+  explicit CPUStat(const std::string &name)
   {
     m_sysHZ = sysconf(_SC_CLK_TCK);
     m_data.set_name(name);
@@ -51,14 +51,14 @@ public:
   auto getLastSystemCPUTime(void) -> uint64_t { return (m_lastSystemJiffies * 1000000 / m_sysHZ); }
 
 private:
-  auto jiffiesToPercent(uint64_t jiffies) -> int
+  auto jiffiesToPercent(uint64_t jiffies, uint64_t durationUsec) -> uint16_t
   {
-    return ((jiffies * 1000000 / m_sysHZ) * 100) / m_usecInterval;
+    return ((jiffies * 1000000 / m_sysHZ) * 100) / durationUsec;
   }
 
 private:
   tkm::msg::monitor::CPUStat m_data;
-  uint64_t m_usecInterval = 1000000;
+  std::chrono::time_point<std::chrono::steady_clock> m_lastUpdateTime{};
   uint64_t m_lastUserJiffies = 0;
   uint64_t m_lastSystemJiffies = 0;
   int m_totalPercent = 0;

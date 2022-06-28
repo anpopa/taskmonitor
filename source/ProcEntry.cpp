@@ -134,8 +134,18 @@ bool ProcEntry::updateInfoData(void)
 
     m_info.set_cpu_time(newCPUTime);
 
-    // Our intervals are in nanoseconds so we muliply by ns in s
-    m_info.set_cpu_percent(((newCPUTime - oldCPUTime) * 1000000) / getUpdateInterval());
+    auto timeNow = std::chrono::steady_clock::now();
+    using USec = std::chrono::microseconds;
+
+    if (m_lastUpdateTime.time_since_epoch().count() == 0) {
+      m_lastUpdateTime = timeNow;
+      m_info.set_cpu_percent(0);
+    } else {
+      auto durationUs = std::chrono::duration_cast<USec>(timeNow - m_lastUpdateTime).count();
+      m_lastUpdateTime = timeNow;
+      m_info.set_cpu_percent(((newCPUTime - oldCPUTime) * 1000000) / durationUs);
+    }
+
     m_info.set_mem_vmrss(std::stoul(tokens[23]) * ::sysconf(_SC_PAGESIZE) / 1024);
   }
 
