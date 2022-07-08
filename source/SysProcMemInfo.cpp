@@ -94,7 +94,9 @@ static bool doUpdateStats(const std::shared_ptr<SysProcMemInfo> mgr,
     MemCached,
     SwapTotal,
     SwapFree,
-    SwapCached
+    SwapCached,
+    CmaTotal,
+    CmaFree
   } LineData;
 
   if (!memInfoStream.is_open()) {
@@ -122,6 +124,10 @@ static bool doUpdateStats(const std::shared_ptr<SysProcMemInfo> mgr,
       lineData = LineData::SwapFree;
     } else if (line.find("SwapCached") != std::string::npos) {
       lineData = LineData::SwapCached;
+    } else if (line.find("CmaTotal") != std::string::npos) {
+      lineData = LineData::CmaTotal;
+    } else if (line.find("CmaFree") != std::string::npos) {
+      lineData = LineData::CmaFree;
     }
 
     if (lineData == LineData::Unset)
@@ -157,6 +163,12 @@ static bool doUpdateStats(const std::shared_ptr<SysProcMemInfo> mgr,
       break;
     case LineData::SwapCached:
       mgr->getProcMemInfo().set_swap_cached(std::stoul(tokens[1].c_str()));
+      break;
+    case LineData::CmaTotal:
+      mgr->getProcMemInfo().set_cma_total(std::stoul(tokens[1].c_str()));
+      break;
+    case LineData::CmaFree:
+      mgr->getProcMemInfo().set_cma_free(std::stoul(tokens[1].c_str()));
       break;
     default:
       break;
