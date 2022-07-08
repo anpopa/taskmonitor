@@ -72,6 +72,8 @@ auto main(int argc, char **argv) -> int
   signal(SIGINT, terminate);
   signal(SIGTERM, terminate);
 
+  GOOGLE_PROTOBUF_VERIFY_VERSION;
+
   fs::path configPath(tkmDefaults.getFor(Defaults::Default::ConfPath));
   if (config_path != nullptr) {
     if (!fs::exists(config_path)) {

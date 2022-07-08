@@ -127,20 +127,17 @@ static bool doCreateSession(const std::shared_ptr<UDSCollector> collector)
   sessionInfo.set_hash(collector->id);
   logInfo() << "Send new sessionID=" << sessionInfo.hash();
 
-  // TODO: Don't know how to get LC ID yet
-  sessionInfo.set_lifecycle_id("na");
-  try {
-  } catch (...) {
-    sessionInfo.set_proc_acct_poll_interval(App()->getSlowLaneInterval());
-    sessionInfo.set_proc_info_poll_interval(App()->getPaceLaneInterval());
-    sessionInfo.set_proc_event_poll_interval(App()->getPaceLaneInterval());
-    sessionInfo.set_sys_proc_stat_poll_interval(App()->getFastLaneInterval());
-    sessionInfo.set_sys_proc_meminfo_poll_interval(App()->getFastLaneInterval());
-    sessionInfo.set_sys_proc_diskstats_poll_interval(App()->getPaceLaneInterval());
-    sessionInfo.set_sys_proc_pressure_poll_interval(App()->getPaceLaneInterval());
-    sessionInfo.set_context_information_poll_interval(App()->getPaceLaneInterval());
-    throw std::runtime_error("Fail to process session poll interval data");
-  }
+  sessionInfo.set_fast_lane_interval(App()->getFastLaneInterval());
+  sessionInfo.set_pace_lane_interval(App()->getPaceLaneInterval());
+  sessionInfo.set_slow_lane_interval(App()->getSlowLaneInterval());
+  sessionInfo.add_fast_lane_sources(msg::monitor::SessionInfo_DataSource_SysProcStat);
+  sessionInfo.add_fast_lane_sources(msg::monitor::SessionInfo_DataSource_SysProcMemInfo);
+  sessionInfo.add_pace_lane_sources(msg::monitor::SessionInfo_DataSource_ProcInfo);
+  sessionInfo.add_pace_lane_sources(msg::monitor::SessionInfo_DataSource_ProcEvent);
+  sessionInfo.add_pace_lane_sources(msg::monitor::SessionInfo_DataSource_ContextInfo);
+  sessionInfo.add_pace_lane_sources(msg::monitor::SessionInfo_DataSource_SysProcPressure);
+  sessionInfo.add_pace_lane_sources(msg::monitor::SessionInfo_DataSource_SysProcDiskStats);
+  sessionInfo.add_slow_lane_sources(msg::monitor::SessionInfo_DataSource_ProcAcct);
 
   message.set_type(tkm::msg::monitor::Message::Type::Message_Type_SetSession);
   message.mutable_payload()->PackFrom(sessionInfo);
