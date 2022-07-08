@@ -108,7 +108,12 @@ ProcEvent::ProcEvent(const std::shared_ptr<Options> options)
                     << " child_pid=" << nlcn_msg.proc_ev.event_data.fork.child_pid
                     << " child_tgid=" << nlcn_msg.proc_ev.event_data.fork.child_tgid;
           m_eventData.set_fork_count(m_eventData.fork_count() + 1);
-          App()->getProcRegistry()->addProcEntry(nlcn_msg.proc_ev.event_data.fork.child_pid);
+
+          // We only add a process entry in registry for processes
+          if (nlcn_msg.proc_ev.event_data.fork.child_pid ==
+              nlcn_msg.proc_ev.event_data.fork.child_tgid) {
+            App()->getProcRegistry()->addProcEntry(nlcn_msg.proc_ev.event_data.fork.child_tgid);
+          }
           break;
         }
         case proc_event::what::PROC_EVENT_EXEC: {
@@ -124,7 +129,7 @@ ProcEvent::ProcEvent(const std::shared_ptr<Options> options)
                     << " process_pid=" << nlcn_msg.proc_ev.event_data.id.process_pid
                     << " process_tgid=" << nlcn_msg.proc_ev.event_data.id.process_tgid
                     << " ruid=" << nlcn_msg.proc_ev.event_data.id.r.ruid
-                    << " ruid=" << nlcn_msg.proc_ev.event_data.id.e.euid;
+                    << " euid=" << nlcn_msg.proc_ev.event_data.id.e.euid;
           m_eventData.set_uid_count(m_eventData.uid_count() + 1);
           break;
         }
@@ -133,7 +138,7 @@ ProcEvent::ProcEvent(const std::shared_ptr<Options> options)
                     << " process_pid=" << nlcn_msg.proc_ev.event_data.id.process_pid
                     << " process_tgid=" << nlcn_msg.proc_ev.event_data.id.process_tgid
                     << " rgid=" << nlcn_msg.proc_ev.event_data.id.r.rgid
-                    << " rgid=" << nlcn_msg.proc_ev.event_data.id.e.egid;
+                    << " egid=" << nlcn_msg.proc_ev.event_data.id.e.egid;
           m_eventData.set_gid_count(m_eventData.gid_count() + 1);
           break;
         }
@@ -143,7 +148,10 @@ ProcEvent::ProcEvent(const std::shared_ptr<Options> options)
                     << " process_tgid=" << nlcn_msg.proc_ev.event_data.id.process_tgid
                     << " exit_code=" << nlcn_msg.proc_ev.event_data.exit.exit_code;
           m_eventData.set_exit_count(m_eventData.exit_count() + 1);
-          App()->getProcRegistry()->remProcEntry(nlcn_msg.proc_ev.event_data.exit.process_pid);
+          if (nlcn_msg.proc_ev.event_data.exit.process_pid ==
+              nlcn_msg.proc_ev.event_data.exit.process_tgid) {
+            App()->getProcRegistry()->remProcEntry(nlcn_msg.proc_ev.event_data.exit.process_pid);
+          }
           break;
         }
         default:
