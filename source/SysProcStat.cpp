@@ -193,7 +193,6 @@ static bool doUpdateStats(const std::shared_ptr<SysProcStat> mgr,
 
     if (!found) {
       std::shared_ptr<CPUStat> entry = std::make_shared<CPUStat>(tokens[statCpuNamePos]);
-
       logInfo() << "Adding new cpu core '" << entry->getName() << "' for statistics";
       mgr->getCPUStatList().append(entry);
       mgr->getCPUStatList().commit();
@@ -207,22 +206,27 @@ static bool doUpdateStats(const std::shared_ptr<SysProcStat> mgr,
 static bool doCollectAndSend(const std::shared_ptr<SysProcStat> mgr,
                              const SysProcStat::Request &request)
 {
-  mgr->getCPUStatList().foreach ([&request](const std::shared_ptr<CPUStat> &entry) {
-    tkm::msg::monitor::SysProcStat statEvent;
-    tkm::msg::monitor::Data data;
+  tkm::msg::monitor::SysProcStat statEvent;
+  tkm::msg::monitor::Data data;
 
-    data.set_what(tkm::msg::monitor::Data_What_SysProcStat);
+  data.set_what(tkm::msg::monitor::Data_What_SysProcStat);
 
-    struct timespec currentTime;
-    clock_gettime(CLOCK_REALTIME, &currentTime);
-    data.set_system_time_sec(currentTime.tv_sec);
-    clock_gettime(CLOCK_MONOTONIC, &currentTime);
-    data.set_monotonic_time_sec(currentTime.tv_sec);
+  struct timespec currentTime;
+  clock_gettime(CLOCK_REALTIME, &currentTime);
+  data.set_system_time_sec(currentTime.tv_sec);
+  clock_gettime(CLOCK_MONOTONIC, &currentTime);
+  data.set_monotonic_time_sec(currentTime.tv_sec);
 
-    statEvent.mutable_cpu()->CopyFrom(entry->getData());
-    data.mutable_payload()->PackFrom(statEvent);
-    request.collector->sendData(data);
+  mgr->getCPUStatList().foreach ([&statEvent](const std::shared_ptr<CPUStat> &entry) {
+    if (entry->getType() == CPUStat::StatType::Cpu) {
+      statEvent.mutable_cpu()->CopyFrom(entry->getData());
+    } else {
+      statEvent.add_core()->CopyFrom(entry->getData());
+    }
   });
+
+  data.mutable_payload()->PackFrom(statEvent);
+  request.collector->sendData(data);
 
   return true;
 }

@@ -32,10 +32,17 @@ namespace tkm::monitor
 
 struct CPUStat : public std::enable_shared_from_this<CPUStat> {
 public:
+  enum class StatType { Cpu, Core };
   explicit CPUStat(const std::string &name)
   {
     m_sysHZ = sysconf(_SC_CLK_TCK);
     m_data.set_name(name);
+
+    if (name == "cpu") {
+      m_type = StatType::Cpu;
+    } else {
+      m_type = StatType::Core;
+    }
   };
   ~CPUStat() = default;
 
@@ -44,6 +51,7 @@ public:
   void operator=(CPUStat const &) = delete;
 
   auto getName(void) -> const std::string & { return m_data.name(); }
+  auto getType(void) -> StatType { return m_type; }
 
   void updateStats(uint64_t newUserJiffies, uint64_t newSystemJiffies);
   auto getData(void) -> tkm::msg::monitor::CPUStat & { return m_data; }
@@ -65,6 +73,7 @@ private:
   int m_userPercent = 0;
   int m_sysPercent = 0;
   int m_sysHZ = 0;
+  StatType m_type = StatType::Cpu;
 };
 
 class SysProcStat : public IDataSource, public std::enable_shared_from_this<SysProcStat>
@@ -91,7 +100,6 @@ public:
   auto pushRequest(SysProcStat::Request &request) -> int;
   void enableEvents();
   bool update(void) final;
-  ;
 
 private:
   bool requestHandler(const Request &request);
