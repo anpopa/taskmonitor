@@ -28,6 +28,7 @@
 #include "SysProcMemInfo.h"
 #include "SysProcPressure.h"
 #include "SysProcStat.h"
+#include "SysProcWireless.h"
 #include "TCPServer.h"
 #include "UDSServer.h"
 
@@ -71,6 +72,10 @@ public:
   auto getProcEvent(void) -> const std::shared_ptr<ProcEvent> { return m_procEvent; }
   auto getSysProcStat(void) -> const std::shared_ptr<SysProcStat> { return m_sysProcStat; }
   auto getSysProcMemInfo(void) -> const std::shared_ptr<SysProcMemInfo> { return m_sysProcMemInfo; }
+  auto getSysProcWireless(void) -> const std::shared_ptr<SysProcWireless>
+  {
+    return m_sysProcWireless;
+  }
   auto getSysProcDiskStats(void) -> const std::shared_ptr<SysProcDiskStats>
   {
     return m_sysProcDiskStats;
@@ -118,6 +123,7 @@ private:
   std::shared_ptr<SysProcDiskStats> m_sysProcDiskStats = nullptr;
   std::shared_ptr<SysProcPressure> m_sysProcPressure = nullptr;
   std::shared_ptr<SysProcBuddyInfo> m_sysProcBuddyInfo = nullptr;
+  std::shared_ptr<SysProcWireless> m_sysProcWireless = nullptr;
   std::atomic<unsigned short> m_procAcctCollectorCounter = 0;
 
 private:

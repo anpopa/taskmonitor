@@ -141,6 +141,14 @@ Application::Application(const string &name, const string &description, const st
     m_dataSources.append(m_sysProcBuddyInfo);
   }
 
+  if (std::filesystem::exists("/proc/net/wireless")) {
+    m_sysProcWireless = std::make_shared<SysProcWireless>(m_options);
+    m_sysProcWireless->setUpdateLane(IDataSource::UpdateLane::Slow);
+    m_sysProcWireless->setUpdateInterval(m_slowLaneInterval);
+    m_sysProcWireless->enableEvents();
+    m_dataSources.append(m_sysProcWireless);
+  }
+
   // Commit our final data source list
   m_dataSources.commit();
 

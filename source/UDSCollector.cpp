@@ -31,6 +31,7 @@ static bool doGetSysProcDiskStats(const std::shared_ptr<UDSCollector> collector)
 static bool doGetSysProcStat(const std::shared_ptr<UDSCollector> collector);
 static bool doGetSysProcPressure(const std::shared_ptr<UDSCollector> collector);
 static bool doGetSysProcBuddyInfo(const std::shared_ptr<UDSCollector> collector);
+static bool doGetSysProcWireless(const std::shared_ptr<UDSCollector> collector);
 static bool doGetContextInfo(const std::shared_ptr<UDSCollector> collector);
 
 UDSCollector::UDSCollector(int fd)
@@ -91,6 +92,9 @@ UDSCollector::UDSCollector(int fd)
             break;
           case tkm::msg::collector::Request_Type_GetSysProcBuddyInfo:
             status = doGetSysProcBuddyInfo(getShared());
+            break;
+          case tkm::msg::collector::Request_Type_GetSysProcWireless:
+            status = doGetSysProcWireless(getShared());
             break;
           case tkm::msg::collector::Request_Type_GetContextInfo:
             status = doGetContextInfo(getShared());
@@ -166,6 +170,9 @@ static bool doCreateSession(const std::shared_ptr<UDSCollector> collector)
   if (App()->getSysProcBuddyInfo() != nullptr) {
     sessionInfo.add_slow_lane_sources(msg::monitor::SessionInfo_DataSource_SysProcBuddyInfo);
   }
+  if (App()->getSysProcWireless() != nullptr) {
+    sessionInfo.add_slow_lane_sources(msg::monitor::SessionInfo_DataSource_SysProcWireless);
+  }
 
   message.set_type(tkm::msg::monitor::Message::Type::Message_Type_SetSession);
   message.mutable_payload()->PackFrom(sessionInfo);
@@ -228,6 +235,13 @@ static bool doGetSysProcPressure(const std::shared_ptr<UDSCollector> collector)
 static bool doGetSysProcBuddyInfo(const std::shared_ptr<UDSCollector> collector)
 {
   Dispatcher::Request req = {.action = Dispatcher::Action::GetSysProcBuddyInfo,
+                             .collector = collector};
+  return App()->getDispatcher()->pushRequest(req);
+}
+
+static bool doGetSysProcWireless(const std::shared_ptr<UDSCollector> collector)
+{
+  Dispatcher::Request req = {.action = Dispatcher::Action::GetSysProcWireless,
                              .collector = collector};
   return App()->getDispatcher()->pushRequest(req);
 }

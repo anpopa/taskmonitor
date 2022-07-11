@@ -37,6 +37,7 @@ static bool doGetSysProcDiskStats(const Dispatcher::Request &rq);
 static bool doGetSysProcStat(const Dispatcher::Request &rq);
 static bool doGetSysProcPsi(const Dispatcher::Request &rq);
 static bool doGetSysProcBuddyInfo(const Dispatcher::Request &rq);
+static bool doGetSysProcWireless(const Dispatcher::Request &rq);
 static bool doGetContextInfo(const Dispatcher::Request &rq);
 
 Dispatcher::Dispatcher(const shared_ptr<Options> options)
@@ -75,6 +76,8 @@ auto Dispatcher::requestHandler(const Request &request) -> bool
     return doGetSysProcPsi(request);
   case Dispatcher::Action::GetSysProcBuddyInfo:
     return doGetSysProcBuddyInfo(request);
+  case Dispatcher::Action::GetSysProcWireless:
+    return doGetSysProcWireless(request);
   case Dispatcher::Action::GetContextInfo:
     return doGetContextInfo(request);
   default:
@@ -166,6 +169,17 @@ static bool doGetSysProcPsi(const Dispatcher::Request &rq)
   SysProcPressure::Request regrq = {.action = SysProcPressure::Action::CollectAndSend,
                                     .collector = rq.collector};
   return App()->getSysProcPressure()->pushRequest(regrq);
+}
+
+static bool doGetSysProcWireless(const Dispatcher::Request &rq)
+{
+  // Ignore requests if the module is not enabled
+  if (App()->getSysProcWireless() == nullptr) {
+    return true;
+  }
+  SysProcWireless::Request regrq = {.action = SysProcWireless::Action::CollectAndSend,
+                                    .collector = rq.collector};
+  return App()->getSysProcWireless()->pushRequest(regrq);
 }
 
 } // namespace tkm::monitor

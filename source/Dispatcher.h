@@ -39,6 +39,7 @@ public:
     GetSysProcStat,
     GetSysProcPressure,
     GetSysProcBuddyInfo,
+    GetSysProcWireless,
     GetContextInfo
   };
 

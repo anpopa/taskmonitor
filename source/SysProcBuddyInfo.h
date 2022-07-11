@@ -4,8 +4,8 @@
  * @date      2021-2022
  * @author    Alin Popa <alin.popa@fxdata.ro>
  * @copyright MIT
- * @brief     SysProcStats Class
- * @details   Collect and report information from /proc/stats
+ * @brief     SysProcBuddyInfo Class
+ * @details   Collect and report information from /proc/buddyinfo
  *-
  */
 
