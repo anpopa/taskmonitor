@@ -149,15 +149,26 @@ static bool doCreateSession(const std::shared_ptr<TCPCollector> collector)
   sessionInfo.set_fast_lane_interval(App()->getFastLaneInterval());
   sessionInfo.set_pace_lane_interval(App()->getPaceLaneInterval());
   sessionInfo.set_slow_lane_interval(App()->getSlowLaneInterval());
-  sessionInfo.add_fast_lane_sources(msg::monitor::SessionInfo_DataSource_SysProcStat);
-  sessionInfo.add_fast_lane_sources(msg::monitor::SessionInfo_DataSource_SysProcMemInfo);
+
   sessionInfo.add_pace_lane_sources(msg::monitor::SessionInfo_DataSource_ProcInfo);
   sessionInfo.add_pace_lane_sources(msg::monitor::SessionInfo_DataSource_ProcEvent);
   sessionInfo.add_pace_lane_sources(msg::monitor::SessionInfo_DataSource_ContextInfo);
-  sessionInfo.add_pace_lane_sources(msg::monitor::SessionInfo_DataSource_SysProcPressure);
-  sessionInfo.add_pace_lane_sources(msg::monitor::SessionInfo_DataSource_SysProcDiskStats);
-  sessionInfo.add_slow_lane_sources(msg::monitor::SessionInfo_DataSource_SysProcBuddyInfo);
   sessionInfo.add_slow_lane_sources(msg::monitor::SessionInfo_DataSource_ProcAcct);
+  if (App()->getSysProcStat() != nullptr) {
+    sessionInfo.add_fast_lane_sources(msg::monitor::SessionInfo_DataSource_SysProcStat);
+  }
+  if (App()->getSysProcMemInfo() != nullptr) {
+    sessionInfo.add_fast_lane_sources(msg::monitor::SessionInfo_DataSource_SysProcMemInfo);
+  }
+  if (App()->getSysProcPressure() != nullptr) {
+    sessionInfo.add_pace_lane_sources(msg::monitor::SessionInfo_DataSource_SysProcPressure);
+  }
+  if (App()->getSysProcDiskStats() != nullptr) {
+    sessionInfo.add_pace_lane_sources(msg::monitor::SessionInfo_DataSource_SysProcDiskStats);
+  }
+  if (App()->getSysProcBuddyInfo() != nullptr) {
+    sessionInfo.add_slow_lane_sources(msg::monitor::SessionInfo_DataSource_SysProcBuddyInfo);
+  }
 
   message.set_type(tkm::msg::monitor::Message::Type::Message_Type_SetSession);
   message.mutable_payload()->PackFrom(sessionInfo);

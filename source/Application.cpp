@@ -101,35 +101,45 @@ Application::Application(const string &name, const string &description, const st
   m_procRegistry->enableEvents();
   m_dataSources.append(m_procRegistry);
 
-  m_sysProcStat = std::make_shared<SysProcStat>(m_options);
-  m_sysProcStat->setUpdateLane(IDataSource::UpdateLane::Fast);
-  m_sysProcStat->setUpdateInterval(m_fastLaneInterval);
-  m_sysProcStat->enableEvents();
-  m_dataSources.append(m_sysProcStat);
+  if (std::filesystem::exists("/proc/stat")) {
+    m_sysProcStat = std::make_shared<SysProcStat>(m_options);
+    m_sysProcStat->setUpdateLane(IDataSource::UpdateLane::Fast);
+    m_sysProcStat->setUpdateInterval(m_fastLaneInterval);
+    m_sysProcStat->enableEvents();
+    m_dataSources.append(m_sysProcStat);
+  }
 
-  m_sysProcMemInfo = std::make_shared<SysProcMemInfo>(m_options);
-  m_sysProcMemInfo->setUpdateLane(IDataSource::UpdateLane::Fast);
-  m_sysProcMemInfo->setUpdateInterval(m_fastLaneInterval);
-  m_sysProcMemInfo->enableEvents();
-  m_dataSources.append(m_sysProcMemInfo);
+  if (std::filesystem::exists("/proc/meminfo")) {
+    m_sysProcMemInfo = std::make_shared<SysProcMemInfo>(m_options);
+    m_sysProcMemInfo->setUpdateLane(IDataSource::UpdateLane::Fast);
+    m_sysProcMemInfo->setUpdateInterval(m_fastLaneInterval);
+    m_sysProcMemInfo->enableEvents();
+    m_dataSources.append(m_sysProcMemInfo);
+  }
 
-  m_sysProcPressure = std::make_shared<SysProcPressure>(m_options);
-  m_sysProcPressure->setUpdateLane(IDataSource::UpdateLane::Pace);
-  m_sysProcPressure->setUpdateInterval(m_paceLaneInterval);
-  m_sysProcPressure->enableEvents();
-  m_dataSources.append(m_sysProcPressure);
+  if (std::filesystem::exists("/proc/pressure")) {
+    m_sysProcPressure = std::make_shared<SysProcPressure>(m_options);
+    m_sysProcPressure->setUpdateLane(IDataSource::UpdateLane::Pace);
+    m_sysProcPressure->setUpdateInterval(m_paceLaneInterval);
+    m_sysProcPressure->enableEvents();
+    m_dataSources.append(m_sysProcPressure);
+  }
 
-  m_sysProcDiskStats = std::make_shared<SysProcDiskStats>(m_options);
-  m_sysProcDiskStats->setUpdateLane(IDataSource::UpdateLane::Pace);
-  m_sysProcDiskStats->setUpdateInterval(m_paceLaneInterval);
-  m_sysProcDiskStats->enableEvents();
-  m_dataSources.append(m_sysProcDiskStats);
+  if (std::filesystem::exists("/proc/diskstats")) {
+    m_sysProcDiskStats = std::make_shared<SysProcDiskStats>(m_options);
+    m_sysProcDiskStats->setUpdateLane(IDataSource::UpdateLane::Pace);
+    m_sysProcDiskStats->setUpdateInterval(m_paceLaneInterval);
+    m_sysProcDiskStats->enableEvents();
+    m_dataSources.append(m_sysProcDiskStats);
+  }
 
-  m_sysProcBuddyInfo = std::make_shared<SysProcBuddyInfo>(m_options);
-  m_sysProcBuddyInfo->setUpdateLane(IDataSource::UpdateLane::Slow);
-  m_sysProcBuddyInfo->setUpdateInterval(m_slowLaneInterval);
-  m_sysProcBuddyInfo->enableEvents();
-  m_dataSources.append(m_sysProcBuddyInfo);
+  if (std::filesystem::exists("/proc/buddyinfo")) {
+    m_sysProcBuddyInfo = std::make_shared<SysProcBuddyInfo>(m_options);
+    m_sysProcBuddyInfo->setUpdateLane(IDataSource::UpdateLane::Slow);
+    m_sysProcBuddyInfo->setUpdateInterval(m_slowLaneInterval);
+    m_sysProcBuddyInfo->enableEvents();
+    m_dataSources.append(m_sysProcBuddyInfo);
+  }
 
   // Commit our final data source list
   m_dataSources.commit();

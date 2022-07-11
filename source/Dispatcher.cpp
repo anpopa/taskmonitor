@@ -115,6 +115,10 @@ static bool doGetProcEventStats(const Dispatcher::Request &rq)
 
 static bool doGetSysProcMemInfo(const Dispatcher::Request &rq)
 {
+  // Ignore requests if the module is not enabled
+  if (App()->getSysProcMemInfo() == nullptr) {
+    return true;
+  }
   SysProcMemInfo::Request regrq = {.action = SysProcMemInfo::Action::CollectAndSend,
                                    .collector = rq.collector};
   return App()->getSysProcMemInfo()->pushRequest(regrq);
@@ -122,6 +126,10 @@ static bool doGetSysProcMemInfo(const Dispatcher::Request &rq)
 
 static bool doGetSysProcDiskStats(const Dispatcher::Request &rq)
 {
+  // Ignore requests if the module is not enabled
+  if (App()->getSysProcDiskStats() == nullptr) {
+    return true;
+  }
   SysProcDiskStats::Request regrq = {.action = SysProcDiskStats::Action::CollectAndSend,
                                      .collector = rq.collector};
   return App()->getSysProcDiskStats()->pushRequest(regrq);
@@ -129,6 +137,10 @@ static bool doGetSysProcDiskStats(const Dispatcher::Request &rq)
 
 static bool doGetSysProcStat(const Dispatcher::Request &rq)
 {
+  // Ignore requests if the module is not enabled
+  if (App()->getSysProcStat() == nullptr) {
+    return true;
+  }
   SysProcStat::Request regrq = {.action = SysProcStat::Action::CollectAndSend,
                                 .collector = rq.collector};
   return App()->getSysProcStat()->pushRequest(regrq);
@@ -136,6 +148,10 @@ static bool doGetSysProcStat(const Dispatcher::Request &rq)
 
 static bool doGetSysProcBuddyInfo(const Dispatcher::Request &rq)
 {
+  // Ignore requests if the module is not enabled
+  if (App()->getSysProcBuddyInfo() == nullptr) {
+    return true;
+  }
   SysProcBuddyInfo::Request regrq = {.action = SysProcBuddyInfo::Action::CollectAndSend,
                                      .collector = rq.collector};
   return App()->getSysProcBuddyInfo()->pushRequest(regrq);
@@ -143,6 +159,10 @@ static bool doGetSysProcBuddyInfo(const Dispatcher::Request &rq)
 
 static bool doGetSysProcPsi(const Dispatcher::Request &rq)
 {
+  // Ignore requests if the module is not enabled
+  if (App()->getSysProcPressure() == nullptr) {
+    return true;
+  }
   SysProcPressure::Request regrq = {.action = SysProcPressure::Action::CollectAndSend,
                                     .collector = rq.collector};
   return App()->getSysProcPressure()->pushRequest(regrq);
