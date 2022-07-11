@@ -167,7 +167,7 @@ static bool doUpdateStats(const std::shared_ptr<SysProcStat> mgr,
       return false;
     }
 
-    auto updateCpuStatEntry = [tokens](const std::shared_ptr<CPUStat> &entry) {
+    auto updateCpuStatEntry = [&tokens](const std::shared_ptr<CPUStat> &entry) {
       uint64_t newUserJiffies = 0;
       uint64_t newSysJiffies = 0;
 
@@ -184,7 +184,7 @@ static bool doUpdateStats(const std::shared_ptr<SysProcStat> mgr,
 
     auto found = false;
     mgr->getCPUStatList().foreach (
-        [tokens, &found, updateCpuStatEntry](const std::shared_ptr<CPUStat> &entry) {
+        [&tokens, &found, updateCpuStatEntry](const std::shared_ptr<CPUStat> &entry) {
           if (entry->getName() == tokens[statCpuNamePos]) {
             updateCpuStatEntry(entry);
             found = true;

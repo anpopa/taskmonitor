@@ -36,6 +36,7 @@ static bool doGetSysProcMemInfo(const Dispatcher::Request &rq);
 static bool doGetSysProcDiskStats(const Dispatcher::Request &rq);
 static bool doGetSysProcStat(const Dispatcher::Request &rq);
 static bool doGetSysProcPsi(const Dispatcher::Request &rq);
+static bool doGetSysProcBuddyInfo(const Dispatcher::Request &rq);
 static bool doGetContextInfo(const Dispatcher::Request &rq);
 
 Dispatcher::Dispatcher(const shared_ptr<Options> options)
@@ -72,6 +73,8 @@ auto Dispatcher::requestHandler(const Request &request) -> bool
     return doGetSysProcStat(request);
   case Dispatcher::Action::GetSysProcPressure:
     return doGetSysProcPsi(request);
+  case Dispatcher::Action::GetSysProcBuddyInfo:
+    return doGetSysProcBuddyInfo(request);
   case Dispatcher::Action::GetContextInfo:
     return doGetContextInfo(request);
   default:
@@ -129,6 +132,13 @@ static bool doGetSysProcStat(const Dispatcher::Request &rq)
   SysProcStat::Request regrq = {.action = SysProcStat::Action::CollectAndSend,
                                 .collector = rq.collector};
   return App()->getSysProcStat()->pushRequest(regrq);
+}
+
+static bool doGetSysProcBuddyInfo(const Dispatcher::Request &rq)
+{
+  SysProcBuddyInfo::Request regrq = {.action = SysProcBuddyInfo::Action::CollectAndSend,
+                                     .collector = rq.collector};
+  return App()->getSysProcBuddyInfo()->pushRequest(regrq);
 }
 
 static bool doGetSysProcPsi(const Dispatcher::Request &rq)

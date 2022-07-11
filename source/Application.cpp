@@ -125,6 +125,12 @@ Application::Application(const string &name, const string &description, const st
   m_sysProcDiskStats->enableEvents();
   m_dataSources.append(m_sysProcDiskStats);
 
+  m_sysProcBuddyInfo = std::make_shared<SysProcBuddyInfo>(m_options);
+  m_sysProcBuddyInfo->setUpdateLane(IDataSource::UpdateLane::Slow);
+  m_sysProcBuddyInfo->setUpdateInterval(m_slowLaneInterval);
+  m_sysProcBuddyInfo->enableEvents();
+  m_dataSources.append(m_sysProcBuddyInfo);
+
   // Commit our final data source list
   m_dataSources.commit();
 

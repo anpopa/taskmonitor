@@ -38,6 +38,7 @@ public:
     GetSysProcDiskStats,
     GetSysProcStat,
     GetSysProcPressure,
+    GetSysProcBuddyInfo,
     GetContextInfo
   };
 

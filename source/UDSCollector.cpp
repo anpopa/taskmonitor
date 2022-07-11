@@ -24,10 +24,14 @@ namespace tkm::monitor
 
 static bool doCreateSession(const std::shared_ptr<UDSCollector> collector);
 static bool doGetProcAcct(const std::shared_ptr<UDSCollector> collector);
+static bool doGetProcInfo(const std::shared_ptr<UDSCollector> collector);
 static bool doGetProcEventStats(const std::shared_ptr<UDSCollector> collector);
 static bool doGetSysProcMemInfo(const std::shared_ptr<UDSCollector> collector);
+static bool doGetSysProcDiskStats(const std::shared_ptr<UDSCollector> collector);
 static bool doGetSysProcStat(const std::shared_ptr<UDSCollector> collector);
 static bool doGetSysProcPressure(const std::shared_ptr<UDSCollector> collector);
+static bool doGetSysProcBuddyInfo(const std::shared_ptr<UDSCollector> collector);
+static bool doGetContextInfo(const std::shared_ptr<UDSCollector> collector);
 
 UDSCollector::UDSCollector(int fd)
 : ICollector("UDSCollector", fd)
@@ -67,11 +71,17 @@ UDSCollector::UDSCollector(int fd)
           case tkm::msg::collector::Request_Type_GetProcAcct:
             status = doGetProcAcct(getShared());
             break;
+          case tkm::msg::collector::Request_Type_GetProcInfo:
+            status = doGetProcInfo(getShared());
+            break;
           case tkm::msg::collector::Request_Type_GetProcEventStats:
             status = doGetProcEventStats(getShared());
             break;
           case tkm::msg::collector::Request_Type_GetSysProcMemInfo:
             status = doGetSysProcMemInfo(getShared());
+            break;
+          case tkm::msg::collector::Request_Type_GetSysProcDiskStats:
+            status = doGetSysProcDiskStats(getShared());
             break;
           case tkm::msg::collector::Request_Type_GetSysProcStat:
             status = doGetSysProcStat(getShared());
@@ -79,11 +89,17 @@ UDSCollector::UDSCollector(int fd)
           case tkm::msg::collector::Request_Type_GetSysProcPressure:
             status = doGetSysProcPressure(getShared());
             break;
+          case tkm::msg::collector::Request_Type_GetSysProcBuddyInfo:
+            status = doGetSysProcBuddyInfo(getShared());
+            break;
+          case tkm::msg::collector::Request_Type_GetContextInfo:
+            status = doGetContextInfo(getShared());
+            break;
           default:
+            logDebug() << "Unknown type " << collectorMessage.type();
             status = false;
             break;
           }
-
         } while (status);
 
         return status;
@@ -137,6 +153,7 @@ static bool doCreateSession(const std::shared_ptr<UDSCollector> collector)
   sessionInfo.add_pace_lane_sources(msg::monitor::SessionInfo_DataSource_ContextInfo);
   sessionInfo.add_pace_lane_sources(msg::monitor::SessionInfo_DataSource_SysProcPressure);
   sessionInfo.add_pace_lane_sources(msg::monitor::SessionInfo_DataSource_SysProcDiskStats);
+  sessionInfo.add_slow_lane_sources(msg::monitor::SessionInfo_DataSource_SysProcBuddyInfo);
   sessionInfo.add_slow_lane_sources(msg::monitor::SessionInfo_DataSource_ProcAcct);
 
   message.set_type(tkm::msg::monitor::Message::Type::Message_Type_SetSession);
@@ -157,6 +174,12 @@ static bool doGetProcAcct(const std::shared_ptr<UDSCollector> collector)
   return App()->getDispatcher()->pushRequest(req);
 }
 
+static bool doGetProcInfo(const std::shared_ptr<UDSCollector> collector)
+{
+  Dispatcher::Request req = {.action = Dispatcher::Action::GetProcInfo, .collector = collector};
+  return App()->getDispatcher()->pushRequest(req);
+}
+
 static bool doGetProcEventStats(const std::shared_ptr<UDSCollector> collector)
 {
   Dispatcher::Request req = {.action = Dispatcher::Action::GetProcEventStats,
@@ -171,6 +194,13 @@ static bool doGetSysProcMemInfo(const std::shared_ptr<UDSCollector> collector)
   return App()->getDispatcher()->pushRequest(req);
 }
 
+static bool doGetSysProcDiskStats(const std::shared_ptr<UDSCollector> collector)
+{
+  Dispatcher::Request req = {.action = Dispatcher::Action::GetSysProcDiskStats,
+                             .collector = collector};
+  return App()->getDispatcher()->pushRequest(req);
+}
+
 static bool doGetSysProcStat(const std::shared_ptr<UDSCollector> collector)
 {
   Dispatcher::Request req = {.action = Dispatcher::Action::GetSysProcStat, .collector = collector};
@@ -181,6 +211,19 @@ static bool doGetSysProcPressure(const std::shared_ptr<UDSCollector> collector)
 {
   Dispatcher::Request req = {.action = Dispatcher::Action::GetSysProcPressure,
                              .collector = collector};
+  return App()->getDispatcher()->pushRequest(req);
+}
+
+static bool doGetSysProcBuddyInfo(const std::shared_ptr<UDSCollector> collector)
+{
+  Dispatcher::Request req = {.action = Dispatcher::Action::GetSysProcBuddyInfo,
+                             .collector = collector};
+  return App()->getDispatcher()->pushRequest(req);
+}
+
+static bool doGetContextInfo(const std::shared_ptr<UDSCollector> collector)
+{
+  Dispatcher::Request req = {.action = Dispatcher::Action::GetContextInfo, .collector = collector};
   return App()->getDispatcher()->pushRequest(req);
 }
 

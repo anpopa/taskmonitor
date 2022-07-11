@@ -30,6 +30,7 @@ static bool doGetSysProcMemInfo(const std::shared_ptr<TCPCollector> collector);
 static bool doGetSysProcDiskStats(const std::shared_ptr<TCPCollector> collector);
 static bool doGetSysProcStat(const std::shared_ptr<TCPCollector> collector);
 static bool doGetSysProcPressure(const std::shared_ptr<TCPCollector> collector);
+static bool doGetSysProcBuddyInfo(const std::shared_ptr<TCPCollector> collector);
 static bool doGetContextInfo(const std::shared_ptr<TCPCollector> collector);
 
 TCPCollector::TCPCollector(int fd)
@@ -63,7 +64,6 @@ TCPCollector::TCPCollector(int fd)
           tkm::msg::collector::Request collectorMessage;
           envelope.mesg().UnpackTo(&collectorMessage);
 
-          status = true;
           switch (collectorMessage.type()) {
           case tkm::msg::collector::Request_Type_CreateSession:
             status = doCreateSession(getShared());
@@ -88,6 +88,9 @@ TCPCollector::TCPCollector(int fd)
             break;
           case tkm::msg::collector::Request_Type_GetSysProcPressure:
             status = doGetSysProcPressure(getShared());
+            break;
+          case tkm::msg::collector::Request_Type_GetSysProcBuddyInfo:
+            status = doGetSysProcBuddyInfo(getShared());
             break;
           case tkm::msg::collector::Request_Type_GetContextInfo:
             status = doGetContextInfo(getShared());
@@ -153,6 +156,7 @@ static bool doCreateSession(const std::shared_ptr<TCPCollector> collector)
   sessionInfo.add_pace_lane_sources(msg::monitor::SessionInfo_DataSource_ContextInfo);
   sessionInfo.add_pace_lane_sources(msg::monitor::SessionInfo_DataSource_SysProcPressure);
   sessionInfo.add_pace_lane_sources(msg::monitor::SessionInfo_DataSource_SysProcDiskStats);
+  sessionInfo.add_slow_lane_sources(msg::monitor::SessionInfo_DataSource_SysProcBuddyInfo);
   sessionInfo.add_slow_lane_sources(msg::monitor::SessionInfo_DataSource_ProcAcct);
 
   message.set_type(tkm::msg::monitor::Message::Type::Message_Type_SetSession);
@@ -209,6 +213,13 @@ static bool doGetSysProcStat(const std::shared_ptr<TCPCollector> collector)
 static bool doGetSysProcPressure(const std::shared_ptr<TCPCollector> collector)
 {
   Dispatcher::Request req = {.action = Dispatcher::Action::GetSysProcPressure,
+                             .collector = collector};
+  return App()->getDispatcher()->pushRequest(req);
+}
+
+static bool doGetSysProcBuddyInfo(const std::shared_ptr<TCPCollector> collector)
+{
+  Dispatcher::Request req = {.action = Dispatcher::Action::GetSysProcBuddyInfo,
                              .collector = collector};
   return App()->getDispatcher()->pushRequest(req);
 }

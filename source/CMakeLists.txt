@@ -19,6 +19,7 @@ set(BINARY_SRC
     SysProcMemInfo.cpp
     SysProcPressure.cpp
     SysProcDiskStats.cpp
+    SysProcBuddyInfo.cpp
     Main.cpp
     )
 add_executable(${BINARY_NAME} ${BINARY_SRC})

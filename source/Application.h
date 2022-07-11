@@ -23,6 +23,7 @@
 #include "ProcAcct.h"
 #include "ProcEvent.h"
 #include "ProcRegistry.h"
+#include "SysProcBuddyInfo.h"
 #include "SysProcDiskStats.h"
 #include "SysProcMemInfo.h"
 #include "SysProcPressure.h"
@@ -78,6 +79,10 @@ public:
   {
     return m_sysProcPressure;
   }
+  auto getSysProcBuddyInfo(void) -> const std::shared_ptr<SysProcBuddyInfo>
+  {
+    return m_sysProcBuddyInfo;
+  }
   bool hasConfigFile(void) { return m_options->hasConfigFile(); }
   auto getConfigFile(void) -> const std::shared_ptr<bswi::kf::KeyFile>
   {
@@ -112,6 +117,7 @@ private:
   std::shared_ptr<SysProcMemInfo> m_sysProcMemInfo = nullptr;
   std::shared_ptr<SysProcDiskStats> m_sysProcDiskStats = nullptr;
   std::shared_ptr<SysProcPressure> m_sysProcPressure = nullptr;
+  std::shared_ptr<SysProcBuddyInfo> m_sysProcBuddyInfo = nullptr;
   std::atomic<unsigned short> m_procAcctCollectorCounter = 0;
 
 private:
