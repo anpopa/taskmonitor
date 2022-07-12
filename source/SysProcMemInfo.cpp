@@ -130,8 +130,9 @@ static bool doUpdateStats(const std::shared_ptr<SysProcMemInfo> mgr,
       lineData = LineData::CmaFree;
     }
 
-    if (lineData == LineData::Unset)
+    if (lineData == LineData::Unset) {
       continue;
+    }
 
     while (ss >> buf) {
       tokens.push_back(buf);

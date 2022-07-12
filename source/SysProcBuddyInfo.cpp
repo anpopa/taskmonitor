@@ -100,7 +100,7 @@ static bool doUpdateStats(const std::shared_ptr<SysProcBuddyInfo> mgr,
     std::string buf;
 
     if (line.find("zone") == std::string::npos) {
-      break;
+      continue;
     }
 
     auto cnt = 0;

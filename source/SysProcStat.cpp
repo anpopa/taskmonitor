@@ -154,6 +154,7 @@ static bool doUpdateStats(const std::shared_ptr<SysProcStat> mgr,
     std::stringstream ss(line);
     std::string buf;
 
+    // cpu lines are at the start
     if (line.find("cpu") == std::string::npos) {
       break;
     }

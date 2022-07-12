@@ -94,13 +94,15 @@ static bool doUpdateStats(const std::shared_ptr<SysProcWireless> mgr,
   }
 
   std::string line;
+  auto lines = 0;
   while (std::getline(statStream, line)) {
     std::vector<std::string> tokens;
     std::stringstream ss(line);
     std::string buf;
 
-    if (line.find("wlan") == std::string::npos) {
-      break;
+    // skip header lines
+    if (lines++ < 2) {
+      continue;
     }
 
     while (ss >> buf) {
@@ -133,7 +135,7 @@ static bool doUpdateStats(const std::shared_ptr<SysProcWireless> mgr,
       if (tokens[4].back() == '.') {
         tokens[4].pop_back();
       }
-      entry->getData().set_quality_level(std::stoi(tokens[4]));
+      entry->getData().set_quality_noise(std::stoi(tokens[4]));
 
       entry->getData().set_discarded_nwid(std::stoul(tokens[5]));
       entry->getData().set_discarded_crypt(std::stoul(tokens[6]));
