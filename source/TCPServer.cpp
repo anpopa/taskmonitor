@@ -64,7 +64,7 @@ TCPServer::TCPServer(const std::shared_ptr<Options> options)
 
         logInfo() << "New Collector with FD: " << collectorFd;
         std::shared_ptr<TCPCollector> collector = std::make_shared<TCPCollector>(collectorFd);
-        collector->descriptor = descriptor;
+        collector->getDescriptor().CopyFrom(descriptor);
         collector->enableEvents();
 
         return true;

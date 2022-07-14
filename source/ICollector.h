@@ -80,15 +80,15 @@ public:
   ICollector(ICollector const &) = delete;
   void operator=(ICollector const &) = delete;
 
-  [[nodiscard]] int getFD() const { return m_fd; }
-
-public:
-  tkm::msg::collector::Descriptor descriptor{};
-  std::string id{};
+  auto getDescriptor(void) -> tkm::msg::collector::Descriptor & { return m_descriptor; }
+  auto getSessionInfo(void) -> tkm::msg::monitor::SessionInfo & { return m_sessionInfo; }
+  auto getFD(void) -> int { return m_fd; }
 
 private:
   std::unique_ptr<EnvelopeReader> m_reader = nullptr;
   std::unique_ptr<EnvelopeWriter> m_writer = nullptr;
+  tkm::msg::collector::Descriptor m_descriptor{};
+  tkm::msg::monitor::SessionInfo m_sessionInfo{};
 };
 
 } // namespace tkm::monitor

@@ -137,7 +137,7 @@ static bool doCreateSession(const std::shared_ptr<TCPCollector> collector)
   tkm::msg::Envelope envelope;
   tkm::msg::monitor::Message message;
   tkm::msg::monitor::SessionInfo sessionInfo;
-  std::string idContent(collector->descriptor.id());
+  std::string idContent(collector->getDescriptor().id());
 
   char randData[64] = {0};
   srandom(time(0));
@@ -146,45 +146,52 @@ static bool doCreateSession(const std::shared_ptr<TCPCollector> collector)
 
   logInfo() << "Session hash content: " << idContent
             << " jenkinsHash: " << tkm::jnkHsh(idContent.c_str());
-  collector->id = std::to_string(tkm::jnkHsh(idContent.c_str()));
-  sessionInfo.set_hash(collector->id);
-  logInfo() << "Send new sessionID=" << sessionInfo.hash();
+  collector->getDescriptor().set_id(std::to_string(tkm::jnkHsh(idContent.c_str())));
+  collector->getSessionInfo().set_hash(collector->getDescriptor().id());
+  logInfo() << "Send new sessionID=" << collector->getSessionInfo().hash();
 
-  sessionInfo.set_fast_lane_interval(App()->getFastLaneInterval());
-  sessionInfo.set_pace_lane_interval(App()->getPaceLaneInterval());
-  sessionInfo.set_slow_lane_interval(App()->getSlowLaneInterval());
+  collector->getSessionInfo().set_fast_lane_interval(App()->getFastLaneInterval());
+  collector->getSessionInfo().set_pace_lane_interval(App()->getPaceLaneInterval());
+  collector->getSessionInfo().set_slow_lane_interval(App()->getSlowLaneInterval());
 
-  sessionInfo.add_pace_lane_sources(msg::monitor::SessionInfo_DataSource_ProcInfo);
-  sessionInfo.add_pace_lane_sources(msg::monitor::SessionInfo_DataSource_ProcEvent);
-  sessionInfo.add_pace_lane_sources(msg::monitor::SessionInfo_DataSource_ContextInfo);
-  sessionInfo.add_slow_lane_sources(msg::monitor::SessionInfo_DataSource_ProcAcct);
+  collector->getSessionInfo().add_pace_lane_sources(msg::monitor::SessionInfo_DataSource_ProcInfo);
+  collector->getSessionInfo().add_pace_lane_sources(msg::monitor::SessionInfo_DataSource_ProcEvent);
+  collector->getSessionInfo().add_pace_lane_sources(
+      msg::monitor::SessionInfo_DataSource_ContextInfo);
+  collector->getSessionInfo().add_slow_lane_sources(msg::monitor::SessionInfo_DataSource_ProcAcct);
   if (App()->getSysProcStat() != nullptr) {
-    sessionInfo.add_fast_lane_sources(msg::monitor::SessionInfo_DataSource_SysProcStat);
+    collector->getSessionInfo().add_fast_lane_sources(
+        msg::monitor::SessionInfo_DataSource_SysProcStat);
   }
   if (App()->getSysProcMemInfo() != nullptr) {
-    sessionInfo.add_fast_lane_sources(msg::monitor::SessionInfo_DataSource_SysProcMemInfo);
+    collector->getSessionInfo().add_fast_lane_sources(
+        msg::monitor::SessionInfo_DataSource_SysProcMemInfo);
   }
   if (App()->getSysProcPressure() != nullptr) {
-    sessionInfo.add_pace_lane_sources(msg::monitor::SessionInfo_DataSource_SysProcPressure);
+    collector->getSessionInfo().add_pace_lane_sources(
+        msg::monitor::SessionInfo_DataSource_SysProcPressure);
   }
   if (App()->getSysProcDiskStats() != nullptr) {
-    sessionInfo.add_pace_lane_sources(msg::monitor::SessionInfo_DataSource_SysProcDiskStats);
+    collector->getSessionInfo().add_pace_lane_sources(
+        msg::monitor::SessionInfo_DataSource_SysProcDiskStats);
   }
   if (App()->getSysProcBuddyInfo() != nullptr) {
-    sessionInfo.add_slow_lane_sources(msg::monitor::SessionInfo_DataSource_SysProcBuddyInfo);
+    collector->getSessionInfo().add_slow_lane_sources(
+        msg::monitor::SessionInfo_DataSource_SysProcBuddyInfo);
   }
   if (App()->getSysProcWireless() != nullptr) {
-    sessionInfo.add_slow_lane_sources(msg::monitor::SessionInfo_DataSource_SysProcWireless);
+    collector->getSessionInfo().add_slow_lane_sources(
+        msg::monitor::SessionInfo_DataSource_SysProcWireless);
   }
 
   message.set_type(tkm::msg::monitor::Message::Type::Message_Type_SetSession);
-  message.mutable_payload()->PackFrom(sessionInfo);
+  message.mutable_payload()->PackFrom(collector->getSessionInfo());
 
   envelope.mutable_mesg()->PackFrom(message);
   envelope.set_target(tkm::msg::Envelope_Recipient_Collector);
   envelope.set_origin(tkm::msg::Envelope_Recipient_Monitor);
 
-  logDebug() << "Send session id: " << sessionInfo.hash()
+  logDebug() << "Send session id: " << collector->getSessionInfo().hash()
              << " to collector: " << collector->getFD();
   return collector->writeEnvelope(envelope);
 }
