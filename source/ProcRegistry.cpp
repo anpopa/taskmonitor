@@ -288,7 +288,7 @@ void ProcRegistry::createProcessEntry(int pid, const std::string &name)
   procEntry->setUpdateInterval(getUpdateInterval());
 
   logDebug() << "Add process monitoring for pid=" << pid << " name=" << name
-             << " context=" << procEntry->getInfo().ctx_name();
+             << " context=" << procEntry->getData().ctx_name();
   m_procList.append(procEntry);
   m_procList.commit(); // sync commit
 
@@ -301,7 +301,7 @@ void ProcRegistry::createProcessEntry(int pid, const std::string &name)
 
   if (!found) {
     std::shared_ptr<ContextEntry> ctxEntry = std::make_shared<ContextEntry>(
-        procEntry->getInfo().ctx_id(), procEntry->getInfo().ctx_name());
+        procEntry->getData().ctx_id(), procEntry->getData().ctx_name());
     m_contextList.append(ctxEntry);
     m_contextList.commit(); // sync commit
   }
@@ -369,20 +369,23 @@ static bool doCollectAndSendProcAcct(const std::shared_ptr<ProcRegistry> mgr,
 static bool doCollectAndSendProcInfo(const std::shared_ptr<ProcRegistry> mgr,
                                      const ProcRegistry::Request &rq)
 {
-  mgr->getProcList().foreach ([&rq](const std::shared_ptr<ProcEntry> &entry) {
-    tkm::msg::monitor::Data data;
+  tkm::msg::monitor::ProcInfo procInfo;
+  tkm::msg::monitor::Data data;
 
-    data.set_what(tkm::msg::monitor::Data_What_ProcInfo);
+  data.set_what(tkm::msg::monitor::Data_What_ProcInfo);
 
-    struct timespec currentTime;
-    clock_gettime(CLOCK_REALTIME, &currentTime);
-    data.set_system_time_sec(currentTime.tv_sec);
-    clock_gettime(CLOCK_MONOTONIC, &currentTime);
-    data.set_monotonic_time_sec(currentTime.tv_sec);
+  struct timespec currentTime;
+  clock_gettime(CLOCK_REALTIME, &currentTime);
+  data.set_system_time_sec(currentTime.tv_sec);
+  clock_gettime(CLOCK_MONOTONIC, &currentTime);
+  data.set_monotonic_time_sec(currentTime.tv_sec);
 
-    data.mutable_payload()->PackFrom(entry->getInfo());
-    rq.collector->sendData(data);
+  mgr->getProcList().foreach ([&procInfo](const std::shared_ptr<ProcEntry> &entry) {
+    procInfo.add_entry()->CopyFrom(entry->getData());
   });
+
+  data.mutable_payload()->PackFrom(procInfo);
+  rq.collector->sendData(data);
 
   return true;
 }
@@ -399,12 +402,12 @@ static bool doCollectAndSendContextInfo(const std::shared_ptr<ProcRegistry> mgr,
     mgr->getProcList().foreach ([&mgr, &ctxEntry, &found](
                                     const std::shared_ptr<ProcEntry> &procEntry) {
       if (ctxEntry->getContextId() == procEntry->getContextId()) {
-        auto totalCPUTime = ctxEntry->getInfo().total_cpu_time() + procEntry->getInfo().cpu_time();
+        auto totalCPUTime = ctxEntry->getInfo().total_cpu_time() + procEntry->getData().cpu_time();
         ctxEntry->getInfo().set_total_cpu_time(totalCPUTime);
         auto totalCPUPercent =
-            ctxEntry->getInfo().total_cpu_percent() + procEntry->getInfo().cpu_percent();
+            ctxEntry->getInfo().total_cpu_percent() + procEntry->getData().cpu_percent();
         ctxEntry->getInfo().set_total_cpu_percent(totalCPUPercent);
-        auto totalMEMrss = ctxEntry->getInfo().total_mem_vmrss() + procEntry->getInfo().mem_vmrss();
+        auto totalMEMrss = ctxEntry->getInfo().total_mem_vmrss() + procEntry->getData().mem_vmrss();
         ctxEntry->getInfo().set_total_mem_vmrss(totalMEMrss);
         found = true;
       }

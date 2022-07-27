@@ -41,17 +41,17 @@ public:
   auto getAcct(void) -> tkm::msg::monitor::ProcAcct & { return m_acct; }
   void setAcct(tkm::msg::monitor::ProcAcct &acct) { m_acct.CopyFrom(acct); }
 
-  auto getInfo(void) -> tkm::msg::monitor::ProcInfo & { return m_info; }
-  void setInfo(tkm::msg::monitor::ProcInfo &info) { m_info.CopyFrom(info); }
+  auto getData(void) -> tkm::msg::monitor::ProcEntry & { return m_proc; }
+  void setData(tkm::msg::monitor::ProcEntry &proc) { m_proc.CopyFrom(proc); }
 
   auto getName(void) -> std::string & { return m_name; }
   void setName(const std::string &name)
   {
     m_name = name;
-    m_info.set_comm(name);
+    m_proc.set_comm(name);
   }
   auto getPid(void) -> int { return m_pid; }
-  auto getContextId(void) -> uint64_t { return m_info.ctx_id(); }
+  auto getContextId(void) -> uint64_t { return m_proc.ctx_id(); }
 
   bool getUpdateProcAcctPending(void) { return m_updateProcAcctPending; }
   void setUpdateProcAcctPending(bool state) { m_updateProcAcctPending = state; }
@@ -65,7 +65,7 @@ private:
 private:
   std::chrono::time_point<std::chrono::steady_clock> m_lastUpdateTime{};
   tkm::msg::monitor::ProcAcct m_acct;
-  tkm::msg::monitor::ProcInfo m_info;
+  tkm::msg::monitor::ProcEntry m_proc;
   bool m_updateProcAcctPending = false;
   std::string m_name{};
   int m_pid = 0;
