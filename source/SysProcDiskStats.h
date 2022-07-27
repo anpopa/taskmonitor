@@ -41,10 +41,10 @@ public:
 public:
   DiskStat(DiskStat const &) = delete;
   void operator=(DiskStat const &) = delete;
-  auto getData(void) -> tkm::msg::monitor::SysProcDiskStats & { return m_data; }
+  auto getData(void) -> tkm::msg::monitor::DiskStatEntry & { return m_data; }
 
 private:
-  tkm::msg::monitor::SysProcDiskStats m_data;
+  tkm::msg::monitor::DiskStatEntry m_data;
 };
 
 class SysProcDiskStats : public IDataSource, public std::enable_shared_from_this<SysProcDiskStats>

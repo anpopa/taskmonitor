@@ -149,20 +149,23 @@ static bool doUpdateStats(const std::shared_ptr<SysProcDiskStats> mgr,
 static bool doCollectAndSend(const std::shared_ptr<SysProcDiskStats> mgr,
                              const SysProcDiskStats::Request &request)
 {
-  mgr->getDiskStatList().foreach ([&request](const std::shared_ptr<DiskStat> &entry) {
-    tkm::msg::monitor::Data data;
+  tkm::msg::monitor::SysProcDiskStats diskStats;
+  tkm::msg::monitor::Data data;
 
-    data.set_what(tkm::msg::monitor::Data_What_SysProcDiskStats);
+  data.set_what(tkm::msg::monitor::Data_What_SysProcDiskStats);
 
-    struct timespec currentTime;
-    clock_gettime(CLOCK_REALTIME, &currentTime);
-    data.set_system_time_sec(currentTime.tv_sec);
-    clock_gettime(CLOCK_MONOTONIC, &currentTime);
-    data.set_monotonic_time_sec(currentTime.tv_sec);
+  struct timespec currentTime;
+  clock_gettime(CLOCK_REALTIME, &currentTime);
+  data.set_system_time_sec(currentTime.tv_sec);
+  clock_gettime(CLOCK_MONOTONIC, &currentTime);
+  data.set_monotonic_time_sec(currentTime.tv_sec);
 
-    data.mutable_payload()->PackFrom(entry->getData());
-    request.collector->sendData(data);
+  mgr->getDiskStatList().foreach ([&diskStats](const std::shared_ptr<DiskStat> &entry) {
+    diskStats.add_disk()->CopyFrom(entry->getData());
   });
+
+  data.mutable_payload()->PackFrom(diskStats);
+  request.collector->sendData(data);
 
   return true;
 }

@@ -89,18 +89,18 @@ void ProcEntry::initInfoData(void)
     }
 
     auto afterNameOffset = tokens.size() - 52;
-    m_proc.set_pid(static_cast<uint32_t>(std::stoul(tokens[0])));
-    m_proc.set_ppid(static_cast<uint32_t>(std::stoul(tokens[3 + afterNameOffset])));
+    m_info.set_pid(static_cast<uint32_t>(std::stoul(tokens[0])));
+    m_info.set_ppid(static_cast<uint32_t>(std::stoul(tokens[3 + afterNameOffset])));
 
     auto cpuTime =
         std::stoul(tokens[13 + afterNameOffset]) + std::stoul(tokens[14 + afterNameOffset]);
-    m_proc.set_cpu_time(cpuTime);
+    m_info.set_cpu_time(cpuTime);
   }
 
-  m_proc.set_comm(m_name);
-  m_proc.set_ctx_id(tkm::getContextId(m_pid));
-  m_proc.set_ctx_name(tkm::getContextName(App()->getOptions()->getFor(Options::Key::ContainersPath),
-                                          m_proc.ctx_id()));
+  m_info.set_comm(m_name);
+  m_info.set_ctx_id(tkm::getContextId(m_pid));
+  m_info.set_ctx_name(tkm::getContextName(App()->getOptions()->getFor(Options::Key::ContainersPath),
+                                          m_info.ctx_id()));
 }
 
 bool ProcEntry::updateInfoData(void)
@@ -128,25 +128,25 @@ bool ProcEntry::updateInfoData(void)
     }
 
     auto afterNameOffset = tokens.size() - 52;
-    uint64_t oldCPUTime = m_proc.cpu_time();
+    uint64_t oldCPUTime = m_info.cpu_time();
     uint64_t newCPUTime =
         std::stoul(tokens[13 + afterNameOffset]) + std::stoul(tokens[14 + afterNameOffset]);
 
-    m_proc.set_cpu_time(newCPUTime);
+    m_info.set_cpu_time(newCPUTime);
 
     auto timeNow = std::chrono::steady_clock::now();
     using USec = std::chrono::microseconds;
 
     if (m_lastUpdateTime.time_since_epoch().count() == 0) {
       m_lastUpdateTime = timeNow;
-      m_proc.set_cpu_percent(0);
+      m_info.set_cpu_percent(0);
     } else {
       auto durationUs = std::chrono::duration_cast<USec>(timeNow - m_lastUpdateTime).count();
       m_lastUpdateTime = timeNow;
-      m_proc.set_cpu_percent(((newCPUTime - oldCPUTime) * 1000000) / durationUs);
+      m_info.set_cpu_percent(((newCPUTime - oldCPUTime) * 1000000) / durationUs);
     }
 
-    m_proc.set_mem_vmrss(std::stoul(tokens[23]) * ::sysconf(_SC_PAGESIZE) / 1024);
+    m_info.set_mem_vmrss(std::stoul(tokens[23]) * ::sysconf(_SC_PAGESIZE) / 1024);
   }
 
   return true;

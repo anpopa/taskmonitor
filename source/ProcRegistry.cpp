@@ -393,6 +393,17 @@ static bool doCollectAndSendProcInfo(const std::shared_ptr<ProcRegistry> mgr,
 static bool doCollectAndSendContextInfo(const std::shared_ptr<ProcRegistry> mgr,
                                         const ProcRegistry::Request &rq)
 {
+  tkm::msg::monitor::ContextInfo contextInfo;
+  tkm::msg::monitor::Data data;
+
+  data.set_what(tkm::msg::monitor::Data_What_ContextInfo);
+
+  struct timespec currentTime;
+  clock_gettime(CLOCK_REALTIME, &currentTime);
+  data.set_system_time_sec(currentTime.tv_sec);
+  clock_gettime(CLOCK_MONOTONIC, &currentTime);
+  data.set_monotonic_time_sec(currentTime.tv_sec);
+
   // Update Context data
   mgr->getContextList().foreach ([&mgr, &rq](const std::shared_ptr<ContextEntry> &ctxEntry) {
     // Reset data
@@ -402,13 +413,13 @@ static bool doCollectAndSendContextInfo(const std::shared_ptr<ProcRegistry> mgr,
     mgr->getProcList().foreach ([&mgr, &ctxEntry, &found](
                                     const std::shared_ptr<ProcEntry> &procEntry) {
       if (ctxEntry->getContextId() == procEntry->getContextId()) {
-        auto totalCPUTime = ctxEntry->getInfo().total_cpu_time() + procEntry->getData().cpu_time();
-        ctxEntry->getInfo().set_total_cpu_time(totalCPUTime);
+        auto totalCPUTime = ctxEntry->getData().total_cpu_time() + procEntry->getData().cpu_time();
+        ctxEntry->getData().set_total_cpu_time(totalCPUTime);
         auto totalCPUPercent =
-            ctxEntry->getInfo().total_cpu_percent() + procEntry->getData().cpu_percent();
-        ctxEntry->getInfo().set_total_cpu_percent(totalCPUPercent);
-        auto totalMEMrss = ctxEntry->getInfo().total_mem_vmrss() + procEntry->getData().mem_vmrss();
-        ctxEntry->getInfo().set_total_mem_vmrss(totalMEMrss);
+            ctxEntry->getData().total_cpu_percent() + procEntry->getData().cpu_percent();
+        ctxEntry->getData().set_total_cpu_percent(totalCPUPercent);
+        auto totalMEMrss = ctxEntry->getData().total_mem_vmrss() + procEntry->getData().mem_vmrss();
+        ctxEntry->getData().set_total_mem_vmrss(totalMEMrss);
         found = true;
       }
     });
@@ -421,20 +432,12 @@ static bool doCollectAndSendContextInfo(const std::shared_ptr<ProcRegistry> mgr,
   ProcRegistry::Request crq = {.action = ProcRegistry::Action::CommitContextList};
   mgr->pushRequest(crq);
 
-  mgr->getContextList().foreach ([&rq](const std::shared_ptr<ContextEntry> &entry) {
-    tkm::msg::monitor::Data data;
-
-    data.set_what(tkm::msg::monitor::Data_What_ContextInfo);
-
-    struct timespec currentTime;
-    clock_gettime(CLOCK_REALTIME, &currentTime);
-    data.set_system_time_sec(currentTime.tv_sec);
-    clock_gettime(CLOCK_MONOTONIC, &currentTime);
-    data.set_monotonic_time_sec(currentTime.tv_sec);
-
-    data.mutable_payload()->PackFrom(entry->getInfo());
-    rq.collector->sendData(data);
+  mgr->getContextList().foreach ([&contextInfo](const std::shared_ptr<ContextEntry> &entry) {
+    contextInfo.add_entry()->CopyFrom(entry->getData());
   });
+
+  data.mutable_payload()->PackFrom(contextInfo);
+  rq.collector->sendData(data);
 
   return true;
 }

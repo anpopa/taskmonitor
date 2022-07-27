@@ -31,13 +31,13 @@ public:
 
 public:
   auto getShared(void) -> std::shared_ptr<ContextEntry> { return shared_from_this(); }
-  auto getInfo(void) -> tkm::msg::monitor::ContextInfo & { return m_info; }
-  void setInfo(tkm::msg::monitor::ContextInfo &info) { m_info.CopyFrom(info); }
-  auto getContextId(void) -> uint64_t { return m_info.ctx_id(); }
+  auto getData(void) -> tkm::msg::monitor::ContextInfoEntry & { return m_data; }
+  void setData(tkm::msg::monitor::ContextInfoEntry &data) { m_data.CopyFrom(data); }
+  auto getContextId(void) -> uint64_t { return m_data.ctx_id(); }
   void resetData(void);
 
 private:
-  tkm::msg::monitor::ContextInfo m_info;
+  tkm::msg::monitor::ContextInfoEntry m_data;
 };
 
 } // namespace tkm::monitor
