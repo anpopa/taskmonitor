@@ -136,7 +136,6 @@ static bool doCreateSession(const std::shared_ptr<TCPCollector> collector)
 {
   tkm::msg::Envelope envelope;
   tkm::msg::monitor::Message message;
-  tkm::msg::monitor::SessionInfo sessionInfo;
   std::string idContent(collector->getDescriptor().id());
 
   char randData[64] = {0};

@@ -10,6 +10,7 @@
  */
 
 #include <filesystem>
+#include <sys/stat.h>
 #include <unistd.h>
 
 #include "Application.h"
@@ -54,7 +55,7 @@ UDSServer::UDSServer(const std::shared_ptr<Options> options)
           return true; // this is a client issue, process next client
         }
 
-        logInfo() << "New UDSCollector with FD: " << clientFd;
+        logInfo() << "New UDSCollector with FD: " << clientFd << " ID: " << descriptor.id();
         std::shared_ptr<UDSCollector> collector = std::make_shared<UDSCollector>(clientFd);
         collector->getDescriptor().CopyFrom(descriptor);
         collector->enableEvents();
@@ -83,6 +84,9 @@ void UDSServer::start()
 {
   fs::path sockPath(m_options->getFor(Options::Key::UDSServerSocketPath));
 
+  // Enable event source
+  enableEvents();
+
   m_addr.sun_family = AF_UNIX;
   strncpy(m_addr.sun_path, sockPath.c_str(), sizeof(m_addr.sun_path) - 1);
 
@@ -94,6 +98,10 @@ void UDSServer::start()
   }
 
   if (bind(m_sockFd, (struct sockaddr *) &m_addr, sizeof(struct sockaddr_un)) != -1) {
+
+    // Allow non root processes to connect
+    ::chmod(sockPath.c_str(), 0666);
+
     // We are ready for events only after start
     setPrepare([]() { return true; });
     if (listen(m_sockFd, 10) == -1) {
