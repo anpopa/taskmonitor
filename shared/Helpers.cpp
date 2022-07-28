@@ -30,8 +30,7 @@
 #include <google/protobuf/io/coded_stream.h>
 #include <google/protobuf/io/zero_copy_stream_impl.h>
 
-constexpr size_t GAsyncBufferSize = 1048576;
-
+constexpr size_t GDescBufferSize = 1024;
 namespace pbio = google::protobuf::io;
 
 namespace tkm
@@ -166,7 +165,7 @@ bool sendCollectorDescriptor(int fd, tkm::msg::collector::Descriptor &descriptor
   envelope.set_target(tkm::msg::Envelope_Recipient_Monitor);
   envelope.set_origin(tkm::msg::Envelope_Recipient_Collector);
 
-  unsigned char buffer[GAsyncBufferSize]{};
+  unsigned char buffer[GDescBufferSize]{};
   pbio::ArrayOutputStream outputArray(buffer, sizeof(buffer));
   pbio::CodedOutputStream codedOutput(&outputArray);
 
@@ -197,7 +196,7 @@ bool readCollectorDescriptor(int fd, tkm::msg::collector::Descriptor &descriptor
   envelope.set_target(tkm::msg::Envelope_Recipient_Monitor);
   envelope.set_origin(tkm::msg::Envelope_Recipient_Collector);
 
-  unsigned char buffer[GAsyncBufferSize]{};
+  unsigned char buffer[GDescBufferSize]{};
   pbio::ArrayInputStream inputArray(buffer, sizeof(buffer));
   pbio::CodedInputStream codedInput(&inputArray);
 
