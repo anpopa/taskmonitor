@@ -31,6 +31,7 @@ class Dispatcher : public std::enable_shared_from_this<Dispatcher>
 {
 public:
   enum class Action {
+    GetStartupData,
     GetProcAcct,
     GetProcInfo,
     GetProcEventStats,

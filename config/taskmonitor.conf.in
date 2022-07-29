@@ -22,6 +22,8 @@ ReadProcAtInit=true
 EnableTCPServer=true
 ; Enable UDP server module
 EnableUDSServer=false
+; Cache startup data in profiling mode
+EnableStartupData=false
 ; LXC containers path if WITH_LXC feature is enabled
 ContainersPath=/var/lib/lxc
 ; Set a path to determine at runtime profiling mode. If path exists profiling
@@ -50,6 +52,8 @@ FastLaneInterval=1000000
 PaceLaneInterval=5000000
 ; Set SlowLane time interval in microseconds. Minimium value is 1000000 (1 sec)
 SlowLaneInterval=10000000
+; Startup data cache drop timeout
+StartupDataCleanupTime=60000000
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; TCPServer options

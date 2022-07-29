@@ -201,6 +201,24 @@ static bool doUpdateStats(const std::shared_ptr<SysProcStat> mgr,
     }
   }
 
+#ifdef WITH_STARTUP_DATA
+  if (App()->getStartupData() != nullptr) {
+    if (!App()->getStartupData()->expired()) {
+      tkm::msg::monitor::SysProcStat statData;
+
+      mgr->getCPUStatList().foreach ([&statData](const std::shared_ptr<CPUStat> &entry) {
+        if (entry->getType() == CPUStat::StatType::Cpu) {
+          statData.mutable_cpu()->CopyFrom(entry->getData());
+        } else {
+          statData.add_core()->CopyFrom(entry->getData());
+        }
+      });
+
+      App()->getStartupData()->addCpuData(statData);
+    }
+  }
+#endif
+
   return true;
 }
 

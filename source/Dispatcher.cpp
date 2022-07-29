@@ -15,6 +15,7 @@
 #include "Application.h"
 #include "Defaults.h"
 #include "Dispatcher.h"
+#include "Logger.h"
 #include "ProcEntry.h"
 
 #include "ProcRegistry.h"
@@ -29,6 +30,7 @@ using std::string;
 namespace tkm::monitor
 {
 
+static bool doGetStartupData(const Dispatcher::Request &rq);
 static bool doGetProcAcct(const Dispatcher::Request &rq);
 static bool doGetProcInfo(const Dispatcher::Request &rq);
 static bool doGetProcEventStats(const Dispatcher::Request &rq);
@@ -60,6 +62,8 @@ void Dispatcher::enableEvents()
 auto Dispatcher::requestHandler(const Request &request) -> bool
 {
   switch (request.action) {
+  case Dispatcher::Action::GetStartupData:
+    return doGetStartupData(request);
   case Dispatcher::Action::GetProcAcct:
     return doGetProcAcct(request);
   case Dispatcher::Action::GetProcInfo:
@@ -86,6 +90,21 @@ auto Dispatcher::requestHandler(const Request &request) -> bool
 
   logError() << "Unknown action request";
   return false;
+}
+
+static bool doGetStartupData(const Dispatcher::Request &rq)
+{
+#ifdef WITH_STARTUP_DATA
+  if (App()->getStartupData() != nullptr) {
+    StartupData::Request regrq = {.action = StartupData::Action::CollectAndSend,
+                                  .collector = rq.collector};
+    return App()->getStartupData()->pushRequest(regrq);
+  } else {
+    return true;
+  }
+#else
+  return true;
+#endif
 }
 
 static bool doGetProcAcct(const Dispatcher::Request &rq)

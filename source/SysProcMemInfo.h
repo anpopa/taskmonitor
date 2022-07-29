@@ -49,7 +49,6 @@ public:
   auto pushRequest(SysProcMemInfo::Request &request) -> int;
   void enableEvents();
   bool update(void) final;
-  ;
 
 private:
   bool requestHandler(const Request &request);

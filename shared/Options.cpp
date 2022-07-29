@@ -201,6 +201,31 @@ auto Options::getFor(Key key) -> string const
       return prop.value_or(tkmDefaults.getFor(Defaults::Default::EnableUDSServer));
     }
     return tkmDefaults.getFor(Defaults::Default::EnableUDSServer);
+  case Key::EnableStartupData:
+    if (hasConfigFile()) {
+      const optional<string> prop =
+          m_configFile->getPropertyValue("monitor", -1, "EnableStartupData");
+      return prop.value_or(tkmDefaults.getFor(Defaults::Default::EnableStartupData));
+    }
+    return tkmDefaults.getFor(Defaults::Default::EnableStartupData);
+  case Key::StartupDataCleanupTime:
+    if (hasConfigFile()) {
+      const optional<string> prop =
+          m_configFile->getPropertyValue("profiling-mode", -1, "StartupDataCleanupTime");
+
+      try {
+        auto interval = std::stoul(
+            prop.value_or(tkmDefaults.getFor(Defaults::Default::StartupDataCleanupTime)));
+        if (interval < 1000000) {
+          return tkmDefaults.getFor(Defaults::Default::StartupDataCleanupTime);
+        }
+      } catch (...) {
+        return tkmDefaults.getFor(Defaults::Default::StartupDataCleanupTime);
+      }
+
+      return prop.value_or(tkmDefaults.getFor(Defaults::Default::StartupDataCleanupTime));
+    }
+    return tkmDefaults.getFor(Defaults::Default::StartupDataCleanupTime);
   case Key::TCPServerAddress:
     if (hasConfigFile()) {
       const optional<string> prop =

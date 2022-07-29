@@ -41,6 +41,8 @@ public:
     ReadProcAtInit,
     EnableTCPServer,
     EnableUDSServer,
+    EnableStartupData,
+    StartupDataCleanupTime,
     TCPServerAddress,
     TCPServerPort,
     UDSServerSocketPath,

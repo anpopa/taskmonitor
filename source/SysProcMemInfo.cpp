@@ -187,6 +187,14 @@ static bool doUpdateStats(const std::shared_ptr<SysProcMemInfo> mgr,
     mgr->getProcMemInfo().set_swap_percent(swapPercent);
   }
 
+#ifdef WITH_STARTUP_DATA
+  if (App()->getStartupData() != nullptr) {
+    if (!App()->getStartupData()->expired()) {
+      App()->getStartupData()->addMemData(mgr->getProcMemInfo());
+    }
+  }
+#endif
+
   return true;
 }
 

@@ -178,6 +178,14 @@ static bool doUpdateStats(const std::shared_ptr<SysProcPressure> mgr,
     }
   });
 
+#ifdef WITH_STARTUP_DATA
+  if (App()->getStartupData() != nullptr) {
+    if (!App()->getStartupData()->expired()) {
+      App()->getStartupData()->addPsiData(mgr->getProcPressure());
+    }
+  }
+#endif
+
   return true;
 }
 

@@ -15,6 +15,7 @@
 #include "Defaults.h"
 #include "Dispatcher.h"
 #include "Helpers.h"
+#include "Logger.h"
 #include "TCPCollector.h"
 
 #include "Collector.pb.h"
@@ -23,6 +24,7 @@ namespace tkm::monitor
 {
 
 static bool doCreateSession(const std::shared_ptr<TCPCollector> collector);
+static bool doGetStartupData(const std::shared_ptr<TCPCollector> collector);
 static bool doGetProcAcct(const std::shared_ptr<TCPCollector> collector);
 static bool doGetProcInfo(const std::shared_ptr<TCPCollector> collector);
 static bool doGetProcEventStats(const std::shared_ptr<TCPCollector> collector);
@@ -68,6 +70,9 @@ TCPCollector::TCPCollector(int fd)
           switch (collectorMessage.type()) {
           case tkm::msg::collector::Request_Type_CreateSession:
             status = doCreateSession(getShared());
+            break;
+          case tkm::msg::collector::Request_Type_GetStartupData:
+            status = doGetStartupData(getShared());
             break;
           case tkm::msg::collector::Request_Type_GetProcAcct:
             status = doGetProcAcct(getShared());
@@ -194,6 +199,12 @@ static bool doCreateSession(const std::shared_ptr<TCPCollector> collector)
   logDebug() << "Send session id: " << collector->getSessionInfo().hash()
              << " to collector: " << collector->getFD();
   return collector->writeEnvelope(envelope);
+}
+
+static bool doGetStartupData(const std::shared_ptr<TCPCollector> collector)
+{
+  Dispatcher::Request req = {.action = Dispatcher::Action::GetStartupData, .collector = collector};
+  return App()->getDispatcher()->pushRequest(req);
 }
 
 static bool doGetProcAcct(const std::shared_ptr<TCPCollector> collector)

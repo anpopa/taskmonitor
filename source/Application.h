@@ -31,6 +31,9 @@
 #include "SysProcWireless.h"
 #include "TCPServer.h"
 #include "UDSServer.h"
+#ifdef WITH_STARTUP_DATA
+#include "StartupData.h"
+#endif
 
 #include "../bswinfra/source/IApplication.h"
 #include "../bswinfra/source/SafeList.h"
@@ -66,12 +69,36 @@ public:
   auto getOptions(void) -> const std::shared_ptr<Options> { return m_options; }
   auto getTCPServer(void) -> const std::shared_ptr<TCPServer> { return m_netServer; }
   auto getUDSServer(void) -> const std::shared_ptr<UDSServer> { return m_udsServer; }
-  auto getDispatcher(void) -> const std::shared_ptr<Dispatcher> { return m_dispatcher; }
-  auto getProcRegistry(void) -> const std::shared_ptr<ProcRegistry> { return m_procRegistry; }
-  auto getProcAcct(void) -> const std::shared_ptr<ProcAcct> { return m_procAcct; }
-  auto getProcEvent(void) -> const std::shared_ptr<ProcEvent> { return m_procEvent; }
-  auto getSysProcStat(void) -> const std::shared_ptr<SysProcStat> { return m_sysProcStat; }
-  auto getSysProcMemInfo(void) -> const std::shared_ptr<SysProcMemInfo> { return m_sysProcMemInfo; }
+#ifdef WITH_STARTUP_DATA
+  auto getStartupData(void) -> const std::shared_ptr<StartupData>
+  {
+    return m_startupData;
+  }
+#endif
+  auto getDispatcher(void) -> const std::shared_ptr<Dispatcher>
+  {
+    return m_dispatcher;
+  }
+  auto getProcRegistry(void) -> const std::shared_ptr<ProcRegistry>
+  {
+    return m_procRegistry;
+  }
+  auto getProcAcct(void) -> const std::shared_ptr<ProcAcct>
+  {
+    return m_procAcct;
+  }
+  auto getProcEvent(void) -> const std::shared_ptr<ProcEvent>
+  {
+    return m_procEvent;
+  }
+  auto getSysProcStat(void) -> const std::shared_ptr<SysProcStat>
+  {
+    return m_sysProcStat;
+  }
+  auto getSysProcMemInfo(void) -> const std::shared_ptr<SysProcMemInfo>
+  {
+    return m_sysProcMemInfo;
+  }
   auto getSysProcWireless(void) -> const std::shared_ptr<SysProcWireless>
   {
     return m_sysProcWireless;
@@ -88,19 +115,40 @@ public:
   {
     return m_sysProcBuddyInfo;
   }
-  bool hasConfigFile(void) { return m_options->hasConfigFile(); }
+  bool hasConfigFile(void)
+  {
+    return m_options->hasConfigFile();
+  }
   auto getConfigFile(void) -> const std::shared_ptr<bswi::kf::KeyFile>
   {
     return m_options->getConfigFile();
   }
 
-  void incProcAcctCollectorCounter(void) { m_procAcctCollectorCounter++; }
-  void decProcAcctCollectorCounter(void) { m_procAcctCollectorCounter--; }
-  auto getProcAcctCollectorCounter(void) -> unsigned short { return m_procAcctCollectorCounter; }
+  void incProcAcctCollectorCounter(void)
+  {
+    m_procAcctCollectorCounter++;
+  }
+  void decProcAcctCollectorCounter(void)
+  {
+    m_procAcctCollectorCounter--;
+  }
+  auto getProcAcctCollectorCounter(void) -> unsigned short
+  {
+    return m_procAcctCollectorCounter;
+  }
 
-  auto getFastLaneInterval(void) -> uint64_t { return m_fastLaneInterval; }
-  auto getPaceLaneInterval(void) -> uint64_t { return m_paceLaneInterval; }
-  auto getSlowLaneInterval(void) -> uint64_t { return m_slowLaneInterval; }
+  auto getFastLaneInterval(void) -> uint64_t
+  {
+    return m_fastLaneInterval;
+  }
+  auto getPaceLaneInterval(void) -> uint64_t
+  {
+    return m_paceLaneInterval;
+  }
+  auto getSlowLaneInterval(void) -> uint64_t
+  {
+    return m_slowLaneInterval;
+  }
 
 public:
   Application(Application const &) = delete;
@@ -114,6 +162,9 @@ private:
   std::shared_ptr<Options> m_options = nullptr;
   std::shared_ptr<TCPServer> m_netServer = nullptr;
   std::shared_ptr<UDSServer> m_udsServer = nullptr;
+#ifdef WITH_STARTUP_DATA
+  std::shared_ptr<StartupData> m_startupData = nullptr;
+#endif
   std::shared_ptr<ProcAcct> m_procAcct = nullptr;
   std::shared_ptr<ProcEvent> m_procEvent = nullptr;
   std::shared_ptr<Dispatcher> m_dispatcher = nullptr;

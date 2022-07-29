@@ -31,7 +31,7 @@ namespace tkm::monitor
 
 Application *Application::appInstance = nullptr;
 
-static bool shouldStartTCPServer(const std::shared_ptr<tkm::monitor::Options> opts);
+static bool isProfMode(const std::shared_ptr<tkm::monitor::Options> opts);
 
 Application::Application(const string &name, const string &description, const string &configFile)
 : bswi::app::IApplication(name, description)
@@ -69,7 +69,7 @@ Application::Application(const string &name, const string &description, const st
 
   if (m_options->getFor(Options::Key::EnableTCPServer) == tkmDefaults.valFor(Defaults::Val::True)) {
     m_netServer = std::make_shared<TCPServer>(m_options);
-    if (shouldStartTCPServer(m_options)) {
+    if (isProfMode(m_options)) {
       try {
         m_netServer->bindAndListen();
       } catch (std::exception &e) {
@@ -86,6 +86,16 @@ Application::Application(const string &name, const string &description, const st
       logError() << "Fail to start UDS server. Exception: " << e.what();
     }
   }
+
+#ifdef WITH_STARTUP_DATA
+  if (m_options->getFor(Options::Key::EnableStartupData) ==
+      tkmDefaults.valFor(Defaults::Val::True)) {
+    if (isProfMode(m_options)) {
+      m_startupData = std::make_shared<StartupData>(m_options);
+      m_startupData->enableEvents();
+    }
+  }
+#endif
 
   // Create and initialize NetLink modules
   m_procAcct = std::make_shared<ProcAcct>(m_options);
@@ -250,7 +260,7 @@ void Application::startWatchdog(void)
 #endif
 }
 
-static bool shouldStartTCPServer(const std::shared_ptr<tkm::monitor::Options> opts)
+static bool isProfMode(const std::shared_ptr<tkm::monitor::Options> opts)
 {
   auto profCond = opts->getFor(Options::Key::ProfModeIfPath);
   if (profCond != tkmDefaults.valFor(Defaults::Val::None)) {

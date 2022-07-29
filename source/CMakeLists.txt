@@ -23,6 +23,11 @@ set(BINARY_SRC
     SysProcWireless.cpp
     Main.cpp
     )
+
+if(WITH_STARTUP_DATA)
+    set(BINARY_SRC ${BINARY_SRC} StartupData.cpp)
+endif()
+
 add_executable(${BINARY_NAME} ${BINARY_SRC})
 target_link_libraries(${BINARY_NAME} ${LIBS} BSWInfra TaskMonitorInterfaces)
 install(TARGETS ${BINARY_NAME} RUNTIME DESTINATION ${CMAKE_INSTALL_SBINDIR})
