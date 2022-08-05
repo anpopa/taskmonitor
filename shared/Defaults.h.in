@@ -28,6 +28,7 @@ public:
     RxBufferSize,
     TxBufferSize,
     MsgBufferSize,
+    EnableProcAcct,
     EnableTCPServer,
     EnableUDSServer,
     EnableStartupData,
@@ -66,6 +67,7 @@ public:
     m_table.insert(std::pair<Default, std::string>(Default::ProfModeIfPath, "none"));
     m_table.insert(std::pair<Default, std::string>(Default::SelfLowerPriority, "true"));
     m_table.insert(std::pair<Default, std::string>(Default::ReadProcAtInit, "true"));
+    m_table.insert(std::pair<Default, std::string>(Default::EnableProcAcct, "true"));
     m_table.insert(std::pair<Default, std::string>(Default::EnableTCPServer, "true"));
     m_table.insert(std::pair<Default, std::string>(Default::EnableUDSServer, "false"));
     m_table.insert(std::pair<Default, std::string>(Default::EnableStartupData, "false"));

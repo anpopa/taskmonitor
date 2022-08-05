@@ -18,6 +18,8 @@ MsgBufferSize=1048576
 SelfLowerPriority=true
 ; Read existing processes when service starts and create ProcEntries
 ReadProcAtInit=true
+; Enable TASKSTAT netlink process data
+EnableProcAcct=true
 ; Enable TCP server module
 EnableTCPServer=true
 ; Enable UDP server module

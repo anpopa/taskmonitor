@@ -98,11 +98,15 @@ Application::Application(const string &name, const string &description, const st
 #endif
 
   // Create and initialize NetLink modules
-  m_procAcct = std::make_shared<ProcAcct>(m_options);
-  m_procAcct->enableEvents();
-
   m_procEvent = std::make_shared<ProcEvent>(m_options);
   m_procEvent->enableEvents();
+
+  if (m_options->getFor(Options::Key::EnableProcAcct) == tkmDefaults.valFor(Defaults::Val::True)) {
+    if (isProfMode(m_options)) {
+      m_procAcct = std::make_shared<ProcAcct>(m_options);
+      m_procAcct->enableEvents();
+    }
+  }
 
   // Create and initialize data sources
   m_procRegistry = std::make_shared<ProcRegistry>(m_options);

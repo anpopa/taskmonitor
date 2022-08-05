@@ -187,6 +187,12 @@ auto Options::getFor(Key key) -> string const
       return prop.value_or(tkmDefaults.getFor(Defaults::Default::ReadProcAtInit));
     }
     return tkmDefaults.getFor(Defaults::Default::ReadProcAtInit);
+  case Key::EnableProcAcct:
+    if (hasConfigFile()) {
+      const optional<string> prop = m_configFile->getPropertyValue("monitor", -1, "EnableProcAcct");
+      return prop.value_or(tkmDefaults.getFor(Defaults::Default::EnableProcAcct));
+    }
+    return tkmDefaults.getFor(Defaults::Default::EnableProcAcct);
   case Key::EnableTCPServer:
     if (hasConfigFile()) {
       const optional<string> prop =

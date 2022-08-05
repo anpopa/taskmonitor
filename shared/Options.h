@@ -39,6 +39,7 @@ public:
     ProfModeIfPath,
     SelfLowerPriority,
     ReadProcAtInit,
+    EnableProcAcct,
     EnableTCPServer,
     EnableUDSServer,
     EnableStartupData,
