@@ -155,7 +155,12 @@ static bool doCreateSession(const std::shared_ptr<UDSCollector> collector)
   collector->getSessionInfo().add_pace_lane_sources(msg::monitor::SessionInfo_DataSource_ProcEvent);
   collector->getSessionInfo().add_pace_lane_sources(
       msg::monitor::SessionInfo_DataSource_ContextInfo);
-  collector->getSessionInfo().add_slow_lane_sources(msg::monitor::SessionInfo_DataSource_ProcAcct);
+
+  if (App()->getProcAcct() != nullptr) {
+    collector->getSessionInfo().add_slow_lane_sources(
+        msg::monitor::SessionInfo_DataSource_ProcAcct);
+  }
+
   if (App()->getSysProcStat() != nullptr) {
     collector->getSessionInfo().add_fast_lane_sources(
         msg::monitor::SessionInfo_DataSource_SysProcStat);

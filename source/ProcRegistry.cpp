@@ -315,7 +315,7 @@ bool ProcRegistry::update(UpdateLane lane)
   }
 
   m_procList.foreach ([&lane](const std::shared_ptr<ProcEntry> &entry) {
-    if (lane == UpdateLane::Slow) {
+    if ((lane == UpdateLane::Slow) && (App()->getProcAcct() != nullptr)) {
       entry->update(tkmDefaults.valFor(Defaults::Val::ProcAcct));
     } else {
       entry->update(tkmDefaults.valFor(Defaults::Val::ProcInfo));
@@ -348,6 +348,12 @@ static bool doCommitContextList(const std::shared_ptr<ProcRegistry> mgr,
 static bool doCollectAndSendProcAcct(const std::shared_ptr<ProcRegistry> mgr,
                                      const ProcRegistry::Request &rq)
 {
+
+  // We ignore unexpected request for procacct data if not enabled
+  if (App()->getProcAcct() == nullptr) {
+    return true;
+  }
+
   mgr->getProcList().foreach ([&rq](const std::shared_ptr<ProcEntry> &entry) {
     tkm::msg::monitor::Data data;
 
