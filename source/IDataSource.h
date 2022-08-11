@@ -11,7 +11,6 @@
 
 #pragma once
 
-#include <cstdint>
 #include <string>
 
 namespace tkm::monitor

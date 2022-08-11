@@ -10,7 +10,6 @@
  */
 
 #include "Application.h"
-#include "Defaults.h"
 #include "TaskMonitor.h"
 
 #include <csignal>

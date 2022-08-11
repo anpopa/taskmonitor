@@ -12,7 +12,6 @@
 #pragma once
 
 #include <TaskMonitor.h>
-#include <fcntl.h>
 
 #include "../bswinfra/source/Pollable.h"
 
