@@ -72,7 +72,7 @@ auto main(int argc, char **argv) -> int
   try {
     TKMLIB_CHECK_VERSION;
   } catch (...) {
-    std::cout << "Unsupported libtaskmonitor headers mismatch library" << std::endl;
+    std::cout << "The libtaskmonitor headers mismatch library" << std::endl;
     ::exit(EXIT_FAILURE);
   }
 
