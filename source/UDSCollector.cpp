@@ -10,14 +10,13 @@
  */
 
 #include <unistd.h>
+#include <TaskMonitor.h>
 
 #include "Application.h"
 #include "Defaults.h"
 #include "Dispatcher.h"
 #include "Helpers.h"
 #include "UDSCollector.h"
-
-#include "Collector.pb.h"
 
 namespace tkm::monitor
 {

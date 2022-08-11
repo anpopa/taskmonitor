@@ -12,7 +12,6 @@
 #include "SysProcBuddyInfo.h"
 #include "Application.h"
 #include "Logger.h"
-#include "Monitor.pb.h"
 
 #include <chrono>
 #include <cstdint>
@@ -22,6 +21,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <TaskMonitor.h>
 
 namespace tkm::monitor
 {

@@ -11,7 +11,6 @@
 
 #include "SysProcMemInfo.h"
 #include "Application.h"
-#include "Monitor.pb.h"
 
 #include <fstream>
 #include <iostream>
@@ -19,6 +18,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <TaskMonitor.h>
 
 namespace tkm::monitor
 {

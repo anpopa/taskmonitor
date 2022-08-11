@@ -1,8 +1,6 @@
 set(BINARY_NAME taskmonitor)
 set(BINARY_SRC 
     ../shared/Options.cpp
-    ../shared/EnvelopeReader.cpp
-    ../shared/EnvelopeWriter.cpp
     ../shared/Helpers.cpp
     Dispatcher.cpp
     ProcAcct.cpp
@@ -29,5 +27,5 @@ if(WITH_STARTUP_DATA)
 endif()
 
 add_executable(${BINARY_NAME} ${BINARY_SRC})
-target_link_libraries(${BINARY_NAME} ${LIBS} BSWInfra TaskMonitorInterfaces)
+target_link_libraries(${BINARY_NAME} ${LIBS} BSWInfra)
 install(TARGETS ${BINARY_NAME} RUNTIME DESTINATION ${CMAKE_INSTALL_SBINDIR})

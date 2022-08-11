@@ -9,10 +9,6 @@
  *-
  */
 
-#include "Application.h"
-#include "Defaults.h"
-#include "IDataSource.h"
-#include "ProcEntry.h"
 #include <cstdint>
 #include <memory>
 #include <string>
@@ -20,6 +16,11 @@
 #include <systemd/sd-daemon.h>
 #endif
 #include <filesystem>
+
+#include "Application.h"
+#include "Defaults.h"
+#include "IDataSource.h"
+#include "ProcEntry.h"
 
 using std::shared_ptr;
 using std::string;

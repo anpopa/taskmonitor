@@ -16,10 +16,10 @@
 #include <ctime>
 #include <time.h>
 #include <unistd.h>
+#include <TaskMonitor.h>
 
 #include "ICollector.h"
 #include "IDataSource.h"
-#include "Monitor.pb.h"
 #include "Options.h"
 
 #include "../bswinfra/source/AsyncQueue.h"

@@ -15,12 +15,9 @@
 
 #include "Application.h"
 #include "Defaults.h"
-#include "EnvelopeReader.h"
 #include "Helpers.h"
 #include "TCPCollector.h"
 #include "TCPServer.h"
-
-#include "Collector.pb.h"
 
 namespace tkm::monitor
 {

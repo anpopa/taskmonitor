@@ -12,7 +12,6 @@
 #include "StartupData.h"
 #include "Application.h"
 #include "Logger.h"
-#include "Monitor.pb.h"
 
 #include <fstream>
 #include <iostream>

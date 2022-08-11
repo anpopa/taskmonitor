@@ -14,9 +14,9 @@
 #include <linux/netlink.h>
 #include <string>
 #include <sys/socket.h>
+#include <TaskMonitor.h>
 
 #include "ICollector.h"
-#include "Monitor.pb.h"
 #include "Options.h"
 
 #include "../bswinfra/source/AsyncQueue.h"

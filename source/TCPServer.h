@@ -14,6 +14,7 @@
 #include <netinet/in.h>
 #include <string>
 #include <sys/socket.h>
+#include <TaskMonitor.h>
 
 #include "ICollector.h"
 #include "Options.h"
@@ -21,8 +22,6 @@
 #include "../bswinfra/source/IApplication.h"
 #include "../bswinfra/source/Pollable.h"
 #include "../bswinfra/source/SafeList.h"
-
-#include "Monitor.pb.h"
 
 using namespace bswi::event;
 

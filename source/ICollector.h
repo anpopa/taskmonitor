@@ -11,16 +11,11 @@
 
 #pragma once
 
-#include "EnvelopeReader.h"
-#include "EnvelopeWriter.h"
-
 #include <fcntl.h>
 #include <memory>
 #include <mutex>
 #include <unistd.h>
-
-#include "Collector.pb.h"
-#include "Monitor.pb.h"
+#include <TaskMonitor.h>
 
 #include "../bswinfra/source/Pollable.h"
 
@@ -34,8 +29,8 @@ class ICollector : public Pollable
 public:
   explicit ICollector(const std::string &name, int fd)
   : Pollable(name, fd)
-  , m_reader(std::make_unique<EnvelopeReader>(fd))
-  , m_writer(std::make_unique<EnvelopeWriter>(fd))
+  , m_reader(std::make_unique<tkm::EnvelopeReader>(fd))
+  , m_writer(std::make_unique<tkm::EnvelopeWriter>(fd))
   {
   }
 
@@ -85,8 +80,8 @@ public:
   auto getFD(void) -> int { return m_fd; }
 
 private:
-  std::unique_ptr<EnvelopeReader> m_reader = nullptr;
-  std::unique_ptr<EnvelopeWriter> m_writer = nullptr;
+  std::unique_ptr<tkm::EnvelopeReader> m_reader = nullptr;
+  std::unique_ptr<tkm::EnvelopeWriter> m_writer = nullptr;
   tkm::msg::collector::Descriptor m_descriptor{};
   tkm::msg::monitor::SessionInfo m_sessionInfo{};
 };

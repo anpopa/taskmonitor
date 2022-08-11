@@ -12,6 +12,7 @@
 #include <filesystem>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <TaskMonitor.h>
 
 #include "Application.h"
 #include "Helpers.h"

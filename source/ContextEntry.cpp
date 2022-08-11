@@ -10,7 +10,6 @@
  */
 
 #include "ContextEntry.h"
-#include "Helpers.h"
 
 namespace tkm::monitor
 {

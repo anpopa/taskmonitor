@@ -12,11 +12,11 @@
 #pragma once
 
 #include "IDataSource.h"
-#include "Monitor.pb.h"
 #include <chrono>
 #include <cstdint>
 #include <memory>
 #include <string>
+#include <TaskMonitor.h>
 
 #include "../bswinfra/source/Logger.h"
 

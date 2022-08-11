@@ -9,8 +9,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 set(BSWINFRA_DIR ${CMAKE_CURRENT_SOURCE_DIR}/bswinfra)
-set(INTERFACES_DIR ${CMAKE_CURRENT_SOURCE_DIR}/interfaces)
-set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" "${BSWINFRA_DIR}/cmake" "${INTERFACES_DIR}/cmake")
+set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" "${BSWINFRA_DIR}/cmake")
 
 message (STATUS "Module paths: ${CMAKE_MODULE_PATH}")
 
@@ -51,7 +50,6 @@ set(PROJECT_VERSION_PATCH ${GIT_SHA1})
 include(GNUInstallDirs)
 include(Packing)
 include(BSWInfra)
-include(TaskMonitorInterfaces)
 
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "RelWithDebInfo" CACHE STRING
@@ -109,6 +107,16 @@ set                   (LIBS ${LIBS} ${LIBNL_LIBRARIES})
 pkg_check_modules     (LIBNLGENL libnl-genl-3.0 REQUIRED)
 include_directories   (${LIBNLGENL_INCLUDE_DIRS})
 set                   (LIBS ${LIBS} ${LIBNLGENL_LIBRARIES})
+
+# Use protobuf library (dependency for libtaskmonitor)
+include      (FindProtobuf)
+find_package (Protobuf REQUIRED)
+set          (LIBS ${LIBS} ${PROTOBUF_LIBRARY})
+
+# Use libtaskmonitor
+pkg_check_modules     (LIBTKM libtaskmonitor REQUIRED)
+include_directories   (${LIBTKM_INCLUDE_DIRS})
+set                   (LIBS ${LIBS} ${LIBTKM_LIBRARIES})
 
 if(WITH_LXC)
     pkg_check_modules     (LIBLXC lxc>=3.0 REQUIRED)

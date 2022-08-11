@@ -10,6 +10,7 @@
  */
 
 #include <unistd.h>
+#include <TaskMonitor.h>
 
 #include "Application.h"
 #include "Defaults.h"
@@ -17,8 +18,6 @@
 #include "Helpers.h"
 #include "Logger.h"
 #include "TCPCollector.h"
-
-#include "Collector.pb.h"
 
 namespace tkm::monitor
 {

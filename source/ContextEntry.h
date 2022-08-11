@@ -11,7 +11,7 @@
 
 #pragma once
 
-#include "Monitor.pb.h"
+#include <TaskMonitor.h>
 #include <cstdint>
 #include <memory>
 #include <string>
