@@ -12,9 +12,6 @@
 #pragma once
 
 #include <TaskMonitor.h>
-#include <cstdint>
-#include <memory>
-#include <string>
 
 namespace tkm::monitor
 {

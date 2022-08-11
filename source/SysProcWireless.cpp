@@ -11,16 +11,6 @@
 
 #include "SysProcWireless.h"
 #include "Application.h"
-#include "Logger.h"
-
-#include <chrono>
-#include <cstdint>
-#include <fstream>
-#include <iostream>
-#include <memory>
-#include <sstream>
-#include <string>
-#include <vector>
 
 namespace tkm::monitor
 {

@@ -10,7 +10,7 @@
  */
 
 #include "Options.h"
-#include "Defaults.h"
+#include "../bswinfra/source/Logger.h"
 
 using namespace std;
 

@@ -9,23 +9,12 @@
  *-
  */
 
-#include <csignal>
-#include <ctime>
-#include <filesystem>
-#include <memory>
-#include <netdb.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-
 #include <linux/cn_proc.h>
 #include <linux/connector.h>
-#include <linux/netlink.h>
+#include <netdb.h>
 #include <unistd.h>
 
 #include "Application.h"
-#include "Defaults.h"
-#include "Logger.h"
 #include "ProcEvent.h"
 
 namespace tkm::monitor
@@ -167,7 +156,7 @@ ProcEvent::ProcEvent(const std::shared_ptr<Options> options)
   // If the event is removed we stop the main application
   setFinalize([]() {
     logInfo() << "Server closed connection. Terminate";
-    ::raise(SIGTERM);
+    App()->stop();
   });
 
   m_queue = std::make_shared<AsyncQueue<ProcEvent::Request>>(

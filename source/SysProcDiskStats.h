@@ -11,10 +11,6 @@
 
 #pragma once
 
-#include <cstdint>
-#include <memory>
-#include <time.h>
-#include <unistd.h>
 #include <TaskMonitor.h>
 
 #include "ICollector.h"

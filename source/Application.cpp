@@ -9,21 +9,12 @@
  *-
  */
 
-#include <cstdint>
-#include <memory>
-#include <string>
+#include <filesystem>
 #ifdef WITH_SYSTEMD
 #include <systemd/sd-daemon.h>
 #endif
-#include <filesystem>
 
 #include "Application.h"
-#include "Defaults.h"
-#include "IDataSource.h"
-#include "ProcEntry.h"
-
-using std::shared_ptr;
-using std::string;
 
 #define USEC2SEC(x) (x / 1000000)
 
@@ -34,7 +25,9 @@ Application *Application::appInstance = nullptr;
 
 static bool isProfMode(const std::shared_ptr<tkm::monitor::Options> opts);
 
-Application::Application(const string &name, const string &description, const string &configFile)
+Application::Application(const std::string &name,
+                         const std::string &description,
+                         const std::string &configFile)
 : bswi::app::IApplication(name, description)
 {
   bool profModeEnabled = false;

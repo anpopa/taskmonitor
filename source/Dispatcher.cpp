@@ -13,19 +13,6 @@
 #include <unistd.h>
 
 #include "Application.h"
-#include "Defaults.h"
-#include "Dispatcher.h"
-#include "Logger.h"
-#include "ProcEntry.h"
-
-#include "ProcRegistry.h"
-#include "SysProcDiskStats.h"
-#include "SysProcMemInfo.h"
-#include "SysProcPressure.h"
-#include "SysProcStat.h"
-
-using std::shared_ptr;
-using std::string;
 
 namespace tkm::monitor
 {
@@ -42,7 +29,7 @@ static bool doGetSysProcBuddyInfo(const Dispatcher::Request &rq);
 static bool doGetSysProcWireless(const Dispatcher::Request &rq);
 static bool doGetContextInfo(const Dispatcher::Request &rq);
 
-Dispatcher::Dispatcher(const shared_ptr<Options> options)
+Dispatcher::Dispatcher(const std::shared_ptr<Options> options)
 : m_options(options)
 {
   m_queue = std::make_shared<AsyncQueue<Request>>(

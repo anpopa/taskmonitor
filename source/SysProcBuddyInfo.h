@@ -11,14 +11,8 @@
 
 #pragma once
 
-#include <chrono>
-#include <cstdint>
-#include <ctime>
-#include <time.h>
-#include <unistd.h>
 #include <TaskMonitor.h>
 
-#include "Helpers.h"
 #include "ICollector.h"
 #include "IDataSource.h"
 #include "Options.h"

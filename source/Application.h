@@ -11,16 +11,11 @@
 
 #pragma once
 
-#include <atomic>
-#include <cstdint>
-#include <cstdlib>
-#include <string>
-
-#include "Defaults.h"
 #include "Dispatcher.h"
 #include "IDataSource.h"
 #include "Options.h"
 #include "ProcAcct.h"
+#include "ProcEntry.h"
 #include "ProcEvent.h"
 #include "ProcRegistry.h"
 #include "SysProcBuddyInfo.h"

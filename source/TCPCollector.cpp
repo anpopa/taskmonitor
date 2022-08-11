@@ -9,7 +9,6 @@
  *-
  */
 
-#include <unistd.h>
 #include <TaskMonitor.h>
 
 #include "Application.h"

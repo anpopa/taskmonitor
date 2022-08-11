@@ -9,13 +9,7 @@
  *-
  */
 
-#include <csignal>
-#include <filesystem>
-#include <netdb.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-
+#include "netlink/errno.h"
 #include <linux/taskstats.h>
 #include <netlink/attr.h>
 #include <netlink/genl/ctrl.h>
@@ -23,15 +17,9 @@
 #include <netlink/msg.h>
 #include <netlink/netlink.h>
 #include <netlink/socket.h>
-#include <unistd.h>
 
 #include "Application.h"
-#include "Defaults.h"
 #include "ProcAcct.h"
-#include "netlink/errno.h"
-
-using std::shared_ptr;
-using std::string;
 
 #define average_ms(t, c) (t / 1000000ULL / (c ? c : 1))
 
@@ -206,7 +194,7 @@ ProcAcct::ProcAcct(const std::shared_ptr<Options> options)
   // If the event is removed we stop the main application
   setFinalize([]() {
     logInfo() << "Server closed connection. Terminate";
-    ::raise(SIGTERM);
+    App()->stop();
   });
 }
 

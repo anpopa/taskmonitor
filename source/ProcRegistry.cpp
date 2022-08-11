@@ -9,20 +9,10 @@
  *-
  */
 
-#include "ProcRegistry.h"
-#include "Application.h"
-
-#include <cstdint>
 #include <filesystem>
-#include <fstream>
-#include <iostream>
-#include <memory>
-#include <streambuf>
 
-#include "../bswinfra/source/KeyFile.h"
-#include "ContextEntry.h"
-#include "Defaults.h"
-#include "Helpers.h"
+#include "Application.h"
+#include "ProcRegistry.h"
 
 namespace tkm::monitor
 {

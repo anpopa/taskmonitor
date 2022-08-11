@@ -11,13 +11,7 @@
 
 #include "ProcEntry.h"
 #include "Application.h"
-#include "Defaults.h"
 #include "Helpers.h"
-#include "ProcAcct.h"
-#include <cstdint>
-
-#include <limits.h>
-#include <unistd.h>
 
 namespace tkm::monitor
 {

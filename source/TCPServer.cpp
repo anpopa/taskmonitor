@@ -14,8 +14,6 @@
 #include <unistd.h>
 
 #include "Application.h"
-#include "Defaults.h"
-#include "Helpers.h"
 #include "TCPCollector.h"
 #include "TCPServer.h"
 

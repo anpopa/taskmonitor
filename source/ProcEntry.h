@@ -11,14 +11,11 @@
 
 #pragma once
 
-#include "IDataSource.h"
-#include <chrono>
-#include <cstdint>
-#include <memory>
-#include <string>
 #include <TaskMonitor.h>
+#include <chrono>
+#include <string>
 
-#include "../bswinfra/source/Logger.h"
+#include "IDataSource.h"
 
 namespace tkm::monitor
 {

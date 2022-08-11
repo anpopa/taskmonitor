@@ -14,11 +14,10 @@
 #include <map>
 #include <string>
 
+#include "ICollector.h"
 #include "Options.h"
 #include "ProcAcct.h"
 #include "ProcEvent.h"
-
-#include "ICollector.h"
 
 #include "../bswinfra/source/AsyncQueue.h"
 

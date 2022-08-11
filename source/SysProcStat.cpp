@@ -11,16 +11,6 @@
 
 #include "SysProcStat.h"
 #include "Application.h"
-#include "Logger.h"
-
-#include <chrono>
-#include <cstdint>
-#include <fstream>
-#include <iostream>
-#include <memory>
-#include <sstream>
-#include <string>
-#include <vector>
 
 static constexpr int statCpuNamePos = 0;
 static constexpr int statUserJiffiesPos = 1;

@@ -13,14 +13,11 @@
 
 #include <netinet/in.h>
 #include <netlink/netlink.h>
-#include <string>
 #include <sys/socket.h>
 
 #include "Options.h"
 #include "ProcEntry.h"
 
-#include "../bswinfra/source/Exceptions.h"
-#include "../bswinfra/source/IApplication.h"
 #include "../bswinfra/source/Pollable.h"
 
 using namespace bswi::event;

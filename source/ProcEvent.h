@@ -11,10 +11,9 @@
 
 #pragma once
 
-#include <linux/netlink.h>
-#include <string>
-#include <sys/socket.h>
 #include <TaskMonitor.h>
+#include <linux/netlink.h>
+#include <sys/socket.h>
 
 #include "ICollector.h"
 #include "Options.h"

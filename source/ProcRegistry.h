@@ -11,13 +11,10 @@
 
 #pragma once
 
-#include <list>
-#include <memory>
 #include <string>
 
 #include "ContextEntry.h"
 #include "ICollector.h"
-#include "IDataSource.h"
 #include "Options.h"
 #include "ProcEntry.h"
 
