@@ -9,7 +9,7 @@ As part of the project group a set of tools is provided to store and process the
 | Component | Location | Description |
 | ------ | ------ | ------ |
 | taskmonitor | https://gitlab.com/taskmonitor/taskmonitor | System daemon running on target system (this project) |
-| taskmonitor-interfaces | https://gitlab.com/taskmonitor/taskmonitor-interfaces | Protobuf interfaces to communicate with the daemon |
+| libtaskmonitor | https://gitlab.com/taskmonitor/libtaskmonitor | Protobuf interfaces to communicate with the daemon |
 | tkm-reader | https://gitlab.com/taskmonitor/tkm-reader | A simple reader that output data in SQLite and JSON formats |
 | tkm-collector | https://gitlab.com/taskmonitor/tkm-collector | A data collector, SQL based, to be used in CI systems |
 
@@ -23,7 +23,8 @@ TaskMonitor depends on the following libraries
 | Library | Reference | Info |
 | ------ | ------ | ------ |
 | libnl3 | https://www.infradead.org/~tgr/libnl | Used for netlink interfaces to taskstats |
-| protobuf | https://developers.google.com/protocol-buffers | Data serialization |
+| libtaskmonitor | https://gitlab.com/taskmonitor/libtaskmonitor | TaskMonitor interfaces |
+| protobuf | https://developers.google.com/protocol-buffers | Data serialization (libtaskmonitor dependency) |
 | libsystemd | https://github.com/systemd/systemd/tree/main/src/libsystemd | Optional if WITH_SYSTEMD is ON |
 
 ## Build
@@ -32,6 +33,8 @@ TaskMonitor depends on the following libraries
 | Option | Default | Info |
 | ------ | ------ | ------ |
 | WITH_SYSTEMD | ON | Enable systemd service, watchdog and journald support |
+| WITH_STARTUP_DATA | ON | Support startup data cache with timeout |
+| WITH_LXC | OFF | Use liblxc to set the context name for containers |
 | WITH_INSTALL_CONFIG | ON | Install default taskmonitor.conf on target |
 | WITH_INSTALL_LICENSE | ON | Install license file on target for QA checks |
 

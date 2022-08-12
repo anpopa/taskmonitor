@@ -1,7 +1,7 @@
 set(BINARY_NAME taskmonitor)
 set(BINARY_SRC 
-    ../shared/Options.cpp
-    ../shared/Helpers.cpp
+    Options.cpp
+    Helpers.cpp
     Dispatcher.cpp
     ProcAcct.cpp
     ProcEvent.cpp

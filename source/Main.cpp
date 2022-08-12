@@ -9,14 +9,14 @@
  *-
  */
 
-#include "Application.h"
-#include "TaskMonitor.h"
-
 #include <csignal>
 #include <cstdlib>
 #include <filesystem>
 #include <getopt.h>
 #include <iostream>
+#include <taskmonitor/taskmonitor.h>
+
+#include "Application.h"
 
 using namespace tkm::monitor;
 namespace fs = std::filesystem;

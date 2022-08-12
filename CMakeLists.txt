@@ -43,18 +43,18 @@ else(EXISTS "${CMAKE_SOURCE_DIR}/.git")
     set(GIT_SHA1 "")
 endif(EXISTS "${CMAKE_SOURCE_DIR}/.git")
 
+if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE "RelWithDebInfo" CACHE STRING
+        "Choose the type of build: Debug, Release, RelWithDebInfo, MinSizeRel." FORCE)
+endif()
+
 set(PROJECT_VERSION_MAJOR "1")
-set(PROJECT_VERSION_MINOR "3")
+set(PROJECT_VERSION_MINOR "5")
 set(PROJECT_VERSION_PATCH ${GIT_SHA1})
 
 include(GNUInstallDirs)
 include(Packing)
 include(BSWInfra)
-
-if(NOT CMAKE_BUILD_TYPE)
-    set(CMAKE_BUILD_TYPE "RelWithDebInfo" CACHE STRING
-        "Choose the type of build: Debug, Release, RelWithDebInfo, MinSizeRel." FORCE)
-endif()
 
 # Add support for coverage analysis
 if(CMAKE_BUILD_TYPE STREQUAL Coverage)
@@ -74,8 +74,8 @@ endif()
 set(TKM_CONFIG_FILE "/etc/taskmonitor.conf" CACHE PATH "Default config file path")
 
 configure_file(
-    ${CMAKE_SOURCE_DIR}/shared/Defaults.h.in
-    ${CMAKE_BINARY_DIR}/taskmonitor/shared/Defaults.h)
+    ${CMAKE_SOURCE_DIR}/source/Defaults.h.in
+    ${CMAKE_BINARY_DIR}/taskmonitor/source/Defaults.h)
 
 configure_file(
     ${CMAKE_SOURCE_DIR}/config/taskmonitor.conf.in
@@ -90,8 +90,8 @@ if(WITH_TIDY)
 endif()
 
 # Header files
-include_directories(${CMAKE_SOURCE_DIR}/shared)
-include_directories(${CMAKE_BINARY_DIR}/taskmonitor/shared)
+include_directories(${CMAKE_SOURCE_DIR}/source)
+include_directories(${CMAKE_BINARY_DIR}/taskmonitor/source)
 
 # Dependencies
 find_package          (PkgConfig REQUIRED)
@@ -109,9 +109,9 @@ include_directories   (${LIBNLGENL_INCLUDE_DIRS})
 set                   (LIBS ${LIBS} ${LIBNLGENL_LIBRARIES})
 
 # Use protobuf library (dependency for libtaskmonitor)
-include      (FindProtobuf)
-find_package (Protobuf REQUIRED)
-set          (LIBS ${LIBS} ${PROTOBUF_LIBRARY})
+include               (FindProtobuf)
+find_package          (Protobuf REQUIRED)
+set                   (LIBS ${LIBS} ${PROTOBUF_LIBRARY})
 
 # Use libtaskmonitor
 pkg_check_modules     (LIBTKM libtaskmonitor REQUIRED)

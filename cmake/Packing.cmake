@@ -23,7 +23,7 @@ set(CPACK_RPM_CHANGELOG_FILE "${CMAKE_SOURCE_DIR}/CHANGELOG")
 set(CPACK_RPM_PACKAGE_DESCRIPTION ${CPACK_PACKAGE_DESCRIPTION_SUMMARY})
 set(CPACK_RPM_PACKAGE_GROUP "Applications/System")
 set(CPACK_RPM_PACKAGE_REQUIRES
-  "systemd >= 243, libnl3 >= 3.4.0, protobuf >= 3.14.0")
+  "libtaskmonitor-bin >= 1.0.0, systemd >= 243, libnl3 >= 3.4.0, protobuf >= 3.14.0")
 list(APPEND CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST_ADDITION "/usr/sbin")
 
 # DEB
@@ -32,6 +32,6 @@ set(CPACK_DEBIAN_DEBUGINFO_PACKAGE OFF)
 set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Alin Popa")
 set(CPACK_DEBIAN_PACKAGE_SECTION "Utilities")
 set(CPACK_DEBIAN_PACKAGE_DEPENDS
-  "libsystemd (>= 243), libnl-3-200 (>= 3.4.0), libnl-genl-3-200 (>=3.5.0), libprotobuf23 (>=3.12.4)")
+  "libtaskmonitor-bin (>=1.0.0), libsystemd (>= 243), libnl-3-200 (>= 3.4.0), libnl-genl-3-200 (>=3.5.0), libprotobuf23 (>=3.12.4)")
 
 include(CPack)

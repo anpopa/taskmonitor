@@ -11,6 +11,7 @@
 
 #include <errno.h>
 #include <netdb.h>
+#include <taskmonitor/taskmonitor.h>
 #include <unistd.h>
 
 #include "Application.h"

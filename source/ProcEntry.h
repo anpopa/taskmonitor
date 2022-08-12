@@ -11,9 +11,9 @@
 
 #pragma once
 
-#include <TaskMonitor.h>
 #include <chrono>
 #include <string>
+#include <taskmonitor/taskmonitor.h>
 
 #include "IDataSource.h"
 
