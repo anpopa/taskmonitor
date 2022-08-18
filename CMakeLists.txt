@@ -148,7 +148,6 @@ add_compile_options (
     -Wformat
     -Wno-variadic-macros
     -Wno-strict-aliasing
-    -D_FORTIFY_SOURCE=2
     -fstack-protector-strong
     -fwrapv
     -Wformat-signedness
