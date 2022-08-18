@@ -9,10 +9,16 @@
  *-
  */
 
-#include "SysProcPressure.h"
-#include "Application.h"
-
+#if __has_include(<filesystem>)
 #include <filesystem>
+namespace fs = std::filesystem;
+#else
+#include <experimental/filesystem>
+namespace fs = std::experimental::filesystem;
+#endif
+
+#include "Application.h"
+#include "SysProcPressure.h"
 
 namespace tkm::monitor
 {
@@ -91,15 +97,15 @@ void PressureStat::updateStats(void)
 SysProcPressure::SysProcPressure(const std::shared_ptr<Options> options)
 : m_options(options)
 {
-  if (std::filesystem::exists("/proc/pressure/cpu")) {
+  if (fs::exists("/proc/pressure/cpu")) {
     std::shared_ptr<PressureStat> entry = std::make_shared<PressureStat>("cpu");
     m_entries.append(entry);
   }
-  if (std::filesystem::exists("/proc/pressure/memory")) {
+  if (fs::exists("/proc/pressure/memory")) {
     std::shared_ptr<PressureStat> entry = std::make_shared<PressureStat>("memory");
     m_entries.append(entry);
   }
-  if (std::filesystem::exists("/proc/pressure/io")) {
+  if (fs::exists("/proc/pressure/io")) {
     std::shared_ptr<PressureStat> entry = std::make_shared<PressureStat>("io");
     m_entries.append(entry);
   }

@@ -11,15 +11,20 @@
 
 #include <csignal>
 #include <cstdlib>
-#include <filesystem>
 #include <getopt.h>
 #include <iostream>
 #include <taskmonitor/taskmonitor.h>
+#if __has_include(<filesystem>)
+#include <filesystem>
+namespace fs = std::filesystem;
+#else
+#include <experimental/filesystem>
+namespace fs = std::experimental::filesystem;
+#endif
 
 #include "Application.h"
 
 using namespace tkm::monitor;
-namespace fs = std::filesystem;
 
 std::unique_ptr<tkm::monitor::Application> app = nullptr;
 

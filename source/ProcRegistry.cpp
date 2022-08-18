@@ -9,7 +9,13 @@
  *-
  */
 
+#if __has_include(<filesystem>)
 #include <filesystem>
+namespace fs = std::filesystem;
+#else
+#include <experimental/filesystem>
+namespace fs = std::experimental::filesystem;
+#endif
 
 #include "Application.h"
 #include "ProcRegistry.h"
@@ -75,7 +81,7 @@ void ProcRegistry::initFromProc(void)
   std::string path = "/proc";
 
   logDebug() << "Read existing proc entries";
-  for (const auto &entry : std::filesystem::directory_iterator(path)) {
+  for (const auto &entry : fs::directory_iterator(path)) {
     int pid = -1;
 
     try {
@@ -222,8 +228,7 @@ bool ProcRegistry::isBlacklisted(const std::string &name)
 
 auto ProcRegistry::getProcNameForPID(int pid) -> std::string
 {
-  auto statusPath = std::filesystem::path("/proc") / std::filesystem::path(std::to_string(pid)) /
-                    std::filesystem::path("status");
+  auto statusPath = fs::path("/proc") / fs::path(std::to_string(pid)) / fs::path("status");
   std::ifstream statusStream{statusPath};
 
   if (!statusStream.is_open()) {

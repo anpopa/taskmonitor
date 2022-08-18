@@ -9,9 +9,15 @@
  *-
  */
 
-#include <filesystem>
 #ifdef WITH_SYSTEMD
 #include <systemd/sd-daemon.h>
+#endif
+#if __has_include(<filesystem>)
+#include <filesystem>
+namespace fs = std::filesystem;
+#else
+#include <experimental/filesystem>
+namespace fs = std::experimental::filesystem;
 #endif
 
 #include "Application.h"
@@ -41,7 +47,7 @@ Application::Application(const std::string &name,
 
   auto profCond = m_options->getFor(Options::Key::ProfModeIfPath);
   if (profCond != tkmDefaults.valFor(Defaults::Val::None)) {
-    if (std::filesystem::exists(profCond)) {
+    if (fs::exists(profCond)) {
       logInfo() << "Profiling mode enabled";
       profModeEnabled = true;
     }
@@ -109,7 +115,7 @@ Application::Application(const std::string &name,
   m_procRegistry->enableEvents();
   m_dataSources.append(m_procRegistry);
 
-  if (std::filesystem::exists("/proc/stat")) {
+  if (fs::exists("/proc/stat")) {
     m_sysProcStat = std::make_shared<SysProcStat>(m_options);
     m_sysProcStat->setUpdateLane(IDataSource::UpdateLane::Fast);
     m_sysProcStat->setUpdateInterval(m_fastLaneInterval);
@@ -117,7 +123,7 @@ Application::Application(const std::string &name,
     m_dataSources.append(m_sysProcStat);
   }
 
-  if (std::filesystem::exists("/proc/meminfo")) {
+  if (fs::exists("/proc/meminfo")) {
     m_sysProcMemInfo = std::make_shared<SysProcMemInfo>(m_options);
     m_sysProcMemInfo->setUpdateLane(IDataSource::UpdateLane::Fast);
     m_sysProcMemInfo->setUpdateInterval(m_fastLaneInterval);
@@ -125,7 +131,7 @@ Application::Application(const std::string &name,
     m_dataSources.append(m_sysProcMemInfo);
   }
 
-  if (std::filesystem::exists("/proc/pressure")) {
+  if (fs::exists("/proc/pressure")) {
     m_sysProcPressure = std::make_shared<SysProcPressure>(m_options);
     m_sysProcPressure->setUpdateLane(IDataSource::UpdateLane::Pace);
     m_sysProcPressure->setUpdateInterval(m_paceLaneInterval);
@@ -133,7 +139,7 @@ Application::Application(const std::string &name,
     m_dataSources.append(m_sysProcPressure);
   }
 
-  if (std::filesystem::exists("/proc/diskstats")) {
+  if (fs::exists("/proc/diskstats")) {
     m_sysProcDiskStats = std::make_shared<SysProcDiskStats>(m_options);
     m_sysProcDiskStats->setUpdateLane(IDataSource::UpdateLane::Pace);
     m_sysProcDiskStats->setUpdateInterval(m_paceLaneInterval);
@@ -141,7 +147,7 @@ Application::Application(const std::string &name,
     m_dataSources.append(m_sysProcDiskStats);
   }
 
-  if (std::filesystem::exists("/proc/buddyinfo")) {
+  if (fs::exists("/proc/buddyinfo")) {
     m_sysProcBuddyInfo = std::make_shared<SysProcBuddyInfo>(m_options);
     m_sysProcBuddyInfo->setUpdateLane(IDataSource::UpdateLane::Slow);
     m_sysProcBuddyInfo->setUpdateInterval(m_slowLaneInterval);
@@ -149,7 +155,7 @@ Application::Application(const std::string &name,
     m_dataSources.append(m_sysProcBuddyInfo);
   }
 
-  if (std::filesystem::exists("/proc/net/wireless")) {
+  if (fs::exists("/proc/net/wireless")) {
     m_sysProcWireless = std::make_shared<SysProcWireless>(m_options);
     m_sysProcWireless->setUpdateLane(IDataSource::UpdateLane::Slow);
     m_sysProcWireless->setUpdateInterval(m_slowLaneInterval);
@@ -262,7 +268,7 @@ static bool isProfMode(const std::shared_ptr<tkm::monitor::Options> opts)
 {
   auto profCond = opts->getFor(Options::Key::ProfModeIfPath);
   if (profCond != tkmDefaults.valFor(Defaults::Val::None)) {
-    if (std::filesystem::exists(profCond)) {
+    if (fs::exists(profCond)) {
       return true;
     }
   }
