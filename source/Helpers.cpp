@@ -10,7 +10,7 @@
  */
 
 #include "Helpers.h"
-#include <taskmonitor/taskmonitor.h>
+#include <taskmonitor.h>
 #ifdef WITH_LXC
 #include <lxc/lxccontainer.h>
 #endif

@@ -9,7 +9,7 @@
  *-
  */
 
-#include <taskmonitor/taskmonitor.h>
+#include <taskmonitor.h>
 
 #include "Application.h"
 #include "UDSCollector.h"

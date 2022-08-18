@@ -13,7 +13,7 @@
 #include <cstdlib>
 #include <getopt.h>
 #include <iostream>
-#include <taskmonitor/taskmonitor.h>
+#include <taskmonitor.h>
 #if __has_include(<filesystem>)
 #include <filesystem>
 namespace fs = std::filesystem;

@@ -11,7 +11,7 @@
 
 #pragma once
 
-#include <taskmonitor/taskmonitor.h>
+#include <taskmonitor.h>
 
 #include "../bswinfra/source/Pollable.h"
 

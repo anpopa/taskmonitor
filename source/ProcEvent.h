@@ -13,7 +13,7 @@
 
 #include <linux/netlink.h>
 #include <sys/socket.h>
-#include <taskmonitor/taskmonitor.h>
+#include <taskmonitor.h>
 
 #include "ICollector.h"
 #include "Options.h"

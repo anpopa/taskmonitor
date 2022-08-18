@@ -13,7 +13,7 @@
 
 #include <chrono>
 #include <string>
-#include <taskmonitor/taskmonitor.h>
+#include <taskmonitor.h>
 
 #include "IDataSource.h"
 
