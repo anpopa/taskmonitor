@@ -51,16 +51,16 @@ auto main(int argc, char **argv) -> int
       config_path = optarg;
       break;
     case 'h':
-      help = true;
-      break;
     default:
+      help = true;
       break;
     }
   }
 
   if (help) {
-    std::cout << "TaskMonitor: Monitor system resources"
-              << tkmDefaults.getFor(Defaults::Default::Version) << "\n\n";
+    std::cout << "TaskMonitor: monitor system resources\n"
+              << "Version: " << tkmDefaults.getFor(Defaults::Default::Version)
+              << " libtkm: " << TKMLIB_VERSION << "\n\n";
     std::cout << "Usage: taskmonitor [OPTIONS] \n\n";
     std::cout << "  General:\n";
     std::cout << "     --config, -c  <string> Configuration file path\n";

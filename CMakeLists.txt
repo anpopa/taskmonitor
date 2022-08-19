@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.7.2)
 project(TaskMonitor
         LANGUAGES CXX
-        VERSION 1.5.0
+        VERSION 1.5.1
 )
 
 set(CMAKE_PROJECT_HOMEPAGE_URL "https://gitlab.com/taskmonitor/taskmonitor")
@@ -20,7 +20,6 @@ option(WITH_INSTALL_CONFIG "Install default taskmonitor.conf on target" Y)
 option(WITH_INSTALL_LICENSE "Install license file on target" Y)
 option(WITH_TESTS "Build test suite" N)
 option(WITH_TIDY "Build with clang-tidy" N)
-
 
 # config
 if(WITH_STARTUP_DATA)
@@ -53,12 +52,10 @@ if(WITH_TIDY)
     set(CMAKE_CXX_CLANG_TIDY "clang-tidy")
 endif()
 
-
 # cmake modules
 include(GNUInstallDirs)
 include(Packing)
 include(BSWInfra)
-
 
 # Add support for coverage analysis
 if(CMAKE_BUILD_TYPE STREQUAL Coverage)
@@ -75,7 +72,6 @@ if(CMAKE_BUILD_TYPE STREQUAL Coverage)
     include(CoverageTarget)
 endif()
 
-
 # generate
 configure_file(
     ${CMAKE_SOURCE_DIR}/source/Defaults.h.in
@@ -88,8 +84,6 @@ configure_file(
 configure_file(
     ${CMAKE_SOURCE_DIR}/config/taskmonitor.service.in
     ${CMAKE_BINARY_DIR}/config/taskmonitor.service)
-
-
 
 # Dependencies
 find_package(PkgConfig REQUIRED)
@@ -122,7 +116,6 @@ find_library(LIBNLGENL_LIBRARIES_ABS ${LIBNLGENL_LIBRARIES})
 if(WITH_LXC)
     find_library(LIBLXC_LIBRARIES_ABS ${LIBLXC_LIBRARIES})
 endif()
-
 
 # binary
 add_executable(taskmonitor 
@@ -166,7 +159,6 @@ include_directories(
     ${LIBNLGENL_INCLUDE_DIRS}
     ${Protobuf_INCLUDE_DIRS}
     ${CMAKE_SOURCE_DIR}/source
-    ${CMAKE_BINARY_DIR}/taskmonitor/source
     ${CMAKE_BINARY_DIR}/source/
 )
 
@@ -201,7 +193,6 @@ add_compile_options (
     -Wredundant-decls
 )
 
-
 if(WITH_TESTS)
     enable_testing()
     add_subdirectory(tests)
@@ -228,8 +219,6 @@ endif()
 if(WITH_INSTALL_LICENSE)
     install(FILES ${CMAKE_SOURCE_DIR}/LICENSE DESTINATION ${CMAKE_INSTALL_PREFIX}/share/licenses/taskmonitor/)
 endif()
-
-
 
 # Status reporting
 message (STATUS "CMAKE_BUILD_TYPE: "     ${CMAKE_BUILD_TYPE})

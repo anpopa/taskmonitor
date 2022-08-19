@@ -51,7 +51,7 @@ public:
 
   Defaults()
   {
-    m_table.insert(std::pair<Default, std::string>(Default::Version, "@GIT_SHA1@"));
+    m_table.insert(std::pair<Default, std::string>(Default::Version, "@PROJECT_VERSION@"));
     m_table.insert(std::pair<Default, std::string>(Default::ConfPath, "@TKM_CONFIG_FILE@"));
     m_table.insert(std::pair<Default, std::string>(Default::ContainersPath, "/var/lib/lxc"));
     m_table.insert(std::pair<Default, std::string>(Default::RuntimeDirectory, "/run/taskmonitor"));

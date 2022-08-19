@@ -1,5 +1,5 @@
 ###############################################################################
-#  TaskMonitor version @GIT_SHA1@
+#  TaskMonitor version @PROJECT_VERSION@
 ###############################################################################
 [Unit]
 Description=TaskMonitor Service
