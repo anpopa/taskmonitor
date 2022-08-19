@@ -17,7 +17,7 @@ namespace fs = std::filesystem;
 #include <experimental/filesystem>
 namespace fs = std::experimental::filesystem;
 #endif
-#include <TaskMonitor.h>
+#include <taskmonitor/taskmonitor.h>
 
 #include "Application.h"
 #include "UDSCollector.h"

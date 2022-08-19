@@ -11,7 +11,7 @@
 
 #pragma once
 
-#include <TaskMonitor.h>
+#include <taskmonitor/taskmonitor.h>
 
 #include "ICollector.h"
 #include "Options.h"

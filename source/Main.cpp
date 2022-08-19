@@ -9,7 +9,6 @@
  *-
  */
 
-#include <TaskMonitor.h>
 #include <csignal>
 #include <cstdlib>
 #include <getopt.h>
@@ -21,6 +20,7 @@ namespace fs = std::filesystem;
 #include <experimental/filesystem>
 namespace fs = std::experimental::filesystem;
 #endif
+#include <taskmonitor/taskmonitor.h>
 
 #include "Application.h"
 
