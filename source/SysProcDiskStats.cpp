@@ -101,8 +101,8 @@ static bool doUpdateStats(const std::shared_ptr<SysProcDiskStats> mgr,
     auto minor = std::stoul(tokens[1]);
 
     auto updateDiskStatEntry = [&tokens, &major, &minor](const std::shared_ptr<DiskStat> &entry) {
-      entry->getData().set_major(major);
-      entry->getData().set_minor(minor);
+      entry->getData().set_node_major(major);
+      entry->getData().set_node_minor(minor);
       entry->getData().set_name(tokens[2]);
       entry->getData().set_reads_completed(std::stoul(tokens[3]));
       entry->getData().set_reads_merged(std::stoul(tokens[4]));
@@ -118,7 +118,7 @@ static bool doUpdateStats(const std::shared_ptr<SysProcDiskStats> mgr,
     auto found = false;
     mgr->getDiskStatList().foreach ([&tokens, &found, &major, &minor, updateDiskStatEntry](
                                         const std::shared_ptr<DiskStat> &entry) {
-      if ((entry->getData().major() == major) && (entry->getData().minor() == minor)) {
+      if ((entry->getData().node_major() == major) && (entry->getData().node_minor() == minor)) {
         updateDiskStatEntry(entry);
         found = true;
       }

@@ -75,11 +75,12 @@ static void processDelayAcct(struct taskstats *t)
   entry->getAcct().mutable_reclaim()->set_freepages_delay_total(t->freepages_delay_total);
   entry->getAcct().mutable_reclaim()->set_freepages_delay_average(
       average_ms(t->freepages_delay_total, t->freepages_count));
-
+#if TASKSTATS_VERSION >= 9
   entry->getAcct().mutable_thrashing()->set_thrashing_count(t->thrashing_count);
   entry->getAcct().mutable_thrashing()->set_thrashing_delay_total(t->thrashing_delay_total);
   entry->getAcct().mutable_thrashing()->set_thrashing_delay_average(
       average_ms(t->thrashing_delay_total, t->thrashing_count));
+#endif
 
   entry->setUpdateProcAcctPending(false);
 }

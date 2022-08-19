@@ -11,7 +11,7 @@
 
 #pragma once
 
-#include <taskmonitor.h>
+#include <TaskMonitor.h>
 
 #include "ICollector.h"
 #include "IDataSource.h"
@@ -28,8 +28,8 @@ struct DiskStat : public std::enable_shared_from_this<DiskStat> {
 public:
   explicit DiskStat(const std::string &name, uint32_t major, uint32_t minor)
   {
-    m_data.set_major(major);
-    m_data.set_minor(minor);
+    m_data.set_node_major(major);
+    m_data.set_node_minor(minor);
     m_data.set_name(name);
   };
   ~DiskStat() = default;

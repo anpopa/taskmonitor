@@ -11,7 +11,7 @@
 
 #pragma once
 
-#include <taskmonitor.h>
+#include <TaskMonitor.h>
 
 #include "ICollector.h"
 #include "IDataSource.h"
