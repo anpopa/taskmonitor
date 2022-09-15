@@ -1,2 +1,5 @@
+* Thu Sep 15 2022 Alin Popa <alin.popa@fxdata.ro> - 1.5.2
+- Add IO Wait in CPU Stats
+
 * Fri May 06 2022 Alin Popa <alin.popa@fxdata.ro> - 1.0
 - Initial release with distro packages

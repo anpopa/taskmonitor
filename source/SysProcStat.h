@@ -11,6 +11,7 @@
 
 #pragma once
 
+#include <cstdint>
 #include <taskmonitor/taskmonitor.h>
 
 #include "ICollector.h"
@@ -48,10 +49,11 @@ public:
   auto getName(void) -> const std::string & { return m_data.name(); }
   auto getType(void) -> StatType { return m_type; }
 
-  void updateStats(uint64_t newUserJiffies, uint64_t newSystemJiffies);
+  void updateStats(uint64_t newUserJiffies, uint64_t newSystemJiffies, uint64_t newIOWaitJiffies);
   auto getData(void) -> tkm::msg::monitor::CPUStat & { return m_data; }
   auto getLastUserCPUTime(void) -> uint64_t { return (m_lastUserJiffies * 1000000 / m_sysHZ); }
   auto getLastSystemCPUTime(void) -> uint64_t { return (m_lastSystemJiffies * 1000000 / m_sysHZ); }
+  auto getLastIOWaitCPUTime(void) -> uint64_t { return (m_lastIOWaitJiffies * 1000000 / m_sysHZ); }
 
 private:
   auto jiffiesToPercent(uint64_t jiffies, uint64_t durationUsec) -> uint16_t
@@ -64,9 +66,11 @@ private:
   std::chrono::time_point<std::chrono::steady_clock> m_lastUpdateTime{};
   uint64_t m_lastUserJiffies = 0;
   uint64_t m_lastSystemJiffies = 0;
+  uint64_t m_lastIOWaitJiffies = 0;
   int m_totalPercent = 0;
   int m_userPercent = 0;
   int m_sysPercent = 0;
+  int m_ioWaitPercent = 0;
   int m_sysHZ = 0;
   StatType m_type = StatType::Cpu;
 };
