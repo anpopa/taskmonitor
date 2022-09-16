@@ -26,14 +26,101 @@ using namespace bswi::event;
 namespace tkm::monitor
 {
 
+struct CPUStatData {
+  enum class DataField {
+    UserTime,
+    NiceTime,
+    SystemTime,
+    IdleTime,
+    IOWaitTime,
+    IRQTime,
+    SoftIRQTime,
+    StealTime,
+    GuestTime,
+    GuestNiceTime
+  };
+
+  uint64_t userTime = 0;
+  uint64_t niceTime = 0;
+  uint64_t systemTime = 0;
+  uint64_t idleTime = 0;
+  uint64_t ioWaitTime = 0;
+  uint64_t irqTime = 0;
+  uint64_t softIRQTime = 0;
+  uint64_t stealTime = 0;
+  uint64_t guestTime = 0;
+  uint64_t guestNiceTime = 0;
+
+  uint64_t getTotalTime()
+  {
+    return userTime + niceTime + systemTime + idleTime + ioWaitTime + irqTime + softIRQTime +
+           stealTime + guestTime + guestNiceTime;
+  }
+
+  CPUStatData getDiff(const CPUStatData &prev) const
+  {
+    return {.userTime = userTime - prev.userTime,
+            .niceTime = niceTime - prev.niceTime,
+            .systemTime = systemTime - prev.systemTime,
+            .idleTime = idleTime - prev.idleTime,
+            .ioWaitTime = ioWaitTime - prev.ioWaitTime,
+            .irqTime = irqTime - prev.irqTime,
+            .softIRQTime = softIRQTime - prev.softIRQTime,
+            .stealTime = stealTime - prev.stealTime,
+            .guestTime = guestTime - prev.guestTime,
+            .guestNiceTime = guestNiceTime - prev.guestNiceTime};
+  }
+
+  void copyFrom(const CPUStatData &src)
+  {
+    userTime = src.userTime;
+    niceTime = src.niceTime;
+    systemTime = src.systemTime;
+    idleTime = src.idleTime;
+    ioWaitTime = src.ioWaitTime;
+    irqTime = src.irqTime;
+    softIRQTime = src.softIRQTime;
+    stealTime = src.stealTime;
+    guestTime = src.guestTime;
+    guestNiceTime = src.guestNiceTime;
+  }
+
+  uint64_t getPercent(DataField type)
+  {
+    switch (type) {
+    case DataField::UserTime:
+      return userTime * 100 / getTotalTime();
+    case DataField::NiceTime:
+      return niceTime * 100 / getTotalTime();
+    case DataField::SystemTime:
+      return systemTime * 100 / getTotalTime();
+    case DataField::IdleTime:
+      return idleTime * 100 / getTotalTime();
+    case DataField::IOWaitTime:
+      return ioWaitTime * 100 / getTotalTime();
+    case DataField::IRQTime:
+      return irqTime * 100 / getTotalTime();
+    case DataField::SoftIRQTime:
+      return softIRQTime * 100 / getTotalTime();
+    case DataField::StealTime:
+      return stealTime * 100 / getTotalTime();
+    case DataField::GuestTime:
+      return guestTime * 100 / getTotalTime();
+    case DataField::GuestNiceTime:
+      return guestNiceTime * 100 / getTotalTime();
+    default:
+      break;
+    }
+    return 0;
+  }
+};
+
 struct CPUStat : public std::enable_shared_from_this<CPUStat> {
 public:
   enum class StatType { Cpu, Core };
   explicit CPUStat(const std::string &name)
   {
-    m_sysHZ = sysconf(_SC_CLK_TCK);
     m_data.set_name(name);
-
     if (name == "cpu") {
       m_type = StatType::Cpu;
     } else {
@@ -48,31 +135,14 @@ public:
 
   auto getName(void) -> const std::string & { return m_data.name(); }
   auto getType(void) -> StatType { return m_type; }
-
-  void updateStats(uint64_t newUserJiffies, uint64_t newSystemJiffies, uint64_t newIOWaitJiffies);
+  void updateStats(const CPUStatData &data);
   auto getData(void) -> tkm::msg::monitor::CPUStat & { return m_data; }
-  auto getLastUserCPUTime(void) -> uint64_t { return (m_lastUserJiffies * 1000000 / m_sysHZ); }
-  auto getLastSystemCPUTime(void) -> uint64_t { return (m_lastSystemJiffies * 1000000 / m_sysHZ); }
-  auto getLastIOWaitCPUTime(void) -> uint64_t { return (m_lastIOWaitJiffies * 1000000 / m_sysHZ); }
 
 private:
-  auto jiffiesToPercent(uint64_t jiffies, uint64_t durationUsec) -> uint16_t
-  {
-    return ((jiffies * 1000000 / m_sysHZ) * 100) / durationUsec;
-  }
-
-private:
-  tkm::msg::monitor::CPUStat m_data;
   std::chrono::time_point<std::chrono::steady_clock> m_lastUpdateTime{};
-  uint64_t m_lastUserJiffies = 0;
-  uint64_t m_lastSystemJiffies = 0;
-  uint64_t m_lastIOWaitJiffies = 0;
-  int m_totalPercent = 0;
-  int m_userPercent = 0;
-  int m_sysPercent = 0;
-  int m_ioWaitPercent = 0;
-  int m_sysHZ = 0;
+  tkm::msg::monitor::CPUStat m_data;
   StatType m_type = StatType::Cpu;
+  CPUStatData m_last;
 };
 
 class SysProcStat : public IDataSource, public std::enable_shared_from_this<SysProcStat>

@@ -11,11 +11,8 @@
 
 #include "SysProcStat.h"
 #include "Application.h"
-
-static constexpr int statCpuNamePos = 0;
-static constexpr int statUserJiffiesPos = 1;
-static constexpr int statSystemJiffiesPos = 3;
-static constexpr int statIOWaitJiffiesPos = 5;
+#include <cstring>
+#include <string>
 
 namespace tkm::monitor
 {
@@ -25,53 +22,18 @@ static bool doUpdateStats(const std::shared_ptr<SysProcStat> mgr,
 static bool doCollectAndSend(const std::shared_ptr<SysProcStat> mgr,
                              const SysProcStat::Request &request);
 
-void CPUStat::updateStats(uint64_t newUserJiffies,
-                          uint64_t newSystemJiffies,
-                          uint64_t newIOWaitJiffies)
+void CPUStat::updateStats(const CPUStatData &data)
 {
-  if (m_lastUserJiffies == 0) {
-    m_lastUserJiffies = newUserJiffies;
-  }
-
-  if (m_lastSystemJiffies == 0) {
-    m_lastSystemJiffies = newSystemJiffies;
-  }
-
-  if (m_lastIOWaitJiffies == 0) {
-    m_lastIOWaitJiffies = newIOWaitJiffies;
-  }
-
-  auto userJiffiesDiff =
-      ((newUserJiffies - m_lastUserJiffies) > 0) ? (newUserJiffies - m_lastUserJiffies) : 0;
-  auto sysJiffiesDiff =
-      ((newSystemJiffies - m_lastSystemJiffies) > 0) ? (newSystemJiffies - m_lastSystemJiffies) : 0;
-  auto ioWaitJiffiesDiff =
-      ((newIOWaitJiffies - m_lastIOWaitJiffies) > 0) ? (newIOWaitJiffies - m_lastIOWaitJiffies) : 0;
-
-  m_lastUserJiffies = newUserJiffies;
-  m_lastSystemJiffies = newSystemJiffies;
-  m_lastIOWaitJiffies = newIOWaitJiffies;
-
-  auto timeNow = std::chrono::steady_clock::now();
-  using USec = std::chrono::microseconds;
-
-  if (m_lastUpdateTime.time_since_epoch().count() == 0) {
-    m_userPercent = m_sysPercent = m_totalPercent = m_ioWaitPercent = 0;
-    m_lastUpdateTime = timeNow;
+  if (m_last.getTotalTime() == 0) {
+    m_last.copyFrom(data);
   } else {
-    auto durationUs = std::chrono::duration_cast<USec>(timeNow - m_lastUpdateTime).count();
-    m_lastUpdateTime = timeNow;
-
-    m_userPercent = jiffiesToPercent(userJiffiesDiff, durationUs);
-    m_sysPercent = jiffiesToPercent(sysJiffiesDiff, durationUs);
-    m_totalPercent = jiffiesToPercent(userJiffiesDiff + sysJiffiesDiff, durationUs);
-    m_ioWaitPercent = jiffiesToPercent(ioWaitJiffiesDiff, durationUs);
+    auto diffData = data.getDiff(m_last);
+    m_last.copyFrom(data);
+    m_data.set_usr(diffData.getPercent(CPUStatData::DataField::UserTime));
+    m_data.set_sys(diffData.getPercent(CPUStatData::DataField::SystemTime));
+    m_data.set_iow(diffData.getPercent(CPUStatData::DataField::IOWaitTime));
+    m_data.set_all(m_data.usr() + m_data.sys() + m_data.iow());
   }
-
-  m_data.set_all(m_totalPercent);
-  m_data.set_usr(m_userPercent);
-  m_data.set_sys(m_sysPercent);
-  m_data.set_iow(m_ioWaitPercent);
 }
 
 SysProcStat::SysProcStat(const std::shared_ptr<Options> options)
@@ -151,56 +113,47 @@ static bool doUpdateStats(const std::shared_ptr<SysProcStat> mgr,
 
   std::string line;
   while (std::getline(statStream, line)) {
-    std::vector<std::string> tokens;
-    std::stringstream ss(line);
-    std::string buf;
-
     // cpu lines are at the start
     if (line.find("cpu") == std::string::npos) {
       break;
     }
 
-    while (ss >> buf) {
-      tokens.push_back(buf);
-    }
+    char name[64] = {0};
+    CPUStatData data{};
+    auto cnt = ::sscanf(line.c_str(),
+                        "%s   %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu",
+                        name,
+                        &data.userTime,
+                        &data.niceTime,
+                        &data.systemTime,
+                        &data.idleTime,
+                        &data.ioWaitTime,
+                        &data.irqTime,
+                        &data.softIRQTime,
+                        &data.stealTime,
+                        &data.guestTime,
+                        &data.guestNiceTime);
 
-    if (tokens.size() < 5) {
+    if (cnt < 11) {
       logError() << "Proc stat file parse error";
       return false;
     }
 
-    auto updateCpuStatEntry = [&tokens](const std::shared_ptr<CPUStat> &entry) {
-      uint64_t newUserJiffies = 0;
-      uint64_t newSysJiffies = 0;
-      uint64_t newIOWaitJiffies = 0;
-
-      try {
-        newUserJiffies = std::stoul(tokens[statUserJiffiesPos].c_str());
-        newSysJiffies = std::stoul(tokens[statSystemJiffiesPos].c_str());
-        newIOWaitJiffies = std::stoul(tokens[statIOWaitJiffiesPos].c_str());
-      } catch (...) {
-        logError() << "Cannot convert stat data to Jiffies";
-        return;
-      }
-
-      entry->updateStats(newUserJiffies, newSysJiffies, newIOWaitJiffies);
-    };
-
     auto found = false;
-    mgr->getCPUStatList().foreach (
-        [&tokens, &found, updateCpuStatEntry](const std::shared_ptr<CPUStat> &entry) {
-          if (entry->getName() == tokens[statCpuNamePos]) {
-            updateCpuStatEntry(entry);
-            found = true;
-          }
-        });
+    mgr->getCPUStatList().foreach ([&data, &name, &found](const std::shared_ptr<CPUStat> &entry) {
+      if (entry->getName() == name) {
+        entry->updateStats(data);
+        found = true;
+      }
+    });
 
     if (!found) {
-      std::shared_ptr<CPUStat> entry = std::make_shared<CPUStat>(tokens[statCpuNamePos]);
+      std::shared_ptr<CPUStat> entry = std::make_shared<CPUStat>(name);
+      entry->updateStats(data);
+
       logInfo() << "Adding new cpu core '" << entry->getName() << "' for statistics";
       mgr->getCPUStatList().append(entry);
       mgr->getCPUStatList().commit();
-      updateCpuStatEntry(entry);
     }
   }
 
