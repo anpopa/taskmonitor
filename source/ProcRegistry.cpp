@@ -137,7 +137,7 @@ void ProcRegistry::addProcEntry(int pid)
 {
   auto found = false;
 
-  m_procList.foreach ([this, &found, pid](const std::shared_ptr<ProcEntry> &entry) {
+  m_procList.foreach ([&found, pid](const std::shared_ptr<ProcEntry> &entry) {
     if (entry->getPid() == pid) {
       found = true;
     }
@@ -186,7 +186,7 @@ void ProcRegistry::updProcEntry(int pid)
   m_procList.commit(); // sync commit
 }
 
-void ProcRegistry::remProcEntry(int pid)
+void ProcRegistry::remProcEntry(int pid, bool sync)
 {
   m_procList.foreach ([this, pid](const std::shared_ptr<ProcEntry> &entry) {
     if (entry->getPid() == pid) {
@@ -195,11 +195,15 @@ void ProcRegistry::remProcEntry(int pid)
     }
   });
 
-  ProcRegistry::Request rq = {.action = ProcRegistry::Action::CommitProcList};
-  pushRequest(rq);
+  if (sync) {
+    m_procList.commit();
+  } else {
+    ProcRegistry::Request rq = {.action = ProcRegistry::Action::CommitProcList};
+    pushRequest(rq);
+  }
 }
 
-void ProcRegistry::remProcEntry(std::string &name)
+void ProcRegistry::remProcEntry(std::string &name, bool sync)
 {
   m_procList.foreach ([this, &name](const std::shared_ptr<ProcEntry> &entry) {
     if (entry->getName() == name) {
@@ -208,8 +212,12 @@ void ProcRegistry::remProcEntry(std::string &name)
     }
   });
 
-  ProcRegistry::Request rq = {.action = ProcRegistry::Action::CommitProcList};
-  pushRequest(rq);
+  if (sync) {
+    m_procList.commit();
+  } else {
+    ProcRegistry::Request rq = {.action = ProcRegistry::Action::CommitProcList};
+    pushRequest(rq);
+  }
 }
 
 bool ProcRegistry::isBlacklisted(const std::string &name)

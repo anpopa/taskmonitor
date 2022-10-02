@@ -139,7 +139,7 @@ ProcEvent::ProcEvent(const std::shared_ptr<Options> options)
           m_eventData.set_exit_count(m_eventData.exit_count() + 1);
           if (nlcn_msg.proc_ev.event_data.exit.process_pid ==
               nlcn_msg.proc_ev.event_data.exit.process_tgid) {
-            App()->getProcRegistry()->remProcEntry(nlcn_msg.proc_ev.event_data.exit.process_pid);
+            App()->getProcRegistry()->remProcEntry(nlcn_msg.proc_ev.event_data.exit.process_pid, true);
           }
           break;
         }

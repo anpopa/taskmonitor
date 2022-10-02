@@ -55,8 +55,8 @@ public:
 
   void addProcEntry(int pid);
   void updProcEntry(int pid);
-  void remProcEntry(int pid);
-  void remProcEntry(std::string &name);
+  void remProcEntry(int pid, bool sync = false);
+  void remProcEntry(std::string &name, bool sync = false);
   auto getProcEntry(int pid) -> const std::shared_ptr<ProcEntry>;
   auto getProcEntry(const std::string &name) -> const std::shared_ptr<ProcEntry>;
   auto getProcList(void) -> bswi::util::SafeList<std::shared_ptr<ProcEntry>> &
