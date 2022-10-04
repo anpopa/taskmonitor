@@ -1,3 +1,7 @@
+* Thu Oct 4 2022 Alin Popa <alin.popa@fxdata.ro> - 1.5.2
+- Update to libtaskmonitor v1.0.2
+- Fix process not re-added to context after restart
+
 * Thu Sep 15 2022 Alin Popa <alin.popa@fxdata.ro> - 1.5.1
 - Add IO Wait in CPU Stats
 
