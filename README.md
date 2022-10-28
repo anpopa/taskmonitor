@@ -1,7 +1,7 @@
 # TaskMonitor
-Monitor and report performance indicators from embedded systems
+Monitor and report performance indicators from embedded target systems
 
-<img src="./manual/assets/TaskMonitor-RPI4-Dashboard_Screenshot1.png" alt="tkmviewer-1" width="800"/>
+<img src="./manual/assets/TaskMonitor-RPI4-Dashboard_Screenshot1.png" alt="Grafana Dashboard" width="800"/>
 
 ## Description
 **TaskMonitor** is a system daemon that collects performance indicators and sends the data out from the system for processing. 
@@ -17,8 +17,9 @@ As part of the project group a set of tools is provided to store and process the
 
 ## Documentation
 For more information about TaskMonitor check the manuals:   
-[User Manual](./manual/UserManual.md "User Manual")   
-[Developer Manual](./manual/DevelManual.md "Devel Manual")
+    
+* [User Manual](./manual/UserManual.md "User Manual")   
+* [Developer Manual](./manual/DevelManual.md "Developer Manual")
 
 ## Download
 Clone this repository with submodules:    
@@ -46,16 +47,21 @@ TaskMonitor depends on the following libraries
 | WITH_INSTALL_LICENSE | ON | Install license file on target for QA checks |
 
 ### Local Build
-`mkdir build && cd build && cmake .. && make `
+> mkdir build && cd build && cmake .. && make
 
 ## Execute
 The service needs elevated capabilities.    
+  
 To start in manually:    
-`sudo taskmonitor -c /etc/taskmonitor.conf`    
-As a systemd service if WITH_SYSTEMD is ON:    
-`sudo systemctl enable --now taskmonitor.service`
+> sudo taskmonitor -c /etc/taskmonitor.conf   
 
-## Sample syslog output
+As a systemd service if WITH_SYSTEMD is ON:    
+> sudo systemctl enable --now taskmonitor.service`
+
+## Output sample
+You can find bellow a short log sample on a Raspberry Pi4 target device
+
+### Syslog output
 ```
 Okt 05 07:33:13 rpi4dev systemd[1]: Started TaskMonitor Service.
 Okt 05 07:33:14 rpi4dev taskmonitor[813]: Logging open for TaskMonitor
@@ -81,7 +87,7 @@ Okt 05 07:33:14 rpi4dev taskmonitor[813]: Add process monitoring for pid=12 name
 ...
 ```
 
-## Systemd status
+### Systemd status
 
 ```
 ● taskmonitor.service - TaskMonitor Service
