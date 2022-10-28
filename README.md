@@ -1,6 +1,8 @@
 # TaskMonitor
 Monitor and report performance indicators from embedded systems
 
+<img src="./manual/assets/TaskMonitor-RPI4-Dashboard_Screenshot1.png" alt="tkmviewer-1" width="800"/>
+
 ## Description
 **TaskMonitor** is a system daemon that collects performance indicators and sends the data out from the system for processing. 
 As part of the project group a set of tools is provided to store and process the output data.
@@ -12,6 +14,11 @@ As part of the project group a set of tools is provided to store and process the
 | libtaskmonitor | https://gitlab.com/taskmonitor/libtaskmonitor | Protobuf interfaces to communicate with the daemon |
 | tkm-reader | https://gitlab.com/taskmonitor/tkm-reader | A simple reader that output data in SQLite and JSON formats |
 | tkm-collector | https://gitlab.com/taskmonitor/tkm-collector | A data collector, SQL based, to be used in CI systems |
+
+## Documentation
+For more information about TaskMonitor check the manuals:   
+[User Manual](./manual/UserManual.md "User Manual")   
+[Developer Manual](./manual/DevelManual.md "Devel Manual")
 
 ## Download
 Clone this repository with submodules:    
@@ -50,25 +57,51 @@ As a systemd service if WITH_SYSTEMD is ON:
 
 ## Sample syslog output
 ```
-Mar 26 04:54:32 rpi4dev systemd[1]: Started Task Monitor Service.
-Mar 26 04:54:32 rpi4dev TaskMonitor[2128]: NetServer listening on port: 3357
-Mar 26 04:54:32 rpi4dev TaskMonitor[2128]: Systemd watchdog enabled with timeout 10 seconds
-Mar 26 04:54:32 rpi4dev TaskMonitor[2128]: Read existing proc entries
-Mar 26 04:54:32 rpi4dev TaskMonitor[2128]: Add process monitoring for pid 1
-Mar 26 04:54:32 rpi4dev TaskMonitor[2128]: Add process monitoring for pid 2
-Mar 26 04:54:32 rpi4dev TaskMonitor[2128]: Add process monitoring for pid 3
-Mar 26 04:54:32 rpi4dev TaskMonitor[2128]: Add process monitoring for pid 4
-Mar 26 04:54:32 rpi4dev TaskMonitor[2128]: Add process monitoring for pid 8
-Mar 26 04:54:32 rpi4dev TaskMonitor[2128]: Add process monitoring for pid 9
-Mar 26 04:54:32 rpi4dev TaskMonitor[2128]: Add process monitoring for pid 10
-Mar 26 04:54:32 rpi4dev TaskMonitor[2128]: Add process monitoring for pid 11
-Mar 26 04:54:32 rpi4dev TaskMonitor[2128]: Add process monitoring for pid 12
-Mar 26 04:54:32 rpi4dev TaskMonitor[2128]: Add process monitoring for pid 13
-Mar 26 04:54:32 rpi4dev TaskMonitor[2128]: Add process monitoring for pid 15
-Mar 26 04:54:32 rpi4dev TaskMonitor[2128]: Add process monitoring for pid 16
-Mar 26 04:54:32 rpi4dev TaskMonitor[2128]: Add process monitoring for pid 17
-Mar 26 04:54:32 rpi4dev TaskMonitor[2128]: Add process monitoring for pid 18
-Mar 26 04:54:32 rpi4dev TaskMonitor[2128]: Add process monitoring for pid 21
+Okt 05 07:33:13 rpi4dev systemd[1]: Started TaskMonitor Service.
+Okt 05 07:33:14 rpi4dev taskmonitor[813]: Logging open for TaskMonitor
+Okt 05 07:33:14 rpi4dev taskmonitor[813]: Profiling mode enabled
+Okt 05 07:33:14 rpi4dev taskmonitor[813]: Update lanes interval fast=1000000 pace=5000000 slow=10000000
+Okt 05 07:33:14 rpi4dev taskmonitor[813]: TCPServer listening on port: 3357
+Okt 05 07:33:14 rpi4dev taskmonitor[813]: Control server listening on /run/taskmonitor/taskmonitor.sock
+Okt 05 07:33:14 rpi4dev taskmonitor[813]: Startup data will expire in 60000000 usec
+Okt 05 07:33:14 rpi4dev taskmonitor[813]: Netlink buffers msgBufferSize=1048576 txBufferSize=524288 rxBufferSize=524288
+Okt 05 07:33:14 rpi4dev taskmonitor[813]: Read existing proc entries
+Okt 05 07:33:14 rpi4dev taskmonitor[813]: Add process monitoring for pid=1 name=systemd context=root
+Okt 05 07:33:14 rpi4dev taskmonitor[813]: Add process monitoring for pid=2 name=kthreadd context=root
+Okt 05 07:33:14 rpi4dev taskmonitor[813]: Add process monitoring for pid=3 name=rcu_gp context=root
+Okt 05 07:33:14 rpi4dev taskmonitor[813]: Add process monitoring for pid=4 name=rcu_par_gp context=root
+Okt 05 07:33:14 rpi4dev taskmonitor[813]: Add process monitoring for pid=5 name=netns context=root
+Okt 05 07:33:14 rpi4dev taskmonitor[813]: Add process monitoring for pid=6 name=kworker/0:0-events context=root
+Okt 05 07:33:14 rpi4dev taskmonitor[813]: Add process monitoring for pid=7 name=kworker/0:0H-events_highpri context=root
+Okt 05 07:33:14 rpi4dev taskmonitor[813]: Add process monitoring for pid=8 name=kworker/u8:0-events_unbound context=root
+Okt 05 07:33:14 rpi4dev taskmonitor[813]: Add process monitoring for pid=9 name=mm_percpu_wq context=root
+Okt 05 07:33:14 rpi4dev taskmonitor[813]: Add process monitoring for pid=10 name=rcu_tasks_kthre context=root
+Okt 05 07:33:14 rpi4dev taskmonitor[813]: Add process monitoring for pid=11 name=rcu_tasks_rude_ context=root
+Okt 05 07:33:14 rpi4dev taskmonitor[813]: Add process monitoring for pid=12 name=rcu_tasks_trace context=root
 ...
+```
 
+## Systemd status
+
+```
+● taskmonitor.service - TaskMonitor Service
+     Loaded: loaded (/etc/systemd/system/taskmonitor.service; enabled; vendor preset: enabled)
+     Active: active (running) since Sat 2022-10-15 10:08:52 CEST; 1 week 5 days ago
+   Main PID: 813 (taskmonitor)
+      Tasks: 1 (limit: 8885)
+     Memory: 10.3M
+        CPU: 1h 58min 14.496s
+     CGroup: /system.slice/taskmonitor.service
+             └─813 /usr/sbin/taskmonitor -c /etc/taskmonitor.conf
+
+Okt 28 09:35:13 rpi4dev taskmonitor[813]: proc.event[gid]: process_pid=76007 process_tgid=76007 rgid=0 egid=0
+Okt 28 09:35:13 rpi4dev taskmonitor[813]: proc.event[fork]: parent_pid=76007 parent_tgid=76007 child_pid=76008 child_tgid=76008
+Okt 28 09:35:13 rpi4dev taskmonitor[813]: Add process monitoring for pid=76008 name=sudo context=root
+Okt 28 09:35:13 rpi4dev taskmonitor[813]: proc.event[fork]: parent_pid=76008 parent_tgid=76008 child_pid=76009 child_tgid=76009
+Okt 28 09:35:13 rpi4dev taskmonitor[813]: Add process monitoring for pid=76009 name=sudo context=root
+Okt 28 09:35:13 rpi4dev taskmonitor[813]: proc.event[uid]: process_pid=76009 process_tgid=76009 ruid=0 euid=0
+Okt 28 09:35:13 rpi4dev taskmonitor[813]: proc.event[exec]: process_pid=76009 process_tgid=76009
+Okt 28 09:35:13 rpi4dev taskmonitor[813]: proc.event[fork]: parent_pid=76009 parent_tgid=76009 child_pid=76010 child_tgid=76010
+Okt 28 09:35:13 rpi4dev taskmonitor[813]: Add process monitoring for pid=76010 name=(pager) context=root
+Okt 28 09:35:13 rpi4dev taskmonitor[813]: proc.event[exec]: process_pid=76010 process_tgid=76010
 ```
