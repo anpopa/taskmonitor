@@ -25,7 +25,7 @@
 
 static void processDelayAcct(struct taskstats *t)
 {
-  auto entry = App()->getProcRegistry()->getProcEntry(t->ac_pid);
+  auto entry = App()->getProcRegistry()->getProcEntry(static_cast<int>(t->ac_pid));
 
   if (entry == nullptr) {
     logError() << "Stat entry with PID " << t->ac_pid << " not in registry";
@@ -45,7 +45,7 @@ static void processDelayAcct(struct taskstats *t)
   entry->getAcct().mutable_cpu()->set_cpu_run_virtual_total(t->cpu_run_virtual_total);
   entry->getAcct().mutable_cpu()->set_cpu_delay_total(t->cpu_run_virtual_total);
   entry->getAcct().mutable_cpu()->set_cpu_delay_average(
-      average_ms((double) t->cpu_delay_total, t->cpu_count));
+      average_ms(t->cpu_delay_total, t->cpu_count));
 
   entry->getAcct().mutable_mem()->set_coremem(t->coremem);
   entry->getAcct().mutable_mem()->set_virtmem(t->virtmem);
@@ -121,9 +121,9 @@ ProcAcct::ProcAcct(const std::shared_ptr<Options> options)
   int err = NLE_SUCCESS;
 
   try {
-    msgBufferSize = std::stoul(m_options->getFor(Options::Key::MsgBufferSize));
-    txBufferSize = std::stoul(m_options->getFor(Options::Key::TxBufferSize));
-    rxBufferSize = std::stoul(m_options->getFor(Options::Key::RxBufferSize));
+    msgBufferSize = std::stol(m_options->getFor(Options::Key::MsgBufferSize));
+    txBufferSize = std::stol(m_options->getFor(Options::Key::TxBufferSize));
+    rxBufferSize = std::stol(m_options->getFor(Options::Key::RxBufferSize));
   } catch (std::exception &e) {
     throw std::runtime_error("Invalid TX/RX/MSG buffer size in configuration");
   }
@@ -155,11 +155,12 @@ ProcAcct::ProcAcct(const std::shared_ptr<Options> options)
   }
 
   // We need larger buffers to handle data for all entries
-  if (nl_socket_set_buffer_size(m_nlSock, rxBufferSize, txBufferSize) < 0) {
+  if (nl_socket_set_buffer_size(
+          m_nlSock, static_cast<int>(rxBufferSize), static_cast<int>(txBufferSize)) < 0) {
     throw std::runtime_error("Fail to set socket buffer size");
   }
 
-  if (nl_socket_set_msg_buf_size(m_nlSock, msgBufferSize) < 0) {
+  if (nl_socket_set_msg_buf_size(m_nlSock, static_cast<size_t>(msgBufferSize)) < 0) {
     throw std::runtime_error("Fail to set socket msg buffer size");
   }
 
@@ -177,11 +178,11 @@ ProcAcct::ProcAcct(const std::shared_ptr<Options> options)
 
   lateSetup(
       [this]() {
-        int err = NLE_SUCCESS;
+        int nl_err = NLE_SUCCESS;
 
-        if ((err = nl_recvmsgs_default(m_nlSock)) < 0) {
-          if ((err != -NLE_AGAIN) && (err != -NLE_BUSY) && (err != -NLE_OBJ_NOTFOUND)) {
-            logError() << "Error receiving procacct message: " << nl_geterror(err);
+        if ((nl_err = nl_recvmsgs_default(m_nlSock)) < 0) {
+          if ((nl_err != -NLE_AGAIN) && (nl_err != -NLE_BUSY) && (nl_err != -NLE_OBJ_NOTFOUND)) {
+            logError() << "Error receiving procacct message: " << nl_geterror(nl_err);
             return false;
           }
         }
@@ -235,7 +236,7 @@ bool ProcAcct::requestTaskAcct(int pid)
     return false;
   }
 
-  if ((err = nla_put_u32(msg, TASKSTATS_CMD_ATTR_PID, pid)) < 0) {
+  if ((err = nla_put_u32(msg, TASKSTATS_CMD_ATTR_PID, static_cast<uint32_t>(pid))) < 0) {
     logError() << "Error setting attribute: " << nl_geterror(err);
     nlmsg_free(msg);
     return false;

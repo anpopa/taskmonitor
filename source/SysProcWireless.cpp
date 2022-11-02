@@ -15,8 +15,7 @@
 namespace tkm::monitor
 {
 
-static bool doUpdateStats(const std::shared_ptr<SysProcWireless> mgr,
-                          const SysProcWireless::Request &request);
+static bool doUpdateStats(const std::shared_ptr<SysProcWireless> mgr);
 static bool doCollectAndSend(const std::shared_ptr<SysProcWireless> mgr,
                              const SysProcWireless::Request &request);
 
@@ -43,7 +42,8 @@ bool SysProcWireless::update(void)
     return true;
   }
 
-  SysProcWireless::Request request = {.action = SysProcWireless::Action::UpdateStats};
+  SysProcWireless::Request request = {.action = SysProcWireless::Action::UpdateStats,
+                                      .collector = nullptr};
   bool status = pushRequest(request);
 
   if (status) {
@@ -59,7 +59,7 @@ auto SysProcWireless::requestHandler(const Request &request) -> bool
 
   switch (request.action) {
   case SysProcWireless::Action::UpdateStats:
-    status = doUpdateStats(getShared(), request);
+    status = doUpdateStats(getShared());
     setUpdatePending(false);
     break;
   case SysProcWireless::Action::CollectAndSend:
@@ -73,8 +73,7 @@ auto SysProcWireless::requestHandler(const Request &request) -> bool
   return status;
 }
 
-static bool doUpdateStats(const std::shared_ptr<SysProcWireless> mgr,
-                          const SysProcWireless::Request &request)
+static bool doUpdateStats(const std::shared_ptr<SysProcWireless> mgr)
 {
   std::ifstream statStream{"/proc/net/wireless"};
 
@@ -126,12 +125,12 @@ static bool doUpdateStats(const std::shared_ptr<SysProcWireless> mgr,
       }
       entry->getData().set_quality_noise(std::stoi(tokens[4]));
 
-      entry->getData().set_discarded_nwid(std::stoul(tokens[5]));
-      entry->getData().set_discarded_crypt(std::stoul(tokens[6]));
-      entry->getData().set_discarded_frag(std::stoul(tokens[7]));
-      entry->getData().set_discarded_retry(std::stoul(tokens[8]));
-      entry->getData().set_discarded_misc(std::stoul(tokens[9]));
-      entry->getData().set_missed_beacon(std::stoul(tokens[10]));
+      entry->getData().set_discarded_nwid(static_cast<uint32_t>(std::stoul(tokens[5])));
+      entry->getData().set_discarded_crypt(static_cast<uint32_t>(std::stoul(tokens[6])));
+      entry->getData().set_discarded_frag(static_cast<uint32_t>(std::stoul(tokens[7])));
+      entry->getData().set_discarded_retry(static_cast<uint32_t>(std::stoul(tokens[8])));
+      entry->getData().set_discarded_misc(static_cast<uint32_t>(std::stoul(tokens[9])));
+      entry->getData().set_missed_beacon(static_cast<uint32_t>(std::stoul(tokens[10])));
     };
 
     auto found = false;
@@ -165,9 +164,9 @@ static bool doCollectAndSend(const std::shared_ptr<SysProcWireless> mgr,
 
   struct timespec currentTime;
   clock_gettime(CLOCK_REALTIME, &currentTime);
-  data.set_system_time_sec(currentTime.tv_sec);
+  data.set_system_time_sec(static_cast<uint64_t>(currentTime.tv_sec));
   clock_gettime(CLOCK_MONOTONIC, &currentTime);
-  data.set_monotonic_time_sec(currentTime.tv_sec);
+  data.set_monotonic_time_sec(static_cast<uint64_t>(currentTime.tv_sec));
 
   mgr->getWlanInterfaceList().foreach (
       [&sysProcWireless](const std::shared_ptr<WlanInterface> &entry) {

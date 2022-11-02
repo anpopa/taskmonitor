@@ -61,6 +61,7 @@ auto getContextName(const std::string &contPath, uint64_t ctxId) -> std::string
 #ifdef WITH_LXC
   return getContainerNameForContext(contPath, ctxId);
 #else
+  static_cast<void>(contPath); // UNUSED
   return std::string("unknown");
 #endif
 }

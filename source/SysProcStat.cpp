@@ -17,8 +17,7 @@
 namespace tkm::monitor
 {
 
-static bool doUpdateStats(const std::shared_ptr<SysProcStat> mgr,
-                          const SysProcStat::Request &request);
+static bool doUpdateStats(const std::shared_ptr<SysProcStat> mgr);
 static bool doCollectAndSend(const std::shared_ptr<SysProcStat> mgr,
                              const SysProcStat::Request &request);
 
@@ -29,9 +28,9 @@ void CPUStat::updateStats(const CPUStatData &data)
   } else {
     auto diffData = data.getDiff(m_last);
     m_last.copyFrom(data);
-    m_data.set_usr(diffData.getPercent(CPUStatData::DataField::UserTime));
-    m_data.set_sys(diffData.getPercent(CPUStatData::DataField::SystemTime));
-    m_data.set_iow(diffData.getPercent(CPUStatData::DataField::IOWaitTime));
+    m_data.set_usr(static_cast<uint32_t>(diffData.getPercent(CPUStatData::DataField::UserTime)));
+    m_data.set_sys(static_cast<uint32_t>(diffData.getPercent(CPUStatData::DataField::SystemTime)));
+    m_data.set_iow(static_cast<uint32_t>(diffData.getPercent(CPUStatData::DataField::IOWaitTime)));
     m_data.set_all(m_data.usr() + m_data.sys() + m_data.iow());
   }
 }
@@ -59,7 +58,7 @@ bool SysProcStat::update(void)
     return true;
   }
 
-  SysProcStat::Request request = {.action = SysProcStat::Action::UpdateStats};
+  SysProcStat::Request request = {.action = SysProcStat::Action::UpdateStats, .collector = nullptr};
   bool status = pushRequest(request);
 
   if (status) {
@@ -88,7 +87,7 @@ auto SysProcStat::requestHandler(const Request &request) -> bool
 
   switch (request.action) {
   case SysProcStat::Action::UpdateStats:
-    status = doUpdateStats(getShared(), request);
+    status = doUpdateStats(getShared());
     setUpdatePending(false);
     break;
   case SysProcStat::Action::CollectAndSend:
@@ -102,8 +101,7 @@ auto SysProcStat::requestHandler(const Request &request) -> bool
   return status;
 }
 
-static bool doUpdateStats(const std::shared_ptr<SysProcStat> mgr,
-                          const SysProcStat::Request &request)
+static bool doUpdateStats(const std::shared_ptr<SysProcStat> mgr)
 {
   std::ifstream statStream{"/proc/stat"};
 
@@ -188,9 +186,9 @@ static bool doCollectAndSend(const std::shared_ptr<SysProcStat> mgr,
 
   struct timespec currentTime;
   clock_gettime(CLOCK_REALTIME, &currentTime);
-  data.set_system_time_sec(currentTime.tv_sec);
+  data.set_system_time_sec(static_cast<uint64_t>(currentTime.tv_sec));
   clock_gettime(CLOCK_MONOTONIC, &currentTime);
-  data.set_monotonic_time_sec(currentTime.tv_sec);
+  data.set_monotonic_time_sec(static_cast<uint64_t>(currentTime.tv_sec));
 
   mgr->getCPUStatList().foreach ([&statEvent](const std::shared_ptr<CPUStat> &entry) {
     if (entry->getType() == CPUStat::StatType::Cpu) {

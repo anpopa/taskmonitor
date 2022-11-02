@@ -142,15 +142,15 @@ static bool doCreateSession(const std::shared_ptr<TCPCollector> collector)
   std::string idContent(collector->getDescriptor().id());
 
   char randData[64] = {0};
-  srandom(time(0));
-  snprintf(randData, sizeof(randData), "%0lX", random());
+  srandom(static_cast<unsigned int>(time(0)));
+  snprintf(randData, sizeof(randData), "%0lX", static_cast<unsigned long>(random()));
   idContent += randData;
 
   logInfo() << "Session hash content: " << idContent
             << " jenkinsHash: " << tkm::jnkHsh(idContent.c_str());
   collector->getDescriptor().set_id(std::to_string(tkm::jnkHsh(idContent.c_str())));
   collector->getSessionInfo().set_hash(collector->getDescriptor().id());
-  collector->getSessionInfo().set_core_count(sysconf(_SC_NPROCESSORS_ONLN));
+  collector->getSessionInfo().set_core_count(static_cast<uint32_t>(sysconf(_SC_NPROCESSORS_ONLN)));
   logInfo() << "Send new sessionID=" << collector->getSessionInfo().hash();
 
   collector->getSessionInfo().set_fast_lane_interval(App()->getFastLaneInterval());
@@ -206,73 +206,89 @@ static bool doCreateSession(const std::shared_ptr<TCPCollector> collector)
 
 static bool doGetStartupData(const std::shared_ptr<TCPCollector> collector)
 {
-  Dispatcher::Request req = {.action = Dispatcher::Action::GetStartupData, .collector = collector};
+  Dispatcher::Request req = {.action = Dispatcher::Action::GetStartupData,
+                             .collector = collector,
+                             .args = std::map<std::string, std::string>()};
   return App()->getDispatcher()->pushRequest(req);
 }
 
 static bool doGetProcAcct(const std::shared_ptr<TCPCollector> collector)
 {
-  Dispatcher::Request req = {.action = Dispatcher::Action::GetProcAcct, .collector = collector};
+  Dispatcher::Request req = {.action = Dispatcher::Action::GetProcAcct,
+                             .collector = collector,
+                             .args = std::map<std::string, std::string>()};
   return App()->getDispatcher()->pushRequest(req);
 }
 
 static bool doGetProcInfo(const std::shared_ptr<TCPCollector> collector)
 {
-  Dispatcher::Request req = {.action = Dispatcher::Action::GetProcInfo, .collector = collector};
+  Dispatcher::Request req = {.action = Dispatcher::Action::GetProcInfo,
+                             .collector = collector,
+                             .args = std::map<std::string, std::string>()};
   return App()->getDispatcher()->pushRequest(req);
 }
 
 static bool doGetProcEventStats(const std::shared_ptr<TCPCollector> collector)
 {
   Dispatcher::Request req = {.action = Dispatcher::Action::GetProcEventStats,
-                             .collector = collector};
+                             .collector = collector,
+                             .args = std::map<std::string, std::string>()};
   return App()->getDispatcher()->pushRequest(req);
 }
 
 static bool doGetSysProcMemInfo(const std::shared_ptr<TCPCollector> collector)
 {
   Dispatcher::Request req = {.action = Dispatcher::Action::GetSysProcMemInfo,
-                             .collector = collector};
+                             .collector = collector,
+                             .args = std::map<std::string, std::string>()};
   return App()->getDispatcher()->pushRequest(req);
 }
 
 static bool doGetSysProcDiskStats(const std::shared_ptr<TCPCollector> collector)
 {
   Dispatcher::Request req = {.action = Dispatcher::Action::GetSysProcDiskStats,
-                             .collector = collector};
+                             .collector = collector,
+                             .args = std::map<std::string, std::string>()};
   return App()->getDispatcher()->pushRequest(req);
 }
 
 static bool doGetSysProcStat(const std::shared_ptr<TCPCollector> collector)
 {
-  Dispatcher::Request req = {.action = Dispatcher::Action::GetSysProcStat, .collector = collector};
+  Dispatcher::Request req = {.action = Dispatcher::Action::GetSysProcStat,
+                             .collector = collector,
+                             .args = std::map<std::string, std::string>()};
   return App()->getDispatcher()->pushRequest(req);
 }
 
 static bool doGetSysProcPressure(const std::shared_ptr<TCPCollector> collector)
 {
   Dispatcher::Request req = {.action = Dispatcher::Action::GetSysProcPressure,
-                             .collector = collector};
+                             .collector = collector,
+                             .args = std::map<std::string, std::string>()};
   return App()->getDispatcher()->pushRequest(req);
 }
 
 static bool doGetSysProcBuddyInfo(const std::shared_ptr<TCPCollector> collector)
 {
   Dispatcher::Request req = {.action = Dispatcher::Action::GetSysProcBuddyInfo,
-                             .collector = collector};
+                             .collector = collector,
+                             .args = std::map<std::string, std::string>()};
   return App()->getDispatcher()->pushRequest(req);
 }
 
 static bool doGetSysProcWireless(const std::shared_ptr<TCPCollector> collector)
 {
   Dispatcher::Request req = {.action = Dispatcher::Action::GetSysProcWireless,
-                             .collector = collector};
+                             .collector = collector,
+                             .args = std::map<std::string, std::string>()};
   return App()->getDispatcher()->pushRequest(req);
 }
 
 static bool doGetContextInfo(const std::shared_ptr<TCPCollector> collector)
 {
-  Dispatcher::Request req = {.action = Dispatcher::Action::GetContextInfo, .collector = collector};
+  Dispatcher::Request req = {.action = Dispatcher::Action::GetContextInfo,
+                             .collector = collector,
+                             .args = std::map<std::string, std::string>()};
   return App()->getDispatcher()->pushRequest(req);
 }
 

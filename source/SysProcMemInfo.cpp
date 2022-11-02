@@ -15,8 +15,7 @@
 namespace tkm::monitor
 {
 
-static bool doUpdateStats(const std::shared_ptr<SysProcMemInfo> mgr,
-                          const SysProcMemInfo::Request &request);
+static bool doUpdateStats(const std::shared_ptr<SysProcMemInfo> mgr);
 static bool doCollectAndSend(const std::shared_ptr<SysProcMemInfo> mgr,
                              const SysProcMemInfo::Request &request);
 
@@ -43,7 +42,8 @@ bool SysProcMemInfo::update()
     return true;
   }
 
-  SysProcMemInfo::Request request = {.action = SysProcMemInfo::Action::UpdateStats};
+  SysProcMemInfo::Request request = {.action = SysProcMemInfo::Action::UpdateStats,
+                                     .collector = nullptr};
   bool status = pushRequest(request);
 
   if (status) {
@@ -59,7 +59,7 @@ auto SysProcMemInfo::requestHandler(const Request &request) -> bool
 
   switch (request.action) {
   case SysProcMemInfo::Action::UpdateStats:
-    status = doUpdateStats(getShared(), request);
+    status = doUpdateStats(getShared());
     setUpdatePending(false);
     break;
   case SysProcMemInfo::Action::CollectAndSend:
@@ -73,8 +73,7 @@ auto SysProcMemInfo::requestHandler(const Request &request) -> bool
   return status;
 }
 
-static bool doUpdateStats(const std::shared_ptr<SysProcMemInfo> mgr,
-                          const SysProcMemInfo::Request &request)
+static bool doUpdateStats(const std::shared_ptr<SysProcMemInfo> mgr)
 {
   std::ifstream memInfoStream{"/proc/meminfo"};
 
@@ -137,31 +136,31 @@ static bool doUpdateStats(const std::shared_ptr<SysProcMemInfo> mgr,
 
     switch (lineData) {
     case LineData::MemTotal:
-      mgr->getProcMemInfo().set_mem_total(std::stoul(tokens[1].c_str()));
+      mgr->getProcMemInfo().set_mem_total(static_cast<uint32_t>(std::stoul(tokens[1].c_str())));
       break;
     case LineData::MemFree:
-      mgr->getProcMemInfo().set_mem_free(std::stoul(tokens[1].c_str()));
+      mgr->getProcMemInfo().set_mem_free(static_cast<uint32_t>(std::stoul(tokens[1].c_str())));
       break;
     case LineData::MemAvailable:
-      mgr->getProcMemInfo().set_mem_available(std::stoul(tokens[1].c_str()));
+      mgr->getProcMemInfo().set_mem_available(static_cast<uint32_t>(std::stoul(tokens[1].c_str())));
       break;
     case LineData::MemCached:
-      mgr->getProcMemInfo().set_mem_cached(std::stoul(tokens[1].c_str()));
+      mgr->getProcMemInfo().set_mem_cached(static_cast<uint32_t>(std::stoul(tokens[1].c_str())));
       break;
     case LineData::SwapTotal:
-      mgr->getProcMemInfo().set_swap_total(std::stoul(tokens[1].c_str()));
+      mgr->getProcMemInfo().set_swap_total(static_cast<uint32_t>(std::stoul(tokens[1].c_str())));
       break;
     case LineData::SwapFree:
-      mgr->getProcMemInfo().set_swap_free(std::stoul(tokens[1].c_str()));
+      mgr->getProcMemInfo().set_swap_free(static_cast<uint32_t>(std::stoul(tokens[1].c_str())));
       break;
     case LineData::SwapCached:
-      mgr->getProcMemInfo().set_swap_cached(std::stoul(tokens[1].c_str()));
+      mgr->getProcMemInfo().set_swap_cached(static_cast<uint32_t>(std::stoul(tokens[1].c_str())));
       break;
     case LineData::CmaTotal:
-      mgr->getProcMemInfo().set_cma_total(std::stoul(tokens[1].c_str()));
+      mgr->getProcMemInfo().set_cma_total(static_cast<uint32_t>(std::stoul(tokens[1].c_str())));
       break;
     case LineData::CmaFree:
-      mgr->getProcMemInfo().set_cma_free(std::stoul(tokens[1].c_str()));
+      mgr->getProcMemInfo().set_cma_free(static_cast<uint32_t>(std::stoul(tokens[1].c_str())));
       break;
     default:
       break;
@@ -199,9 +198,9 @@ static bool doCollectAndSend(const std::shared_ptr<SysProcMemInfo> mgr,
 
   struct timespec currentTime;
   clock_gettime(CLOCK_REALTIME, &currentTime);
-  data.set_system_time_sec(currentTime.tv_sec);
+  data.set_system_time_sec(static_cast<uint64_t>(currentTime.tv_sec));
   clock_gettime(CLOCK_MONOTONIC, &currentTime);
-  data.set_monotonic_time_sec(currentTime.tv_sec);
+  data.set_monotonic_time_sec(static_cast<uint64_t>(currentTime.tv_sec));
 
   data.mutable_payload()->PackFrom(mgr->getProcMemInfo());
   request.collector->sendData(data);

@@ -110,8 +110,8 @@ static bool doCollectAndSend(const std::shared_ptr<StartupData> mgr,
     tkm::msg::monitor::Data data;
 
     data.set_what(tkm::msg::monitor::Data_What_SysProcStat);
-    data.set_system_time_sec(cpuData->getSystemTime());
-    data.set_monotonic_time_sec(cpuData->getMonotonicTime());
+    data.set_system_time_sec(static_cast<uint64_t>(cpuData->getSystemTime()));
+    data.set_monotonic_time_sec(static_cast<uint64_t>(cpuData->getMonotonicTime()));
     data.mutable_payload()->PackFrom(cpuData->getData());
 
     request.collector->sendData(data);
@@ -121,8 +121,8 @@ static bool doCollectAndSend(const std::shared_ptr<StartupData> mgr,
     tkm::msg::monitor::Data data;
 
     data.set_what(tkm::msg::monitor::Data_What_SysProcMemInfo);
-    data.set_system_time_sec(memData->getSystemTime());
-    data.set_monotonic_time_sec(memData->getMonotonicTime());
+    data.set_system_time_sec(static_cast<uint64_t>(memData->getSystemTime()));
+    data.set_monotonic_time_sec(static_cast<uint64_t>(memData->getMonotonicTime()));
     data.mutable_payload()->PackFrom(memData->getData());
 
     request.collector->sendData(data);
@@ -132,8 +132,8 @@ static bool doCollectAndSend(const std::shared_ptr<StartupData> mgr,
     tkm::msg::monitor::Data data;
 
     data.set_what(tkm::msg::monitor::Data_What_SysProcPressure);
-    data.set_system_time_sec(psiData->getSystemTime());
-    data.set_monotonic_time_sec(psiData->getMonotonicTime());
+    data.set_system_time_sec(static_cast<uint64_t>(psiData->getSystemTime()));
+    data.set_monotonic_time_sec(static_cast<uint64_t>(psiData->getMonotonicTime()));
     data.mutable_payload()->PackFrom(psiData->getData());
 
     request.collector->sendData(data);

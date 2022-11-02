@@ -107,7 +107,7 @@ void TCPServer::bindAndListen()
     port = std::stoi(tkmDefaults.getFor(Defaults::Default::TCPServerPort));
     logWarn() << "Cannot convert port number from config: " << e.what();
   }
-  m_addr.sin_port = htons(port);
+  m_addr.sin_port = htons(static_cast<uint16_t>(port));
 
   if (bind(m_sockFd, (struct sockaddr *) &m_addr, sizeof(struct sockaddr_in)) != -1) {
     if (listen(m_sockFd, 100) == -1) {

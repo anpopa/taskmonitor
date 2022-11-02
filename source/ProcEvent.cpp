@@ -27,7 +27,6 @@ ProcEvent::ProcEvent(const std::shared_ptr<Options> options)
 , m_options(options)
 {
   int txBufferSize, rxBufferSize;
-  int err = NLE_SUCCESS;
 
   try {
     txBufferSize = std::stoi(m_options->getFor(Options::Key::TxBufferSize));
@@ -50,7 +49,7 @@ ProcEvent::ProcEvent(const std::shared_ptr<Options> options)
 
   m_addr.nl_family = AF_NETLINK;
   m_addr.nl_groups = CN_IDX_PROC;
-  m_addr.nl_pid = getpid();
+  m_addr.nl_pid = static_cast<unsigned int>(getpid());
 
   if (bind(m_sockFd, (struct sockaddr *) &m_addr, sizeof(m_addr)) == -1) {
     throw std::runtime_error("Fail to bind netlink socket");
@@ -65,7 +64,7 @@ ProcEvent::ProcEvent(const std::shared_ptr<Options> options)
             struct proc_event proc_ev;
           };
         } nlcn_msg;
-        int rc;
+        ssize_t rc;
 
         rc = recv(m_sockFd, &nlcn_msg, sizeof(nlcn_msg), 0);
         if (rc == 0) {
@@ -82,9 +81,9 @@ ProcEvent::ProcEvent(const std::shared_ptr<Options> options)
 
         struct timespec currentTime;
         clock_gettime(CLOCK_REALTIME, &currentTime);
-        data.set_system_time_sec(currentTime.tv_sec);
+        data.set_system_time_sec(static_cast<uint64_t>(currentTime.tv_sec));
         clock_gettime(CLOCK_MONOTONIC, &currentTime);
-        data.set_monotonic_time_sec(currentTime.tv_sec);
+        data.set_monotonic_time_sec(static_cast<uint64_t>(currentTime.tv_sec));
 
         switch (nlcn_msg.proc_ev.what) {
         case proc_event::what::PROC_EVENT_NONE:
@@ -139,7 +138,8 @@ ProcEvent::ProcEvent(const std::shared_ptr<Options> options)
           m_eventData.set_exit_count(m_eventData.exit_count() + 1);
           if (nlcn_msg.proc_ev.event_data.exit.process_pid ==
               nlcn_msg.proc_ev.event_data.exit.process_tgid) {
-            App()->getProcRegistry()->remProcEntry(nlcn_msg.proc_ev.event_data.exit.process_pid, true);
+            App()->getProcRegistry()->remProcEntry(nlcn_msg.proc_ev.event_data.exit.process_pid,
+                                                   true);
           }
           break;
         }
@@ -213,7 +213,7 @@ void ProcEvent::startMonitoring(void)
 
   memset(&nlcn_msg, 0, sizeof(nlcn_msg));
   nlcn_msg.nl_hdr.nlmsg_len = sizeof(nlcn_msg);
-  nlcn_msg.nl_hdr.nlmsg_pid = getpid();
+  nlcn_msg.nl_hdr.nlmsg_pid = static_cast<uint32_t>(getpid());
   nlcn_msg.nl_hdr.nlmsg_type = NLMSG_DONE;
 
   nlcn_msg.cn_msg.id.idx = CN_IDX_PROC;
@@ -234,9 +234,9 @@ static bool doCollectAndSend(const std::shared_ptr<ProcEvent> mgr, const ProcEve
 
   struct timespec currentTime;
   clock_gettime(CLOCK_REALTIME, &currentTime);
-  data.set_system_time_sec(currentTime.tv_sec);
+  data.set_system_time_sec(static_cast<uint64_t>(currentTime.tv_sec));
   clock_gettime(CLOCK_MONOTONIC, &currentTime);
-  data.set_monotonic_time_sec(currentTime.tv_sec);
+  data.set_monotonic_time_sec(static_cast<uint64_t>(currentTime.tv_sec));
 
   data.mutable_payload()->PackFrom(mgr->getProcEventData());
 

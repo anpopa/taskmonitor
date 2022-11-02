@@ -20,6 +20,8 @@ option(WITH_INSTALL_CONFIG "Install default taskmonitor.conf on target" Y)
 option(WITH_INSTALL_LICENSE "Install license file on target" Y)
 option(WITH_TESTS "Build test suite" N)
 option(WITH_TIDY "Build with clang-tidy" N)
+option(WITH_ASAN "Build with address sanitize" N)
+option(WITH_HARDEN_FLAGS "Build with harden compile flags" Y)
 
 # config
 if(WITH_STARTUP_DATA)
@@ -50,6 +52,44 @@ endif()
 
 if(WITH_TIDY)
     set(CMAKE_CXX_CLANG_TIDY "clang-tidy")
+endif()
+
+if(WITH_ASAN)
+    add_compile_options(-fsanitize=address)
+    add_link_options(-fsanitize=address)
+endif()
+
+if(WITH_HARDEN_FLAGS)
+    # Build flags
+    add_compile_options (
+        -Wall
+        -Wextra
+        -Wno-unused-function
+        -Wformat
+        -Wno-variadic-macros
+        -Wno-strict-aliasing
+        -fstack-protector-strong
+        -fwrapv
+        -Wformat-signedness
+        -Wmissing-include-dirs
+        -Wimplicit-fallthrough=5
+        -Wunused-parameter
+        -Wuninitialized
+        -Walloca
+        -Wduplicated-branches
+        -Wduplicated-cond
+        -Wfloat-equal
+        -Wshadow
+        -Wcast-qual
+        -Wconversion
+        -Wsign-conversion
+        -Wlogical-op
+        -Werror
+        -Wformat-security
+        -Walloc-zero
+        -Wcast-align
+        -Wredundant-decls
+    )
 endif()
 
 # cmake modules
@@ -117,8 +157,16 @@ if(WITH_LXC)
     find_library(LIBLXC_LIBRARIES_ABS ${LIBLXC_LIBRARIES})
 endif()
 
+include_directories(
+    ${LIBNL_INCLUDE_DIRS}
+    ${LIBNLGENL_INCLUDE_DIRS}
+    ${Protobuf_INCLUDE_DIRS}
+    ${CMAKE_SOURCE_DIR}/source
+    ${CMAKE_BINARY_DIR}/source/
+)
+
 # binary
-add_executable(taskmonitor 
+add_executable(taskmonitor
     source/Options.cpp
     source/Helpers.cpp
     source/Dispatcher.cpp
@@ -152,45 +200,6 @@ target_link_libraries(taskmonitor
         ${LIBNL_LIBRARIES_ABS}
         ${LIBNLGENL_LIBRARIES_ABS}
         ${LIBLXC_LIBRARIES_ABS}
-)
-
-include_directories(
-    ${LIBNL_INCLUDE_DIRS}
-    ${LIBNLGENL_INCLUDE_DIRS}
-    ${Protobuf_INCLUDE_DIRS}
-    ${CMAKE_SOURCE_DIR}/source
-    ${CMAKE_BINARY_DIR}/source/
-)
-
-# Build flags
-add_compile_options (
-    -Wall
-    -Wextra
-    -Wno-unused-function
-    -Wformat
-    -Wno-variadic-macros
-    -Wno-strict-aliasing
-    -fstack-protector-strong
-    -fwrapv
-    -Wformat-signedness
-    -Wmissing-include-dirs
-    -Wimplicit-fallthrough=5
-    -Wunused-parameter
-    -Wuninitialized
-    -Walloca
-    -Wduplicated-branches
-    -Wduplicated-cond
-    -Wfloat-equal
-    -Wshadow
-    -Wcast-qual
-    -Wconversion
-    -Wsign-conversion
-    -Wlogical-op
-    -Werror
-    -Wformat-security
-    -Walloc-zero
-    -Wcast-align
-    -Wredundant-decls
 )
 
 if(WITH_TESTS)
@@ -229,3 +238,5 @@ message (STATUS "WITH_INSTALL_CONFIG: "  ${WITH_INSTALL_CONFIG})
 message (STATUS "WITH_INSTALL_LICENSE: " ${WITH_INSTALL_LICENSE})
 message (STATUS "WITH_TESTS: "           ${WITH_TESTS})
 message (STATUS "WITH_TIDY: "            ${WITH_TIDY})
+message (STATUS "WITH_ASAN: "            ${WITH_ASAN})
+message (STATUS "WITH_HARDEN_FLAGS: "    ${WITH_HARDEN_FLAGS})

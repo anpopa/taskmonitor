@@ -23,10 +23,8 @@ namespace fs = std::experimental::filesystem;
 namespace tkm::monitor
 {
 
-static bool doCommitProcList(const std::shared_ptr<ProcRegistry> mgr,
-                             const ProcRegistry::Request &rq);
-static bool doCommitContextList(const std::shared_ptr<ProcRegistry> mgr,
-                                const ProcRegistry::Request &rq);
+static bool doCommitProcList(const std::shared_ptr<ProcRegistry> mgr);
+static bool doCommitContextList(const std::shared_ptr<ProcRegistry> mgr);
 static bool doCollectAndSendProcAcct(const std::shared_ptr<ProcRegistry> mgr,
                                      const ProcRegistry::Request &rq);
 static bool doCollectAndSendProcInfo(const std::shared_ptr<ProcRegistry> mgr,
@@ -59,9 +57,9 @@ auto ProcRegistry::requestHandler(const Request &request) -> bool
 {
   switch (request.action) {
   case ProcRegistry::Action::CommitProcList:
-    return doCommitProcList(getShared(), request);
+    return doCommitProcList(getShared());
   case ProcRegistry::Action::CommitContextList:
-    return doCommitContextList(getShared(), request);
+    return doCommitContextList(getShared());
   case ProcRegistry::Action::CollectAndSendProcAcct:
     return doCollectAndSendProcAcct(getShared(), request);
   case ProcRegistry::Action::CollectAndSendProcInfo:
@@ -111,7 +109,7 @@ auto ProcRegistry::getProcEntry(int pid) -> const std::shared_ptr<ProcEntry>
 {
   std::shared_ptr<ProcEntry> retEntry = nullptr;
 
-  m_procList.foreach ([this, pid, &retEntry](const std::shared_ptr<ProcEntry> &entry) {
+  m_procList.foreach ([pid, &retEntry](const std::shared_ptr<ProcEntry> &entry) {
     if (entry->getPid() == pid) {
       retEntry = entry;
     }
@@ -124,7 +122,7 @@ auto ProcRegistry::getProcEntry(const std::string &name) -> const std::shared_pt
 {
   std::shared_ptr<ProcEntry> retEntry = nullptr;
 
-  m_procList.foreach ([this, &name, &retEntry](const std::shared_ptr<ProcEntry> &entry) {
+  m_procList.foreach ([&name, &retEntry](const std::shared_ptr<ProcEntry> &entry) {
     if (entry->getName() == name) {
       retEntry = entry;
     }
@@ -198,7 +196,8 @@ void ProcRegistry::remProcEntry(int pid, bool sync)
   if (sync) {
     m_procList.commit();
   } else {
-    ProcRegistry::Request rq = {.action = ProcRegistry::Action::CommitProcList};
+    ProcRegistry::Request rq = {.action = ProcRegistry::Action::CommitProcList,
+                                .collector = nullptr};
     pushRequest(rq);
   }
 }
@@ -215,7 +214,8 @@ void ProcRegistry::remProcEntry(std::string &name, bool sync)
   if (sync) {
     m_procList.commit();
   } else {
-    ProcRegistry::Request rq = {.action = ProcRegistry::Action::CommitProcList};
+    ProcRegistry::Request rq = {.action = ProcRegistry::Action::CommitProcList,
+                                .collector = nullptr};
     pushRequest(rq);
   }
 }
@@ -264,7 +264,7 @@ auto ProcRegistry::getProcNameForPID(int pid) -> std::string
     }
 
     std::string name{tokens[1]};
-    for (int i = 2; i < tokens.size(); i++) {
+    for (size_t i = 2; i < tokens.size(); i++) {
       name.append(" " + tokens[i]);
     }
 
@@ -334,15 +334,13 @@ bool ProcRegistry::update(void)
   return true;
 }
 
-static bool doCommitProcList(const std::shared_ptr<ProcRegistry> mgr,
-                             const ProcRegistry::Request &rq)
+static bool doCommitProcList(const std::shared_ptr<ProcRegistry> mgr)
 {
   mgr->getProcList().commit();
   return true;
 }
 
-static bool doCommitContextList(const std::shared_ptr<ProcRegistry> mgr,
-                                const ProcRegistry::Request &rq)
+static bool doCommitContextList(const std::shared_ptr<ProcRegistry> mgr)
 {
   mgr->getContextList().commit();
   return true;
@@ -364,9 +362,9 @@ static bool doCollectAndSendProcAcct(const std::shared_ptr<ProcRegistry> mgr,
 
     struct timespec currentTime;
     clock_gettime(CLOCK_REALTIME, &currentTime);
-    data.set_system_time_sec(currentTime.tv_sec);
+    data.set_system_time_sec(static_cast<uint64_t>(currentTime.tv_sec));
     clock_gettime(CLOCK_MONOTONIC, &currentTime);
-    data.set_monotonic_time_sec(currentTime.tv_sec);
+    data.set_monotonic_time_sec(static_cast<uint64_t>(currentTime.tv_sec));
 
     data.mutable_payload()->PackFrom(entry->getAcct());
     rq.collector->sendData(data);
@@ -385,9 +383,9 @@ static bool doCollectAndSendProcInfo(const std::shared_ptr<ProcRegistry> mgr,
 
   struct timespec currentTime;
   clock_gettime(CLOCK_REALTIME, &currentTime);
-  data.set_system_time_sec(currentTime.tv_sec);
+  data.set_system_time_sec(static_cast<uint64_t>(currentTime.tv_sec));
   clock_gettime(CLOCK_MONOTONIC, &currentTime);
-  data.set_monotonic_time_sec(currentTime.tv_sec);
+  data.set_monotonic_time_sec(static_cast<uint64_t>(currentTime.tv_sec));
 
   mgr->getProcList().foreach ([&procInfo](const std::shared_ptr<ProcEntry> &entry) {
     procInfo.add_entry()->CopyFrom(entry->getData());
@@ -409,18 +407,17 @@ static bool doCollectAndSendContextInfo(const std::shared_ptr<ProcRegistry> mgr,
 
   struct timespec currentTime;
   clock_gettime(CLOCK_REALTIME, &currentTime);
-  data.set_system_time_sec(currentTime.tv_sec);
+  data.set_system_time_sec(static_cast<uint64_t>(currentTime.tv_sec));
   clock_gettime(CLOCK_MONOTONIC, &currentTime);
-  data.set_monotonic_time_sec(currentTime.tv_sec);
+  data.set_monotonic_time_sec(static_cast<uint64_t>(currentTime.tv_sec));
 
   // Update Context data
-  mgr->getContextList().foreach ([&mgr, &rq](const std::shared_ptr<ContextEntry> &ctxEntry) {
+  mgr->getContextList().foreach ([&mgr](const std::shared_ptr<ContextEntry> &ctxEntry) {
     // Reset data
     ctxEntry->resetData();
 
     bool found = false;
-    mgr->getProcList().foreach ([&mgr, &ctxEntry, &found](
-                                    const std::shared_ptr<ProcEntry> &procEntry) {
+    mgr->getProcList().foreach ([&ctxEntry, &found](const std::shared_ptr<ProcEntry> &procEntry) {
       if (ctxEntry->getContextId() == procEntry->getContextId()) {
         auto totalCPUTime = ctxEntry->getData().total_cpu_time() + procEntry->getData().cpu_time();
         ctxEntry->getData().set_total_cpu_time(totalCPUTime);
@@ -438,7 +435,8 @@ static bool doCollectAndSendContextInfo(const std::shared_ptr<ProcRegistry> mgr,
       mgr->getContextList().remove(ctxEntry);
     }
   });
-  ProcRegistry::Request crq = {.action = ProcRegistry::Action::CommitContextList};
+  ProcRegistry::Request crq = {.action = ProcRegistry::Action::CommitContextList,
+                               .collector = nullptr};
   mgr->pushRequest(crq);
 
   mgr->getContextList().foreach ([&contextInfo](const std::shared_ptr<ContextEntry> &entry) {

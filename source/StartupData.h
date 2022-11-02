@@ -46,13 +46,13 @@ class StartupData : public std::enable_shared_from_this<StartupData>
     void operator=(CPUStartupData const &) = delete;
 
     auto getData(void) -> const tkm::msg::monitor::SysProcStat & { return m_data; }
-    auto getMonotonicTime(void) -> uint64_t { return m_monotonicTime; };
-    auto getSystemTime(void) -> uint64_t { return m_systemTime; };
+    auto getMonotonicTime(void) -> long { return m_monotonicTime; };
+    auto getSystemTime(void) -> long { return m_systemTime; };
 
   private:
     tkm::msg::monitor::SysProcStat m_data;
-    uint64_t m_monotonicTime;
-    uint64_t m_systemTime;
+    long m_monotonicTime;
+    long m_systemTime;
   };
 
   struct MEMStartupData {
@@ -75,13 +75,13 @@ class StartupData : public std::enable_shared_from_this<StartupData>
     void operator=(MEMStartupData const &) = delete;
 
     auto getData(void) -> const tkm::msg::monitor::SysProcMemInfo & { return m_data; }
-    auto getMonotonicTime(void) -> uint64_t { return m_monotonicTime; };
-    auto getSystemTime(void) -> uint64_t { return m_systemTime; };
+    auto getMonotonicTime(void) -> long { return m_monotonicTime; };
+    auto getSystemTime(void) -> long { return m_systemTime; };
 
   private:
     tkm::msg::monitor::SysProcMemInfo m_data;
-    uint64_t m_monotonicTime;
-    uint64_t m_systemTime;
+    long m_monotonicTime;
+    long m_systemTime;
   };
 
   struct PSIStartupData {
@@ -104,13 +104,13 @@ class StartupData : public std::enable_shared_from_this<StartupData>
     void operator=(PSIStartupData const &) = delete;
 
     auto getData(void) -> const tkm::msg::monitor::SysProcPressure & { return m_data; }
-    auto getMonotonicTime(void) -> uint64_t { return m_monotonicTime; };
-    auto getSystemTime(void) -> uint64_t { return m_systemTime; };
+    auto getMonotonicTime(void) -> long { return m_monotonicTime; };
+    auto getSystemTime(void) -> long { return m_systemTime; };
 
   private:
     tkm::msg::monitor::SysProcPressure m_data;
-    uint64_t m_monotonicTime;
-    uint64_t m_systemTime;
+    long m_monotonicTime;
+    long m_systemTime;
   };
 
 public:

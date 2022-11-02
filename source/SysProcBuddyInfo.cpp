@@ -15,8 +15,7 @@
 namespace tkm::monitor
 {
 
-static bool doUpdateStats(const std::shared_ptr<SysProcBuddyInfo> mgr,
-                          const SysProcBuddyInfo::Request &request);
+static bool doUpdateStats(const std::shared_ptr<SysProcBuddyInfo> mgr);
 static bool doCollectAndSend(const std::shared_ptr<SysProcBuddyInfo> mgr,
                              const SysProcBuddyInfo::Request &request);
 
@@ -43,7 +42,8 @@ bool SysProcBuddyInfo::update(void)
     return true;
   }
 
-  SysProcBuddyInfo::Request request = {.action = SysProcBuddyInfo::Action::UpdateStats};
+  SysProcBuddyInfo::Request request = {.action = SysProcBuddyInfo::Action::UpdateStats,
+                                       .collector = nullptr};
   bool status = pushRequest(request);
 
   if (status) {
@@ -59,7 +59,7 @@ auto SysProcBuddyInfo::requestHandler(const Request &request) -> bool
 
   switch (request.action) {
   case SysProcBuddyInfo::Action::UpdateStats:
-    status = doUpdateStats(getShared(), request);
+    status = doUpdateStats(getShared());
     setUpdatePending(false);
     break;
   case SysProcBuddyInfo::Action::CollectAndSend:
@@ -73,8 +73,7 @@ auto SysProcBuddyInfo::requestHandler(const Request &request) -> bool
   return status;
 }
 
-static bool doUpdateStats(const std::shared_ptr<SysProcBuddyInfo> mgr,
-                          const SysProcBuddyInfo::Request &request)
+static bool doUpdateStats(const std::shared_ptr<SysProcBuddyInfo> mgr)
 {
   std::ifstream statStream{"/proc/buddyinfo"};
 
@@ -92,8 +91,8 @@ static bool doUpdateStats(const std::shared_ptr<SysProcBuddyInfo> mgr,
       continue;
     }
 
-    auto cnt = 0;
-    auto zoneMarker = 0;
+    size_t cnt = 0;
+    size_t zoneMarker = 0;
     while (ss >> buf) {
       if ((zoneMarker == 0) && (buf == "zone")) {
         zoneMarker = cnt;
@@ -109,14 +108,14 @@ static bool doUpdateStats(const std::shared_ptr<SysProcBuddyInfo> mgr,
 
     auto updateBuddyInfoEntry = [zoneMarker, &tokens](const std::shared_ptr<BuddyInfo> &entry) {
       std::string data{};
-      for (int i = zoneMarker + 2; i < tokens.size(); i++) {
+      for (size_t i = zoneMarker + 2; i < tokens.size(); i++) {
         data += tokens[i] + " ";
       }
       entry->getData().set_data(data);
     };
 
     std::string nameToken{};
-    for (int i = 0; i < zoneMarker; i++) {
+    for (size_t i = 0; i < zoneMarker; i++) {
       nameToken += tokens[i];
     }
     // remove comma after name
@@ -157,9 +156,9 @@ static bool doCollectAndSend(const std::shared_ptr<SysProcBuddyInfo> mgr,
 
   struct timespec currentTime;
   clock_gettime(CLOCK_REALTIME, &currentTime);
-  data.set_system_time_sec(currentTime.tv_sec);
+  data.set_system_time_sec(static_cast<uint64_t>(currentTime.tv_sec));
   clock_gettime(CLOCK_MONOTONIC, &currentTime);
-  data.set_monotonic_time_sec(currentTime.tv_sec);
+  data.set_monotonic_time_sec(static_cast<uint64_t>(currentTime.tv_sec));
 
   mgr->getBuddyInfoList().foreach ([&info](const std::shared_ptr<BuddyInfo> &entry) {
     info.add_node()->CopyFrom(entry->getData());

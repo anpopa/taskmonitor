@@ -137,10 +137,12 @@ bool ProcEntry::updateInfoData(void)
     } else {
       auto durationUs = std::chrono::duration_cast<USec>(timeNow - m_lastUpdateTime).count();
       m_lastUpdateTime = timeNow;
-      m_info.set_cpu_percent(((newCPUTime - oldCPUTime) * 1000000) / durationUs);
+      m_info.set_cpu_percent(static_cast<uint32_t>(((newCPUTime - oldCPUTime) * 1000000) /
+                                                   static_cast<uint64_t>(durationUs)));
     }
 
-    m_info.set_mem_vmrss(std::stoul(tokens[23]) * ::sysconf(_SC_PAGESIZE) / 1024);
+    m_info.set_mem_vmrss(static_cast<uint32_t>(
+        std::stoul(tokens[23]) * static_cast<uint64_t>(::sysconf(_SC_PAGESIZE)) / 1024));
   }
 
   return true;

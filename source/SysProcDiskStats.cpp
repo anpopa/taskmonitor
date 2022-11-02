@@ -15,8 +15,7 @@
 namespace tkm::monitor
 {
 
-static bool doUpdateStats(const std::shared_ptr<SysProcDiskStats> mgr,
-                          const SysProcDiskStats::Request &request);
+static bool doUpdateStats(const std::shared_ptr<SysProcDiskStats> mgr);
 static bool doCollectAndSend(const std::shared_ptr<SysProcDiskStats> mgr,
                              const SysProcDiskStats::Request &request);
 
@@ -43,7 +42,8 @@ bool SysProcDiskStats::update()
     return true;
   }
 
-  SysProcDiskStats::Request request = {.action = SysProcDiskStats::Action::UpdateStats};
+  SysProcDiskStats::Request request = {.action = SysProcDiskStats::Action::UpdateStats,
+                                       .collector = nullptr};
   bool status = pushRequest(request);
 
   if (status) {
@@ -59,7 +59,7 @@ auto SysProcDiskStats::requestHandler(const Request &request) -> bool
 
   switch (request.action) {
   case SysProcDiskStats::Action::UpdateStats:
-    status = doUpdateStats(getShared(), request);
+    status = doUpdateStats(getShared());
     setUpdatePending(false);
     break;
   case SysProcDiskStats::Action::CollectAndSend:
@@ -73,8 +73,7 @@ auto SysProcDiskStats::requestHandler(const Request &request) -> bool
   return status;
 }
 
-static bool doUpdateStats(const std::shared_ptr<SysProcDiskStats> mgr,
-                          const SysProcDiskStats::Request &request)
+static bool doUpdateStats(const std::shared_ptr<SysProcDiskStats> mgr)
 {
   std::ifstream diskStatsStream{"/proc/diskstats"};
 
@@ -97,8 +96,8 @@ static bool doUpdateStats(const std::shared_ptr<SysProcDiskStats> mgr,
       return false;
     }
 
-    auto major = std::stoul(tokens[0]);
-    auto minor = std::stoul(tokens[1]);
+    auto major = static_cast<uint32_t>(std::stoul(tokens[0]));
+    auto minor = static_cast<uint32_t>(std::stoul(tokens[1]));
 
     auto updateDiskStatEntry = [&tokens, &major, &minor](const std::shared_ptr<DiskStat> &entry) {
       entry->getData().set_node_major(major);
@@ -116,7 +115,7 @@ static bool doUpdateStats(const std::shared_ptr<SysProcDiskStats> mgr,
     };
 
     auto found = false;
-    mgr->getDiskStatList().foreach ([&tokens, &found, &major, &minor, updateDiskStatEntry](
+    mgr->getDiskStatList().foreach ([&found, &major, &minor, updateDiskStatEntry](
                                         const std::shared_ptr<DiskStat> &entry) {
       if ((entry->getData().node_major() == major) && (entry->getData().node_minor() == minor)) {
         updateDiskStatEntry(entry);
@@ -148,9 +147,9 @@ static bool doCollectAndSend(const std::shared_ptr<SysProcDiskStats> mgr,
 
   struct timespec currentTime;
   clock_gettime(CLOCK_REALTIME, &currentTime);
-  data.set_system_time_sec(currentTime.tv_sec);
+  data.set_system_time_sec(static_cast<uint64_t>(currentTime.tv_sec));
   clock_gettime(CLOCK_MONOTONIC, &currentTime);
-  data.set_monotonic_time_sec(currentTime.tv_sec);
+  data.set_monotonic_time_sec(static_cast<uint64_t>(currentTime.tv_sec));
 
   mgr->getDiskStatList().foreach ([&diskStats](const std::shared_ptr<DiskStat> &entry) {
     diskStats.add_disk()->CopyFrom(entry->getData());

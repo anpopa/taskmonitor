@@ -23,8 +23,7 @@ namespace fs = std::experimental::filesystem;
 namespace tkm::monitor
 {
 
-static bool doUpdateStats(const std::shared_ptr<SysProcPressure> mgr,
-                          const SysProcPressure::Request &request);
+static bool doUpdateStats(const std::shared_ptr<SysProcPressure> mgr);
 static bool doCollectAndSend(const std::shared_ptr<SysProcPressure> mgr,
                              const SysProcPressure::Request &request);
 
@@ -131,7 +130,8 @@ bool SysProcPressure::update()
     return true;
   }
 
-  SysProcPressure::Request request = {.action = SysProcPressure::Action::UpdateStats};
+  SysProcPressure::Request request = {.action = SysProcPressure::Action::UpdateStats,
+                                      .collector = nullptr};
   bool status = pushRequest(request);
 
   if (status) {
@@ -147,7 +147,7 @@ auto SysProcPressure::requestHandler(const Request &request) -> bool
 
   switch (request.action) {
   case SysProcPressure::Action::UpdateStats:
-    status = doUpdateStats(getShared(), request);
+    status = doUpdateStats(getShared());
     setUpdatePending(false);
     break;
   case SysProcPressure::Action::CollectAndSend:
@@ -161,8 +161,7 @@ auto SysProcPressure::requestHandler(const Request &request) -> bool
   return status;
 }
 
-static bool doUpdateStats(const std::shared_ptr<SysProcPressure> mgr,
-                          const SysProcPressure::Request &request)
+static bool doUpdateStats(const std::shared_ptr<SysProcPressure> mgr)
 {
   mgr->getProcEntries().foreach ([&mgr](const std::shared_ptr<PressureStat> &entry) {
     entry->updateStats();
@@ -198,9 +197,9 @@ static bool doCollectAndSend(const std::shared_ptr<SysProcPressure> mgr,
 
   struct timespec currentTime;
   clock_gettime(CLOCK_REALTIME, &currentTime);
-  data.set_system_time_sec(currentTime.tv_sec);
+  data.set_system_time_sec(static_cast<uint64_t>(currentTime.tv_sec));
   clock_gettime(CLOCK_MONOTONIC, &currentTime);
-  data.set_monotonic_time_sec(currentTime.tv_sec);
+  data.set_monotonic_time_sec(static_cast<uint64_t>(currentTime.tv_sec));
 
   data.mutable_payload()->PackFrom(mgr->getProcPressure());
   request.collector->sendData(data);
