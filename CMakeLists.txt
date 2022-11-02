@@ -21,7 +21,7 @@ option(WITH_INSTALL_LICENSE "Install license file on target" Y)
 option(WITH_TESTS "Build test suite" N)
 option(WITH_TIDY "Build with clang-tidy" N)
 option(WITH_ASAN "Build with address sanitize" N)
-option(WITH_HARDEN_FLAGS "Build with harden compile flags" Y)
+option(WITH_GCC_HARDEN_FLAGS "Build with GCC harden compile flags" N)
 
 # config
 if(WITH_STARTUP_DATA)
@@ -59,7 +59,7 @@ if(WITH_ASAN)
     add_link_options(-fsanitize=address)
 endif()
 
-if(WITH_HARDEN_FLAGS)
+if(WITH_GCC_HARDEN_FLAGS)
     # Build flags
     add_compile_options (
         -Wall
@@ -230,13 +230,13 @@ if(WITH_INSTALL_LICENSE)
 endif()
 
 # Status reporting
-message (STATUS "CMAKE_BUILD_TYPE: "     ${CMAKE_BUILD_TYPE})
-message (STATUS "WITH_LXC: "             ${WITH_LXC})
-message (STATUS "WITH_SYSTEMD: "         ${WITH_SYSTEMD})
-message (STATUS "WITH_STARTUP_DATA: "    ${WITH_STARTUP_DATA})
-message (STATUS "WITH_INSTALL_CONFIG: "  ${WITH_INSTALL_CONFIG})
-message (STATUS "WITH_INSTALL_LICENSE: " ${WITH_INSTALL_LICENSE})
-message (STATUS "WITH_TESTS: "           ${WITH_TESTS})
-message (STATUS "WITH_TIDY: "            ${WITH_TIDY})
-message (STATUS "WITH_ASAN: "            ${WITH_ASAN})
-message (STATUS "WITH_HARDEN_FLAGS: "    ${WITH_HARDEN_FLAGS})
+message (STATUS "CMAKE_BUILD_TYPE: "        ${CMAKE_BUILD_TYPE})
+message (STATUS "WITH_LXC: "                ${WITH_LXC})
+message (STATUS "WITH_SYSTEMD: "            ${WITH_SYSTEMD})
+message (STATUS "WITH_STARTUP_DATA: "       ${WITH_STARTUP_DATA})
+message (STATUS "WITH_INSTALL_CONFIG: "     ${WITH_INSTALL_CONFIG})
+message (STATUS "WITH_INSTALL_LICENSE: "    ${WITH_INSTALL_LICENSE})
+message (STATUS "WITH_TESTS: "              ${WITH_TESTS})
+message (STATUS "WITH_TIDY: "               ${WITH_TIDY})
+message (STATUS "WITH_ASAN: "               ${WITH_ASAN})
+message (STATUS "WITH_GCC_HARDEN_FLAGS: "   ${WITH_GCC_HARDEN_FLAGS})
