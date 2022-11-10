@@ -55,7 +55,7 @@ public:
 
 private:
   void initInfoData(void);
-  bool updateInfoData(void);
+  void updateInfoData(void);
   bool updateProcAcct(void);
   bool updateProcInfo(void);
 

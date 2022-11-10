@@ -136,31 +136,31 @@ static bool doUpdateStats(const std::shared_ptr<SysProcMemInfo> mgr)
 
     switch (lineData) {
     case LineData::MemTotal:
-      mgr->getProcMemInfo().set_mem_total(static_cast<uint32_t>(std::stoul(tokens[1].c_str())));
+      mgr->getProcMemInfo().set_mem_total(std::stoul(tokens[1].c_str()));
       break;
     case LineData::MemFree:
-      mgr->getProcMemInfo().set_mem_free(static_cast<uint32_t>(std::stoul(tokens[1].c_str())));
+      mgr->getProcMemInfo().set_mem_free(std::stoul(tokens[1].c_str()));
       break;
     case LineData::MemAvailable:
-      mgr->getProcMemInfo().set_mem_available(static_cast<uint32_t>(std::stoul(tokens[1].c_str())));
+      mgr->getProcMemInfo().set_mem_available(std::stoul(tokens[1].c_str()));
       break;
     case LineData::MemCached:
-      mgr->getProcMemInfo().set_mem_cached(static_cast<uint32_t>(std::stoul(tokens[1].c_str())));
+      mgr->getProcMemInfo().set_mem_cached(std::stoul(tokens[1].c_str()));
       break;
     case LineData::SwapTotal:
-      mgr->getProcMemInfo().set_swap_total(static_cast<uint32_t>(std::stoul(tokens[1].c_str())));
+      mgr->getProcMemInfo().set_swap_total(std::stoul(tokens[1].c_str()));
       break;
     case LineData::SwapFree:
-      mgr->getProcMemInfo().set_swap_free(static_cast<uint32_t>(std::stoul(tokens[1].c_str())));
+      mgr->getProcMemInfo().set_swap_free(std::stoul(tokens[1].c_str()));
       break;
     case LineData::SwapCached:
-      mgr->getProcMemInfo().set_swap_cached(static_cast<uint32_t>(std::stoul(tokens[1].c_str())));
+      mgr->getProcMemInfo().set_swap_cached(std::stoul(tokens[1].c_str()));
       break;
     case LineData::CmaTotal:
-      mgr->getProcMemInfo().set_cma_total(static_cast<uint32_t>(std::stoul(tokens[1].c_str())));
+      mgr->getProcMemInfo().set_cma_total(std::stoul(tokens[1].c_str()));
       break;
     case LineData::CmaFree:
-      mgr->getProcMemInfo().set_cma_free(static_cast<uint32_t>(std::stoul(tokens[1].c_str())));
+      mgr->getProcMemInfo().set_cma_free(std::stoul(tokens[1].c_str()));
       break;
     default:
       break;
@@ -168,14 +168,14 @@ static bool doUpdateStats(const std::shared_ptr<SysProcMemInfo> mgr)
   }
 
   if (mgr->getProcMemInfo().mem_total() > 0) {
-    uint32_t memPercent =
+    uint64_t memPercent =
         (mgr->getProcMemInfo().mem_available() * 100) / mgr->getProcMemInfo().mem_total();
-    mgr->getProcMemInfo().set_mem_percent(memPercent);
+    mgr->getProcMemInfo().set_mem_percent(static_cast<uint32_t>(memPercent));
   }
   if (mgr->getProcMemInfo().swap_total() > 0) {
-    uint32_t swapPercent =
+    uint64_t swapPercent =
         (mgr->getProcMemInfo().swap_free() * 100) / mgr->getProcMemInfo().swap_total();
-    mgr->getProcMemInfo().set_swap_percent(swapPercent);
+    mgr->getProcMemInfo().set_swap_percent(static_cast<uint32_t>(swapPercent));
   }
 
 #ifdef WITH_STARTUP_DATA

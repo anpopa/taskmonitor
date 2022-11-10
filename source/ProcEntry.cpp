@@ -44,20 +44,26 @@ bool ProcEntry::updateProcAcct(void)
 
 bool ProcEntry::updateProcInfo(void)
 {
+  bool status = true;
+
   if (getUpdatePending()) {
     return true;
   }
-
   setUpdatePending(true);
-  auto status = updateInfoData();
-  setUpdatePending(false);
 
-  if (!status) {
-    App()->getProcRegistry()->remProcEntry(m_pid);
-    return false;
+  try {
+    updateInfoData();
+  } catch (std::exception &e) {
+    logError() << "Fail to update info data for PID " << m_pid << ". Exception: " << e.what();
+    status = false;
   }
 
-  return true;
+  setUpdatePending(false);
+  if (!status) {
+    App()->getProcRegistry()->remProcEntry(m_pid);
+  }
+
+  return status;
 }
 
 void ProcEntry::initInfoData(void)
@@ -97,16 +103,11 @@ void ProcEntry::initInfoData(void)
                                           m_info.ctx_id()));
 }
 
-bool ProcEntry::updateInfoData(void)
+void ProcEntry::updateInfoData(void)
 {
-  std::ifstream statStream{"/proc/" + std::to_string(m_pid) + "/stat"};
-
-  if (!statStream.is_open()) {
-    logWarn() << "Fail to open stat file for pid " << m_pid;
-    return false;
-  }
-
   std::string line;
+
+  std::ifstream statStream{"/proc/" + std::to_string(m_pid) + "/stat"};
   if (std::getline(statStream, line)) {
     std::vector<std::string> tokens;
     std::stringstream ss(line);
@@ -117,8 +118,7 @@ bool ProcEntry::updateInfoData(void)
     }
 
     if (tokens.size() < 52) {
-      logError() << "Fail to parse state file for pid " << m_pid;
-      return false;
+      throw std::runtime_error("Fail to parse stat file");
     }
 
     auto afterNameOffset = tokens.size() - 52;
@@ -140,12 +140,30 @@ bool ProcEntry::updateInfoData(void)
       m_info.set_cpu_percent(static_cast<uint32_t>(((newCPUTime - oldCPUTime) * 1000000) /
                                                    static_cast<uint64_t>(durationUs)));
     }
-
-    m_info.set_mem_vmrss(static_cast<uint32_t>(
-        std::stoul(tokens[23]) * static_cast<uint64_t>(::sysconf(_SC_PAGESIZE)) / 1024));
   }
 
-  return true;
+  std::ifstream statmStream{"/proc/" + std::to_string(m_pid) + "/statm"};
+  if (std::getline(statmStream, line)) {
+    std::vector<std::string> tokens;
+    std::stringstream ss(line);
+    std::string buf;
+
+    while (ss >> buf) {
+      tokens.push_back(buf);
+    }
+
+    // We are only interested in the first 3 values
+    if (tokens.size() < 3) {
+      throw std::runtime_error("Fail to parse statm file");
+    }
+
+    const auto pageSize = static_cast<uint64_t>(::sysconf(_SC_PAGESIZE));
+
+    // Store memory sizes in Kb
+    m_info.set_mem_vmsize(std::stoul(tokens[0]) * pageSize / 1024);
+    m_info.set_mem_vmrss(std::stoul(tokens[1]) * pageSize / 1024);
+    m_info.set_mem_shared(std::stoul(tokens[2]) * pageSize / 1024);
+  }
 }
 
 bool ProcEntry::update(const std::string &sourceName)
