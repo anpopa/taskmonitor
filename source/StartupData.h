@@ -142,7 +142,7 @@ public:
   void addPsiData(const tkm::msg::monitor::SysProcPressure &data);
 
   auto pushRequest(StartupData::Request &request) -> int;
-  void enableEvents();
+  void setEventSource(bool enabled = true);
 
 private:
   bool requestHandler(const Request &request);

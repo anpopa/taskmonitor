@@ -31,9 +31,13 @@ auto SysProcWireless::pushRequest(Request &request) -> int
   return m_queue->push(request);
 }
 
-void SysProcWireless::enableEvents()
+void SysProcWireless::setEventSource(bool enabled)
 {
-  App()->addEventSource(m_queue);
+  if (enabled) {
+    App()->addEventSource(m_queue);
+  } else {
+    App()->remEventSource(m_queue);
+  }
 }
 
 bool SysProcWireless::update(void)

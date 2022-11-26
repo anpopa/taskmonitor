@@ -200,9 +200,13 @@ ProcAcct::ProcAcct(const std::shared_ptr<Options> options)
   });
 }
 
-void ProcAcct::enableEvents()
+void ProcAcct::setEventSource(bool enabled)
 {
-  App()->addEventSource(getShared());
+  if (enabled) {
+    App()->addEventSource(getShared());
+  } else {
+    App()->remEventSource(getShared());
+  }
 }
 
 ProcAcct::~ProcAcct()

@@ -37,8 +37,7 @@ public:
 
 public:
   auto getShared() -> std::shared_ptr<ProcAcct> { return shared_from_this(); }
-  void enableEvents();
-
+  void setEventSource(bool enabled = true);
   bool requestTaskAcct(int pid);
 
 private:

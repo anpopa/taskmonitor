@@ -103,11 +103,12 @@ if(CMAKE_BUILD_TYPE STREQUAL Coverage)
         "*/bswinfra/*"
         "*/build/*"
         "*/tests/*"
+        "*/source/Main.cpp"
         )
     set(COVERAGE_BASE_DIR ${CMAKE_SOURCE_DIR}/source)
     set(COVERAGE_BRANCH_COVERAGE ON)
-    set(COVERAGE_THRESHOLD_LINE 90)
-    set(COVERAGE_THRESHOLD_FUNCTION 90)
+    set(COVERAGE_THRESHOLD_LINE 80)
+    set(COVERAGE_THRESHOLD_FUNCTION 80)
 
     include(CoverageTarget)
 endif()
@@ -169,7 +170,6 @@ include_directories(
 add_executable(taskmonitor
     source/Options.cpp
     source/Helpers.cpp
-    source/Dispatcher.cpp
     source/ProcAcct.cpp
     source/ProcEvent.cpp
     source/Application.cpp

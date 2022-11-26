@@ -30,7 +30,7 @@ UDSServer::UDSServer(const std::shared_ptr<Options> options)
 : Pollable("UDSServer")
 , m_options(options)
 {
-  if ((m_sockFd = socket(AF_UNIX, SOCK_STREAM, 0)) < 0) {
+  if ((m_sockFd = socket(AF_UNIX, SOCK_STREAM | SOCK_NONBLOCK, 0)) < 0) {
     throw std::runtime_error("Fail to create UDSServer socket");
   }
 
@@ -39,6 +39,9 @@ UDSServer::UDSServer(const std::shared_ptr<Options> options)
         int clientFd = accept(m_sockFd, (struct sockaddr *) nullptr, nullptr);
 
         if (clientFd < 0) {
+          if (errno == EWOULDBLOCK || (EWOULDBLOCK != EAGAIN && errno == EAGAIN)) {
+            return true;
+          }
           logWarn() << "Fail to accept on UDSServer socket";
           return false;
         }
@@ -61,7 +64,7 @@ UDSServer::UDSServer(const std::shared_ptr<Options> options)
         logInfo() << "New UDSCollector with FD: " << clientFd << " ID: " << descriptor.id();
         std::shared_ptr<UDSCollector> collector = std::make_shared<UDSCollector>(clientFd);
         collector->getDescriptor().CopyFrom(descriptor);
-        collector->enableEvents();
+        collector->setEventSource();
 
         return true;
       },
@@ -73,9 +76,13 @@ UDSServer::UDSServer(const std::shared_ptr<Options> options)
   setPrepare([]() { return false; });
 }
 
-void UDSServer::enableEvents()
+void UDSServer::setEventSource(bool enabled)
 {
-  App()->addEventSource(getShared());
+  if (enabled) {
+    App()->addEventSource(getShared());
+  } else {
+    App()->remEventSource(getShared());
+  }
 }
 
 UDSServer::~UDSServer()
@@ -88,7 +95,7 @@ void UDSServer::start()
   fs::path sockPath(m_options->getFor(Options::Key::UDSServerSocketPath));
 
   // Enable event source
-  enableEvents();
+  setEventSource(true);
 
   m_addr.sun_family = AF_UNIX;
   strncpy(m_addr.sun_path, sockPath.c_str(), sizeof(m_addr.sun_path) - 1);
@@ -112,7 +119,7 @@ void UDSServer::start()
                  << ". Error: " << strerror(errno);
       throw std::runtime_error("UDSServer server listen failed");
     }
-    logInfo() << "Control server listening on " << sockPath.string();
+    logInfo() << "UDSServer listening on " << sockPath.string();
   } else {
     logError() << "UDSServer bind failed on " << sockPath.string()
                << ". Error: " << strerror(errno);

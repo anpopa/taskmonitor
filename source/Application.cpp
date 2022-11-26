@@ -69,6 +69,7 @@ Application::Application(const std::string &name,
 
   if (m_options->getFor(Options::Key::EnableTCPServer) == tkmDefaults.valFor(Defaults::Val::True)) {
     m_netServer = std::make_shared<TCPServer>(m_options);
+    m_netServer->setEventSource();
     if (isProfMode(m_options)) {
       try {
         m_netServer->bindAndListen();
@@ -80,6 +81,7 @@ Application::Application(const std::string &name,
 
   if (m_options->getFor(Options::Key::EnableUDSServer) == tkmDefaults.valFor(Defaults::Val::True)) {
     m_udsServer = std::make_shared<UDSServer>(m_options);
+    m_udsServer->setEventSource();
     try {
       m_udsServer->start();
     } catch (std::exception &e) {
@@ -92,19 +94,19 @@ Application::Application(const std::string &name,
       tkmDefaults.valFor(Defaults::Val::True)) {
     if (isProfMode(m_options)) {
       m_startupData = std::make_shared<StartupData>(m_options);
-      m_startupData->enableEvents();
+      m_startupData->setEventSource();
     }
   }
 #endif
 
   // Create and initialize NetLink modules
   m_procEvent = std::make_shared<ProcEvent>(m_options);
-  m_procEvent->enableEvents();
+  m_procEvent->setEventSource();
 
   if (m_options->getFor(Options::Key::EnableProcAcct) == tkmDefaults.valFor(Defaults::Val::True)) {
     if (isProfMode(m_options)) {
       m_procAcct = std::make_shared<ProcAcct>(m_options);
-      m_procAcct->enableEvents();
+      m_procAcct->setEventSource();
     }
   }
 
@@ -112,14 +114,14 @@ Application::Application(const std::string &name,
   m_procRegistry = std::make_shared<ProcRegistry>(m_options);
   m_procRegistry->setUpdateLane(IDataSource::UpdateLane::Any);
   m_procRegistry->setUpdateInterval(m_paceLaneInterval);
-  m_procRegistry->enableEvents();
+  m_procRegistry->setEventSource();
   m_dataSources.append(m_procRegistry);
 
   if (fs::exists("/proc/stat")) {
     m_sysProcStat = std::make_shared<SysProcStat>(m_options);
     m_sysProcStat->setUpdateLane(IDataSource::UpdateLane::Fast);
     m_sysProcStat->setUpdateInterval(m_fastLaneInterval);
-    m_sysProcStat->enableEvents();
+    m_sysProcStat->setEventSource();
     m_dataSources.append(m_sysProcStat);
   }
 
@@ -127,7 +129,7 @@ Application::Application(const std::string &name,
     m_sysProcMemInfo = std::make_shared<SysProcMemInfo>(m_options);
     m_sysProcMemInfo->setUpdateLane(IDataSource::UpdateLane::Fast);
     m_sysProcMemInfo->setUpdateInterval(m_fastLaneInterval);
-    m_sysProcMemInfo->enableEvents();
+    m_sysProcMemInfo->setEventSource();
     m_dataSources.append(m_sysProcMemInfo);
   }
 
@@ -135,7 +137,7 @@ Application::Application(const std::string &name,
     m_sysProcPressure = std::make_shared<SysProcPressure>(m_options);
     m_sysProcPressure->setUpdateLane(IDataSource::UpdateLane::Pace);
     m_sysProcPressure->setUpdateInterval(m_paceLaneInterval);
-    m_sysProcPressure->enableEvents();
+    m_sysProcPressure->setEventSource();
     m_dataSources.append(m_sysProcPressure);
   }
 
@@ -143,7 +145,7 @@ Application::Application(const std::string &name,
     m_sysProcDiskStats = std::make_shared<SysProcDiskStats>(m_options);
     m_sysProcDiskStats->setUpdateLane(IDataSource::UpdateLane::Pace);
     m_sysProcDiskStats->setUpdateInterval(m_paceLaneInterval);
-    m_sysProcDiskStats->enableEvents();
+    m_sysProcDiskStats->setEventSource();
     m_dataSources.append(m_sysProcDiskStats);
   }
 
@@ -151,7 +153,7 @@ Application::Application(const std::string &name,
     m_sysProcBuddyInfo = std::make_shared<SysProcBuddyInfo>(m_options);
     m_sysProcBuddyInfo->setUpdateLane(IDataSource::UpdateLane::Slow);
     m_sysProcBuddyInfo->setUpdateInterval(m_slowLaneInterval);
-    m_sysProcBuddyInfo->enableEvents();
+    m_sysProcBuddyInfo->setEventSource();
     m_dataSources.append(m_sysProcBuddyInfo);
   }
 
@@ -159,16 +161,12 @@ Application::Application(const std::string &name,
     m_sysProcWireless = std::make_shared<SysProcWireless>(m_options);
     m_sysProcWireless->setUpdateLane(IDataSource::UpdateLane::Slow);
     m_sysProcWireless->setUpdateInterval(m_slowLaneInterval);
-    m_sysProcWireless->enableEvents();
+    m_sysProcWireless->setEventSource();
     m_dataSources.append(m_sysProcWireless);
   }
 
   // Commit our final data source list
   m_dataSources.commit();
-
-  // Create and init dispatcher module
-  m_dispatcher = std::make_unique<Dispatcher>(m_options);
-  m_dispatcher->enableEvents();
 
   // Create and start lanes timers
   enableUpdateLanes();

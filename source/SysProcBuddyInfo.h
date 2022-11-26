@@ -68,7 +68,7 @@ public:
   auto getShared() -> std::shared_ptr<SysProcBuddyInfo> { return shared_from_this(); }
   auto getBuddyInfoList() -> bswi::util::SafeList<std::shared_ptr<BuddyInfo>> & { return m_nodes; }
   auto pushRequest(SysProcBuddyInfo::Request &request) -> int;
-  void enableEvents();
+  void setEventSource(bool enabled = true);
   bool update(void) final;
 
 private:

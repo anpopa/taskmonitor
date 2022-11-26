@@ -167,7 +167,7 @@ public:
   auto getCPUStat(const std::string &name) -> const std::shared_ptr<CPUStat>;
   auto getCPUStatList() -> bswi::util::SafeList<std::shared_ptr<CPUStat>> & { return m_cpus; }
   auto pushRequest(SysProcStat::Request &request) -> int;
-  void enableEvents();
+  void setEventSource(bool enabled = true);
   bool update(void) final;
 
 private:

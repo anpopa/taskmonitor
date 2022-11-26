@@ -17,6 +17,7 @@
 #include "ProcEntry.h"
 #include "ProcEvent.h"
 #include "ProcRegistry.h"
+#include "StartupData.h"
 #include "SysProcBuddyInfo.h"
 #include "SysProcDiskStats.h"
 #include "SysProcMemInfo.h"
@@ -25,13 +26,10 @@
 #include "SysProcWireless.h"
 #include "TCPServer.h"
 #include "UDSServer.h"
-#ifdef WITH_STARTUP_DATA
-#include "StartupData.h"
-#endif
 
-#include "../bswinfra/source/IApplication.h"
-#include "../bswinfra/source/SafeList.h"
-#include "../bswinfra/source/Timer.h"
+#include "../../bswinfra/source/IApplication.h"
+#include "../../bswinfra/source/SafeList.h"
+#include "../../bswinfra/source/Timer.h"
 
 using namespace bswi::event;
 
@@ -69,32 +67,12 @@ public:
   auto getOptions(void) -> const std::shared_ptr<Options> { return m_options; }
   auto getTCPServer(void) -> const std::shared_ptr<TCPServer> { return m_netServer; }
   auto getUDSServer(void) -> const std::shared_ptr<UDSServer> { return m_udsServer; }
-#ifdef WITH_STARTUP_DATA
-  auto getStartupData(void) -> const std::shared_ptr<StartupData>
-  {
-    return m_startupData;
-  }
-#endif
-  auto getProcRegistry(void) -> const std::shared_ptr<ProcRegistry>
-  {
-    return m_procRegistry;
-  }
-  auto getProcAcct(void) -> const std::shared_ptr<ProcAcct>
-  {
-    return m_procAcct;
-  }
-  auto getProcEvent(void) -> const std::shared_ptr<ProcEvent>
-  {
-    return m_procEvent;
-  }
-  auto getSysProcStat(void) -> const std::shared_ptr<SysProcStat>
-  {
-    return m_sysProcStat;
-  }
-  auto getSysProcMemInfo(void) -> const std::shared_ptr<SysProcMemInfo>
-  {
-    return m_sysProcMemInfo;
-  }
+  auto getStartupData(void) -> const std::shared_ptr<StartupData> { return m_startupData; }
+  auto getProcRegistry(void) -> const std::shared_ptr<ProcRegistry> { return m_procRegistry; }
+  auto getProcAcct(void) -> const std::shared_ptr<ProcAcct> { return m_procAcct; }
+  auto getProcEvent(void) -> const std::shared_ptr<ProcEvent> { return m_procEvent; }
+  auto getSysProcStat(void) -> const std::shared_ptr<SysProcStat> { return m_sysProcStat; }
+  auto getSysProcMemInfo(void) -> const std::shared_ptr<SysProcMemInfo> { return m_sysProcMemInfo; }
   auto getSysProcWireless(void) -> const std::shared_ptr<SysProcWireless>
   {
     return m_sysProcWireless;
@@ -111,56 +89,17 @@ public:
   {
     return m_sysProcBuddyInfo;
   }
-  bool hasConfigFile(void)
-  {
-    return m_options->hasConfigFile();
-  }
-  auto getConfigFile(void) -> const std::shared_ptr<bswi::kf::KeyFile>
-  {
-    return m_options->getConfigFile();
-  }
-
-  void incProcAcctCollectorCounter(void)
-  {
-    m_procAcctCollectorCounter++;
-  }
-  void decProcAcctCollectorCounter(void)
-  {
-    m_procAcctCollectorCounter--;
-  }
-  auto getProcAcctCollectorCounter(void) -> unsigned short
-  {
-    return m_procAcctCollectorCounter;
-  }
-
-  auto getFastLaneInterval(void) -> uint64_t
-  {
-    return m_fastLaneInterval;
-  }
-  auto getPaceLaneInterval(void) -> uint64_t
-  {
-    return m_paceLaneInterval;
-  }
-  auto getSlowLaneInterval(void) -> uint64_t
-  {
-    return m_slowLaneInterval;
-  }
+  auto getProcAcctCollectorCounter(void) -> unsigned short { return m_procAcctCollectorCounter; }
 
 public:
   Application(Application const &) = delete;
   void operator=(Application const &) = delete;
 
-private:
-  void startWatchdog(void);
-  void enableUpdateLanes(void);
-
-private:
+public:
   std::shared_ptr<Options> m_options = nullptr;
   std::shared_ptr<TCPServer> m_netServer = nullptr;
   std::shared_ptr<UDSServer> m_udsServer = nullptr;
-#ifdef WITH_STARTUP_DATA
   std::shared_ptr<StartupData> m_startupData = nullptr;
-#endif
   std::shared_ptr<ProcAcct> m_procAcct = nullptr;
   std::shared_ptr<ProcEvent> m_procEvent = nullptr;
   std::shared_ptr<ProcRegistry> m_procRegistry = nullptr;
@@ -171,15 +110,6 @@ private:
   std::shared_ptr<SysProcBuddyInfo> m_sysProcBuddyInfo = nullptr;
   std::shared_ptr<SysProcWireless> m_sysProcWireless = nullptr;
   std::atomic<unsigned short> m_procAcctCollectorCounter = 0;
-
-private:
-  bswi::util::SafeList<std::shared_ptr<IDataSource>> m_dataSources{"DataSourceList"};
-  std::shared_ptr<Timer> m_fastLaneTimer = nullptr;
-  std::shared_ptr<Timer> m_paceLaneTimer = nullptr;
-  std::shared_ptr<Timer> m_slowLaneTimer = nullptr;
-  uint64_t m_fastLaneInterval = 10000000;
-  uint64_t m_paceLaneInterval = 30000000;
-  uint64_t m_slowLaneInterval = 60000000;
 
 private:
   static Application *appInstance;

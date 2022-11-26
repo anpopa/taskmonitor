@@ -51,12 +51,13 @@ public:
 
 public:
   auto getShared() -> std::shared_ptr<ProcRegistry> { return shared_from_this(); }
+  void setEventSource(bool enabled = true);
   void initFromProc(void);
 
   void addProcEntry(int pid);
   void updProcEntry(int pid);
   void remProcEntry(int pid, bool sync = false);
-  void remProcEntry(std::string &name, bool sync = false);
+  void remProcEntry(const std::string &name, bool sync = false);
   auto getProcEntry(int pid) -> const std::shared_ptr<ProcEntry>;
   auto getProcEntry(const std::string &name) -> const std::shared_ptr<ProcEntry>;
   auto getProcList(void) -> bswi::util::SafeList<std::shared_ptr<ProcEntry>> &
@@ -71,7 +72,6 @@ public:
   auto pushRequest(ProcRegistry::Request &request) -> int;
   bool update(UpdateLane lane) final;
   bool update(void) final;
-  void enableEvents();
 
 private:
   bool requestHandler(const Request &request);

@@ -31,7 +31,7 @@ public:
   ~UDSServer();
 
   auto getShared(void) -> std::shared_ptr<UDSServer> { return shared_from_this(); }
-  void enableEvents(void);
+  void setEventSource(bool enabled = true);
   void start(void);
   void stop(void);
 

@@ -64,7 +64,7 @@ public:
     return m_nodes;
   }
   auto pushRequest(SysProcWireless::Request &request) -> int;
-  void enableEvents();
+  void setEventSource(bool enabled = true);
   bool update(void) final;
 
 private:

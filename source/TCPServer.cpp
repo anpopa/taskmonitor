@@ -25,7 +25,7 @@ TCPServer::TCPServer(const std::shared_ptr<Options> options)
 : Pollable("TCPServer")
 , m_options(options)
 {
-  if ((m_sockFd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
+  if ((m_sockFd = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, 0)) < 0) {
     throw std::runtime_error("Fail to create TCPServer socket");
   }
 
@@ -41,6 +41,9 @@ TCPServer::TCPServer(const std::shared_ptr<Options> options)
         int collectorFd = accept(m_sockFd, (struct sockaddr *) nullptr, nullptr);
 
         if (collectorFd < 0) {
+          if (errno == EWOULDBLOCK || (EWOULDBLOCK != EAGAIN && errno == EAGAIN)) {
+            return true;
+          }
           logWarn() << "Fail to accept on TCPServer socket";
           return false;
         }
@@ -61,18 +64,25 @@ TCPServer::TCPServer(const std::shared_ptr<Options> options)
         logInfo() << "New Collector with FD: " << collectorFd;
         std::shared_ptr<TCPCollector> collector = std::make_shared<TCPCollector>(collectorFd);
         collector->getDescriptor().CopyFrom(descriptor);
-        collector->enableEvents();
+        collector->setEventSource();
 
         return true;
       },
       m_sockFd,
       bswi::event::IPollable::Events::Level,
       bswi::event::IEventSource::Priority::Normal);
+
+  // We are ready for events only after start
+  setPrepare([]() { return false; });
 }
 
-void TCPServer::enableEvents()
+void TCPServer::setEventSource(bool enabled)
 {
-  App()->addEventSource(getShared());
+  if (enabled) {
+    App()->addEventSource(getShared());
+  } else {
+    App()->remEventSource(getShared());
+  }
 }
 
 TCPServer::~TCPServer()
@@ -88,9 +98,6 @@ void TCPServer::bindAndListen()
     logWarn() << "TCPServer already listening";
     return;
   }
-
-  // Enable event source
-  enableEvents();
 
   m_addr.sin_family = AF_INET;
   m_addr.sin_addr.s_addr = INADDR_ANY;
@@ -110,7 +117,8 @@ void TCPServer::bindAndListen()
   m_addr.sin_port = htons(static_cast<uint16_t>(port));
 
   if (bind(m_sockFd, (struct sockaddr *) &m_addr, sizeof(struct sockaddr_in)) != -1) {
-    if (listen(m_sockFd, 100) == -1) {
+    setPrepare([]() { return true; });
+    if (listen(m_sockFd, 10) == -1) {
       logError() << "TCPServer listening failed on port: " << port
                  << ". Error: " << strerror(errno);
       throw std::runtime_error("TCPServer listen failed");
@@ -128,6 +136,7 @@ void TCPServer::invalidate()
 {
   if (m_sockFd > 0) {
     ::close(m_sockFd);
+    m_sockFd = -1;
   }
 }
 

@@ -35,9 +35,9 @@ public:
   void operator=(TCPServer const &) = delete;
 
   auto getShared() -> std::shared_ptr<TCPServer> { return shared_from_this(); }
+  void setEventSource(bool enabled = true);
   void bindAndListen();
   void invalidate();
-  void enableEvents();
 
 private:
   std::shared_ptr<Options> m_options = nullptr;

@@ -47,9 +47,13 @@ auto SysProcStat::pushRequest(Request &request) -> int
   return m_queue->push(request);
 }
 
-void SysProcStat::enableEvents()
+void SysProcStat::setEventSource(bool enabled)
 {
-  App()->addEventSource(m_queue);
+  if (enabled) {
+    App()->addEventSource(m_queue);
+  } else {
+    App()->remEventSource(m_queue);
+  }
 }
 
 bool SysProcStat::update(void)
@@ -72,7 +76,7 @@ auto SysProcStat::getCPUStat(const std::string &name) -> const std::shared_ptr<C
 {
   std::shared_ptr<CPUStat> cpuStat = nullptr;
 
-  m_cpus.foreach ([this, &name, &cpuStat](const std::shared_ptr<CPUStat> &entry) {
+  m_cpus.foreach ([&name, &cpuStat](const std::shared_ptr<CPUStat> &entry) {
     if (entry->getName() == name) {
       cpuStat = entry;
     }
