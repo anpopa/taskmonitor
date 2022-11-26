@@ -119,9 +119,13 @@ auto SysProcPressure::pushRequest(Request &request) -> int
   return m_queue->push(request);
 }
 
-void SysProcPressure::enableEvents()
+void SysProcPressure::setEventSource(bool enabled)
 {
-  App()->addEventSource(m_queue);
+  if (enabled) {
+    App()->addEventSource(m_queue);
+  } else {
+    App()->remEventSource(m_queue);
+  }
 }
 
 bool SysProcPressure::update()

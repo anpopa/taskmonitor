@@ -26,7 +26,7 @@ public:
   ~TCPCollector();
 
   auto getShared() -> std::shared_ptr<TCPCollector> { return shared_from_this(); }
-  void enableEvents();
+  void setEventSource(bool enabled = true);
 
 public:
   TCPCollector(TCPCollector const &) = delete;

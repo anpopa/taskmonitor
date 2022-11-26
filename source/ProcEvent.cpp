@@ -74,17 +74,6 @@ ProcEvent::ProcEvent(const std::shared_ptr<Options> options)
           return false;
         }
 
-        // Fill common data
-        tkm::msg::monitor::Data data;
-        tkm::msg::monitor::ProcEvent procEvent;
-        data.set_what(tkm::msg::monitor::Data_What_ProcEvent);
-
-        struct timespec currentTime;
-        clock_gettime(CLOCK_REALTIME, &currentTime);
-        data.set_system_time_sec(static_cast<uint64_t>(currentTime.tv_sec));
-        clock_gettime(CLOCK_MONOTONIC, &currentTime);
-        data.set_monotonic_time_sec(static_cast<uint64_t>(currentTime.tv_sec));
-
         switch (nlcn_msg.proc_ev.what) {
         case proc_event::what::PROC_EVENT_NONE:
           logDebug() << "ProcEvent Set mcast listen OK";
@@ -155,7 +144,7 @@ ProcEvent::ProcEvent(const std::shared_ptr<Options> options)
 
   // If the event is removed we stop the main application
   setFinalize([]() {
-    logInfo() << "Server closed connection. Terminate";
+    logInfo() << "ProcEvent kernel closed connection. Terminate";
     App()->stop();
   });
 
@@ -176,16 +165,24 @@ auto ProcEvent::pushRequest(ProcEvent::Request &request) -> int
   return m_queue->push(request);
 }
 
-void ProcEvent::enableEvents()
+void ProcEvent::setEventSource(bool enabled)
 {
-  // Main pollable events
-  App()->addEventSource(getShared());
+  if (enabled) {
+    // Main pollable events
+    App()->addEventSource(getShared());
 
-  // Request queue events
-  App()->addEventSource(m_queue);
+    // Request queue events
+    App()->addEventSource(m_queue);
 
-  // Start monitoring
-  startMonitoring();
+    // Start monitoring
+    startMonitoring();
+  } else {
+    // Request queue events
+    App()->remEventSource(m_queue);
+
+    // Main pollable events
+    App()->remEventSource(getShared());
+  }
 }
 
 auto ProcEvent::requestHandler(const Request &request) -> bool

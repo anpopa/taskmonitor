@@ -13,7 +13,6 @@
 
 #include "Application.h"
 #include "Defaults.h"
-#include "Dispatcher.h"
 #include "Helpers.h"
 #include "Logger.h"
 #include "TCPCollector.h"
@@ -78,6 +77,9 @@ TCPCollector::TCPCollector(int fd)
           case tkm::msg::collector::Request_Type_GetProcInfo:
             status = doGetProcInfo(getShared());
             break;
+          case tkm::msg::collector::Request_Type_GetContextInfo:
+            status = doGetContextInfo(getShared());
+            break;
           case tkm::msg::collector::Request_Type_GetProcEventStats:
             status = doGetProcEventStats(getShared());
             break;
@@ -99,9 +101,6 @@ TCPCollector::TCPCollector(int fd)
           case tkm::msg::collector::Request_Type_GetSysProcWireless:
             status = doGetSysProcWireless(getShared());
             break;
-          case tkm::msg::collector::Request_Type_GetContextInfo:
-            status = doGetContextInfo(getShared());
-            break;
           default:
             logDebug() << "Unknown type " << collectorMessage.type();
             status = false;
@@ -122,9 +121,13 @@ TCPCollector::TCPCollector(int fd)
   App()->incProcAcctCollectorCounter();
 }
 
-void TCPCollector::enableEvents()
+void TCPCollector::setEventSource(bool enabled)
 {
-  App()->addEventSource(getShared());
+  if (enabled) {
+    App()->addEventSource(getShared());
+  } else {
+    App()->remEventSource(getShared());
+  }
 }
 
 TCPCollector::~TCPCollector()
@@ -206,90 +209,99 @@ static bool doCreateSession(const std::shared_ptr<TCPCollector> collector)
 
 static bool doGetStartupData(const std::shared_ptr<TCPCollector> collector)
 {
-  Dispatcher::Request req = {.action = Dispatcher::Action::GetStartupData,
-                             .collector = collector,
-                             .args = std::map<std::string, std::string>()};
-  return App()->getDispatcher()->pushRequest(req);
+  if (App()->getStartupData() != nullptr) {
+    StartupData::Request regrq = {.action = StartupData::Action::CollectAndSend,
+                                  .collector = collector};
+    return App()->getStartupData()->pushRequest(regrq);
+  }
+  return true;
 }
 
 static bool doGetProcAcct(const std::shared_ptr<TCPCollector> collector)
 {
-  Dispatcher::Request req = {.action = Dispatcher::Action::GetProcAcct,
-                             .collector = collector,
-                             .args = std::map<std::string, std::string>()};
-  return App()->getDispatcher()->pushRequest(req);
+  ProcRegistry::Request rq = {.action = ProcRegistry::Action::CollectAndSendProcAcct,
+                              .collector = collector};
+  return App()->getProcRegistry()->pushRequest(rq);
 }
 
 static bool doGetProcInfo(const std::shared_ptr<TCPCollector> collector)
 {
-  Dispatcher::Request req = {.action = Dispatcher::Action::GetProcInfo,
-                             .collector = collector,
-                             .args = std::map<std::string, std::string>()};
-  return App()->getDispatcher()->pushRequest(req);
-}
-
-static bool doGetProcEventStats(const std::shared_ptr<TCPCollector> collector)
-{
-  Dispatcher::Request req = {.action = Dispatcher::Action::GetProcEventStats,
-                             .collector = collector,
-                             .args = std::map<std::string, std::string>()};
-  return App()->getDispatcher()->pushRequest(req);
-}
-
-static bool doGetSysProcMemInfo(const std::shared_ptr<TCPCollector> collector)
-{
-  Dispatcher::Request req = {.action = Dispatcher::Action::GetSysProcMemInfo,
-                             .collector = collector,
-                             .args = std::map<std::string, std::string>()};
-  return App()->getDispatcher()->pushRequest(req);
-}
-
-static bool doGetSysProcDiskStats(const std::shared_ptr<TCPCollector> collector)
-{
-  Dispatcher::Request req = {.action = Dispatcher::Action::GetSysProcDiskStats,
-                             .collector = collector,
-                             .args = std::map<std::string, std::string>()};
-  return App()->getDispatcher()->pushRequest(req);
-}
-
-static bool doGetSysProcStat(const std::shared_ptr<TCPCollector> collector)
-{
-  Dispatcher::Request req = {.action = Dispatcher::Action::GetSysProcStat,
-                             .collector = collector,
-                             .args = std::map<std::string, std::string>()};
-  return App()->getDispatcher()->pushRequest(req);
-}
-
-static bool doGetSysProcPressure(const std::shared_ptr<TCPCollector> collector)
-{
-  Dispatcher::Request req = {.action = Dispatcher::Action::GetSysProcPressure,
-                             .collector = collector,
-                             .args = std::map<std::string, std::string>()};
-  return App()->getDispatcher()->pushRequest(req);
-}
-
-static bool doGetSysProcBuddyInfo(const std::shared_ptr<TCPCollector> collector)
-{
-  Dispatcher::Request req = {.action = Dispatcher::Action::GetSysProcBuddyInfo,
-                             .collector = collector,
-                             .args = std::map<std::string, std::string>()};
-  return App()->getDispatcher()->pushRequest(req);
+  ProcRegistry::Request rq = {.action = ProcRegistry::Action::CollectAndSendProcInfo,
+                              .collector = collector};
+  return App()->getProcRegistry()->pushRequest(rq);
 }
 
 static bool doGetSysProcWireless(const std::shared_ptr<TCPCollector> collector)
 {
-  Dispatcher::Request req = {.action = Dispatcher::Action::GetSysProcWireless,
-                             .collector = collector,
-                             .args = std::map<std::string, std::string>()};
-  return App()->getDispatcher()->pushRequest(req);
+  if (App()->getSysProcWireless() != nullptr) {
+    SysProcWireless::Request rq = {.action = SysProcWireless::Action::CollectAndSend,
+                                   .collector = collector};
+    return App()->getSysProcWireless()->pushRequest(rq);
+  }
+  return true;
+}
+
+static bool doGetProcEventStats(const std::shared_ptr<TCPCollector> collector)
+{
+  ProcEvent::Request rq = {.action = ProcEvent::Action::CollectAndSend, .collector = collector};
+  return App()->getProcEvent()->pushRequest(rq);
+}
+
+static bool doGetSysProcMemInfo(const std::shared_ptr<TCPCollector> collector)
+{
+  if (App()->getSysProcMemInfo() != nullptr) {
+    SysProcMemInfo::Request rq = {.action = SysProcMemInfo::Action::CollectAndSend,
+                                  .collector = collector};
+    return App()->getSysProcMemInfo()->pushRequest(rq);
+  }
+  return true;
+}
+
+static bool doGetSysProcDiskStats(const std::shared_ptr<TCPCollector> collector)
+{
+  if (App()->getSysProcDiskStats() != nullptr) {
+    SysProcDiskStats::Request rq = {.action = SysProcDiskStats::Action::CollectAndSend,
+                                    .collector = collector};
+    return App()->getSysProcDiskStats()->pushRequest(rq);
+  }
+  return true;
+}
+
+static bool doGetSysProcStat(const std::shared_ptr<TCPCollector> collector)
+{
+  if (App()->getSysProcStat() != nullptr) {
+    SysProcStat::Request rq = {.action = SysProcStat::Action::CollectAndSend,
+                               .collector = collector};
+    return App()->getSysProcStat()->pushRequest(rq);
+  }
+  return true;
+}
+
+static bool doGetSysProcPressure(const std::shared_ptr<TCPCollector> collector)
+{
+  if (App()->getSysProcPressure() != nullptr) {
+    SysProcPressure::Request rq = {.action = SysProcPressure::Action::CollectAndSend,
+                                   .collector = collector};
+    return App()->getSysProcPressure()->pushRequest(rq);
+  }
+  return true;
+}
+
+static bool doGetSysProcBuddyInfo(const std::shared_ptr<TCPCollector> collector)
+{
+  if (App()->getSysProcBuddyInfo() != nullptr) {
+    SysProcBuddyInfo::Request rq = {.action = SysProcBuddyInfo::Action::CollectAndSend,
+                                    .collector = collector};
+    return App()->getSysProcBuddyInfo()->pushRequest(rq);
+  }
+  return true;
 }
 
 static bool doGetContextInfo(const std::shared_ptr<TCPCollector> collector)
 {
-  Dispatcher::Request req = {.action = Dispatcher::Action::GetContextInfo,
-                             .collector = collector,
-                             .args = std::map<std::string, std::string>()};
-  return App()->getDispatcher()->pushRequest(req);
+  ProcRegistry::Request rq = {.action = ProcRegistry::Action::CollectAndSendContextInfo,
+                              .collector = collector};
+  return App()->getProcRegistry()->pushRequest(rq);
 }
 
 } // namespace tkm::monitor

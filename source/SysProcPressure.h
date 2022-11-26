@@ -71,7 +71,7 @@ public:
   {
     return m_entries;
   }
-  void enableEvents();
+  void setEventSource(bool enabled = true);
   bool update(void) final;
 
 private:

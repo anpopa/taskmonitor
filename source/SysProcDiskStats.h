@@ -64,7 +64,7 @@ public:
   auto getShared() -> std::shared_ptr<SysProcDiskStats> { return shared_from_this(); }
   auto getDiskStatList() -> bswi::util::SafeList<std::shared_ptr<DiskStat>> & { return m_disks; }
   auto pushRequest(SysProcDiskStats::Request &request) -> int;
-  void enableEvents();
+  void setEventSource(bool enabled = true);
   bool update(void) final;
 
 private:

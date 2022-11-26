@@ -44,12 +44,15 @@ auto ProcRegistry::pushRequest(Request &request) -> int
   return m_queue->push(request);
 }
 
-void ProcRegistry::enableEvents()
+void ProcRegistry::setEventSource(bool enabled)
 {
-  App()->addEventSource(m_queue);
-
-  if (m_options->getFor(Options::Key::ReadProcAtInit) == "true") {
-    initFromProc();
+  if (enabled) {
+    App()->addEventSource(m_queue);
+    if (m_options->getFor(Options::Key::ReadProcAtInit) == "true") {
+      initFromProc();
+    }
+  } else {
+    App()->remEventSource(m_queue);
   }
 }
 
@@ -202,7 +205,7 @@ void ProcRegistry::remProcEntry(int pid, bool sync)
   }
 }
 
-void ProcRegistry::remProcEntry(std::string &name, bool sync)
+void ProcRegistry::remProcEntry(const std::string &name, bool sync)
 {
   m_procList.foreach ([this, &name](const std::shared_ptr<ProcEntry> &entry) {
     if (entry->getName() == name) {

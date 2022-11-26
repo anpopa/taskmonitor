@@ -44,7 +44,7 @@ public:
   auto getShared() -> std::shared_ptr<SysProcMemInfo> { return shared_from_this(); }
   auto getProcMemInfo() -> tkm::msg::monitor::SysProcMemInfo & { return m_memInfo; }
   auto pushRequest(SysProcMemInfo::Request &request) -> int;
-  void enableEvents();
+  void setEventSource(bool enabled = true);
   bool update(void) final;
 
 private:

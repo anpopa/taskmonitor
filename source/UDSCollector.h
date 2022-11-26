@@ -26,7 +26,7 @@ public:
   ~UDSCollector();
 
   auto getShared() -> std::shared_ptr<UDSCollector> { return shared_from_this(); }
-  void enableEvents();
+  void setEventSource(bool enabled = true);
 
 public:
   UDSCollector(UDSCollector const &) = delete;

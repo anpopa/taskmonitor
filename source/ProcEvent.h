@@ -47,7 +47,7 @@ public:
   auto getShared(void) -> std::shared_ptr<ProcEvent> { return shared_from_this(); }
   auto getProcEventData(void) -> tkm::msg::monitor::ProcEvent & { return m_eventData; }
   auto pushRequest(ProcEvent::Request &request) -> int;
-  void enableEvents(void);
+  void setEventSource(bool enabled = true);
 
 private:
   void startMonitoring(void);

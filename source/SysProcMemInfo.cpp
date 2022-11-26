@@ -31,9 +31,13 @@ auto SysProcMemInfo::pushRequest(Request &request) -> int
   return m_queue->push(request);
 }
 
-void SysProcMemInfo::enableEvents()
+void SysProcMemInfo::setEventSource(bool enabled)
 {
-  App()->addEventSource(m_queue);
+  if (enabled) {
+    App()->addEventSource(m_queue);
+  } else {
+    App()->remEventSource(m_queue);
+  }
 }
 
 bool SysProcMemInfo::update()
@@ -107,7 +111,7 @@ static bool doUpdateStats(const std::shared_ptr<SysProcMemInfo> mgr)
       lineData = LineData::MemFree;
     } else if (line.find("MemAvailable") != std::string::npos) {
       lineData = LineData::MemAvailable;
-    } else if (line.find("MemCached") != std::string::npos) {
+    } else if (line.find("Cached") != std::string::npos) {
       lineData = LineData::MemCached;
     } else if (line.find("SwapTotal") != std::string::npos) {
       lineData = LineData::SwapTotal;
