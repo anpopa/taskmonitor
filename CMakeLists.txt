@@ -16,6 +16,8 @@ LIST(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" "${CMAKE_CURRE
 option(WITH_LXC "Build with LXC container support" N)
 option(WITH_SYSTEMD "Build with systemd watchdog and journald support" Y)
 option(WITH_STARTUP_DATA "Build with StartupData module support" Y)
+option(WITH_PROC_EVENT "Enable ProcEvent module" Y)
+option(WITH_PROC_ACCT "Enable ProcAcct module" Y)
 option(WITH_INSTALL_CONFIG "Install default taskmonitor.conf on target" Y)
 option(WITH_INSTALL_LICENSE "Install license file on target" Y)
 option(WITH_TESTS "Build test suite" N)
@@ -24,6 +26,14 @@ option(WITH_ASAN "Build with address sanitize" N)
 option(WITH_GCC_HARDEN_FLAGS "Build with GCC harden compile flags" N)
 
 # config
+if(WITH_PROC_EVENT)
+    add_compile_options("-DWITH_PROC_EVENT")
+endif()
+
+if(WITH_PROC_ACCT)
+    add_compile_options("-DWITH_PROC_ACCT")
+endif()
+
 if(WITH_STARTUP_DATA)
     add_compile_options("-DWITH_STARTUP_DATA")
 endif()
@@ -132,8 +142,10 @@ find_package(Threads REQUIRED)
 find_package(Protobuf REQUIRED)
 find_package(tkm REQUIRED)
 
-pkg_check_modules     (LIBNL libnl-3.0 REQUIRED)
-pkg_check_modules     (LIBNLGENL libnl-genl-3.0 REQUIRED)
+if(WITH_PROC_ACCT)
+    pkg_check_modules     (LIBNL libnl-3.0 REQUIRED)
+    pkg_check_modules     (LIBNLGENL libnl-genl-3.0 REQUIRED)
+endif()
 
 if(WITH_LXC)
     pkg_check_modules     (LIBLXC lxc>=3.0 REQUIRED)
@@ -151,9 +163,17 @@ if(WITH_STARTUP_DATA)
     LIST(APPEND BINARY_SRC source/StartupData.cpp)
 endif()
 
-# workarounds to get absolute paths
-find_library(LIBNL_LIBRARIES_ABS ${LIBNL_LIBRARIES})
-find_library(LIBNLGENL_LIBRARIES_ABS ${LIBNLGENL_LIBRARIES})
+if(WITH_PROC_EVENT)
+    LIST(APPEND BINARY_SRC source/ProcEvent.cpp)
+endif()
+
+if(WITH_PROC_ACCT)
+    LIST(APPEND BINARY_SRC source/ProcAcct.cpp)
+    # workarounds to get absolute paths
+    find_library(LIBNL_LIBRARIES_ABS ${LIBNL_LIBRARIES})
+    find_library(LIBNLGENL_LIBRARIES_ABS ${LIBNLGENL_LIBRARIES})
+endif()
+
 if(WITH_LXC)
     find_library(LIBLXC_LIBRARIES_ABS ${LIBLXC_LIBRARIES})
 endif()
@@ -170,8 +190,6 @@ include_directories(
 add_executable(taskmonitor
     source/Options.cpp
     source/Helpers.cpp
-    source/ProcAcct.cpp
-    source/ProcEvent.cpp
     source/Application.cpp
     source/ProcEntry.cpp
     source/ContextEntry.cpp
@@ -234,6 +252,8 @@ message (STATUS "CMAKE_BUILD_TYPE: "        ${CMAKE_BUILD_TYPE})
 message (STATUS "WITH_LXC: "                ${WITH_LXC})
 message (STATUS "WITH_SYSTEMD: "            ${WITH_SYSTEMD})
 message (STATUS "WITH_STARTUP_DATA: "       ${WITH_STARTUP_DATA})
+message (STATUS "WITH_PROC_EVENT: "         ${WITH_PROC_EVENT})
+message (STATUS "WITH_PROC_ACCT: "          ${WITH_PROC_EVENT})
 message (STATUS "WITH_INSTALL_CONFIG: "     ${WITH_INSTALL_CONFIG})
 message (STATUS "WITH_INSTALL_LICENSE: "    ${WITH_INSTALL_LICENSE})
 message (STATUS "WITH_TESTS: "              ${WITH_TESTS})

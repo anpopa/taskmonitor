@@ -28,10 +28,12 @@ public:
     RxBufferSize,
     TxBufferSize,
     MsgBufferSize,
+    EnableProcEvent,
     EnableProcAcct,
     EnableTCPServer,
     EnableUDSServer,
     EnableStartupData,
+    UpdateOnProcEvent,
     StartupDataCleanupTime,
     ProdModeFastLaneInt,
     ProdModePaceLaneInt,
@@ -67,10 +69,12 @@ public:
     m_table.insert(std::pair<Default, std::string>(Default::ProfModeIfPath, "none"));
     m_table.insert(std::pair<Default, std::string>(Default::SelfLowerPriority, "true"));
     m_table.insert(std::pair<Default, std::string>(Default::ReadProcAtInit, "true"));
+    m_table.insert(std::pair<Default, std::string>(Default::EnableProcEvent, "true"));
     m_table.insert(std::pair<Default, std::string>(Default::EnableProcAcct, "true"));
     m_table.insert(std::pair<Default, std::string>(Default::EnableTCPServer, "true"));
     m_table.insert(std::pair<Default, std::string>(Default::EnableUDSServer, "false"));
     m_table.insert(std::pair<Default, std::string>(Default::EnableStartupData, "false"));
+    m_table.insert(std::pair<Default, std::string>(Default::UpdateOnProcEvent, "true"));
     m_table.insert(std::pair<Default, std::string>(Default::StartupDataCleanupTime, "60000000"));
     m_table.insert(std::pair<Default, std::string>(Default::TCPServerAddress, "localhost"));
     m_table.insert(std::pair<Default, std::string>(Default::TCPServerPort, "3357"));

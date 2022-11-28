@@ -89,7 +89,10 @@ ProcEvent::ProcEvent(const std::shared_ptr<Options> options)
           // We only add a process entry in registry for processes
           if (nlcn_msg.proc_ev.event_data.fork.child_pid ==
               nlcn_msg.proc_ev.event_data.fork.child_tgid) {
-            App()->getProcRegistry()->addProcEntry(nlcn_msg.proc_ev.event_data.fork.child_tgid);
+            if (m_options->getFor(Options::Key::UpdateOnProcEvent) ==
+                tkmDefaults.valFor(Defaults::Val::True)) {
+              App()->getProcRegistry()->addProcEntry(nlcn_msg.proc_ev.event_data.fork.child_tgid);
+            }
           }
           break;
         }
@@ -98,7 +101,10 @@ ProcEvent::ProcEvent(const std::shared_ptr<Options> options)
                     << " process_pid=" << nlcn_msg.proc_ev.event_data.exec.process_pid
                     << " process_tgid=" << nlcn_msg.proc_ev.event_data.exec.process_tgid;
           m_eventData.set_exec_count(m_eventData.exec_count() + 1);
-          App()->getProcRegistry()->updProcEntry(nlcn_msg.proc_ev.event_data.exec.process_pid);
+          if (m_options->getFor(Options::Key::UpdateOnProcEvent) ==
+              tkmDefaults.valFor(Defaults::Val::True)) {
+            App()->getProcRegistry()->updProcEntry(nlcn_msg.proc_ev.event_data.exec.process_pid);
+          }
           break;
         }
         case proc_event::what::PROC_EVENT_UID: {
@@ -127,8 +133,11 @@ ProcEvent::ProcEvent(const std::shared_ptr<Options> options)
           m_eventData.set_exit_count(m_eventData.exit_count() + 1);
           if (nlcn_msg.proc_ev.event_data.exit.process_pid ==
               nlcn_msg.proc_ev.event_data.exit.process_tgid) {
-            App()->getProcRegistry()->remProcEntry(nlcn_msg.proc_ev.event_data.exit.process_pid,
-                                                   true);
+            if (m_options->getFor(Options::Key::UpdateOnProcEvent) ==
+                tkmDefaults.valFor(Defaults::Val::True)) {
+              App()->getProcRegistry()->remProcEntry(nlcn_msg.proc_ev.event_data.exit.process_pid,
+                                                     true);
+            }
           }
           break;
         }
@@ -143,9 +152,13 @@ ProcEvent::ProcEvent(const std::shared_ptr<Options> options)
       bswi::event::IEventSource::Priority::Normal);
 
   // If the event is removed we stop the main application
-  setFinalize([]() {
-    logInfo() << "ProcEvent kernel closed connection. Terminate";
-    App()->stop();
+  setFinalize([this]() {
+    logInfo() << "ProcEvent kernel closed connection";
+    if (m_options->getFor(Options::Key::UpdateOnProcEvent) ==
+        tkmDefaults.valFor(Defaults::Val::True)) {
+      logError() << "ProcEvent source lost. Terminate taskmonitor";
+      App()->stop();
+    }
   });
 
   m_queue = std::make_shared<AsyncQueue<ProcEvent::Request>>(

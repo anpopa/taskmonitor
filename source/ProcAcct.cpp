@@ -194,10 +194,7 @@ ProcAcct::ProcAcct(const std::shared_ptr<Options> options)
       bswi::event::IEventSource::Priority::Normal);
 
   // If the event is removed we stop the main application
-  setFinalize([]() {
-    logInfo() << "Server closed connection. Terminate";
-    App()->stop();
-  });
+  setFinalize([]() { logInfo() << "Server closed connection. Terminate"; });
 }
 
 void ProcAcct::setEventSource(bool enabled)

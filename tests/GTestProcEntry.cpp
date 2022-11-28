@@ -19,7 +19,6 @@
 #include <thread>
 #include <utility>
 
-#include "../source/ProcEntry.h"
 #include "../tests/dummy/Application.h"
 
 using namespace tkm::monitor;
@@ -46,7 +45,8 @@ protected:
 
 GTestProcEntry::GTestProcEntry()
 {
-  app = std::make_unique<Application>("TKM", "TaskMonitor Application", "assets/taskmonitor.conf");
+  app = std::make_unique<Application>(
+      "TKM", "TaskMonitor Application", "assets/taskmonitor_var0.conf");
   if (getuid() == 0) {
     m_ownThread = std::make_unique<std::thread>(appRun);
   }
@@ -67,26 +67,29 @@ void GTestProcEntry::SetUp()
   App()->m_procRegistry = std::make_shared<ProcRegistry>(App()->getOptions());
   App()->getProcRegistry()->setEventSource();
 
-  // Create ProcAcct
+#ifdef WITH_PROC_ACCT
   App()->m_procAcct = std::make_shared<ProcAcct>(App()->getOptions());
   App()->getProcAcct()->setEventSource();
+#endif
 }
 
 void GTestProcEntry::TearDown()
 {
   App()->getProcRegistry()->setEventSource(false);
+#ifdef WITH_PROC_ACCT
   App()->getProcAcct()->setEventSource(false);
+#endif
 }
 
 TEST_F(GTestProcEntry, Update)
 {
   App()->m_procAcctCollectorCounter = 1;
 
-  if (getuid() == 0) {
-    EXPECT_EQ(App()->getProcRegistry()->getProcEntry(getpid()), nullptr);
-    App()->getProcRegistry()->addProcEntry(getpid()); // Add self to proc list
-    EXPECT_NE(App()->getProcRegistry()->getProcEntry(getpid()), nullptr);
+  EXPECT_EQ(App()->getProcRegistry()->getProcEntry(getpid()), nullptr);
+  App()->getProcRegistry()->addProcEntry(getpid()); // Add self to proc list
+  EXPECT_NE(App()->getProcRegistry()->getProcEntry(getpid()), nullptr);
 
+  if (getuid() == 0) {
     const std::shared_ptr<ProcEntry> testEntry = App()->getProcRegistry()->getProcEntry(getpid());
     EXPECT_NE(testEntry, nullptr);
 
@@ -96,14 +99,18 @@ TEST_F(GTestProcEntry, Update)
     const auto accCpuTime = testEntry->getAcct().cpu().cpu_count();
     const auto infCpuTime = testEntry->getData().cpu_time();
 
+#ifdef WITH_PROC_ACCT
     EXPECT_EQ(testEntry->getAcct().ac_pid(), getpid());
     EXPECT_STRCASEEQ(testEntry->getAcct().ac_comm().c_str(), "GTestProcEntry");
+#endif
     EXPECT_STRCASEEQ(testEntry->getName().c_str(), "GTestProcEntry");
     EXPECT_STRCASEEQ(testEntry->getData().comm().c_str(), "GTestProcEntry");
     EXPECT_EQ(testEntry->getData().pid(), getpid());
 
     testEntry->update(tkmDefaults.valFor(Defaults::Val::ProcAcct));
+#ifdef WITH_PROC_ACCT
     EXPECT_GT(testEntry->getAcct().cpu().cpu_count(), accCpuTime);
+#endif
     EXPECT_EQ(testEntry->getData().cpu_time(), infCpuTime);
   }
 }

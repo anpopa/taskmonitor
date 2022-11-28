@@ -18,13 +18,25 @@ MsgBufferSize=1048576
 SelfLowerPriority=true
 ; Read existing processes when service starts and create ProcEntries
 ReadProcAtInit=true
-; Enable TASKSTAT netlink process data
+; Enable netlink process events if WITH_PROC_EVENT enabled at build time
+; If build flag not enabled this option has no effect
+EnableProcEvent=true
+; Use process events to update process list if WITH_PROC_EVENT is enabled.
+; Enabled this feature require EnableProcEvent to be true
+; If the feature is not enabled or the option is set to false the process list
+; updated by scanning procfs entries on each lane update.
+; If WITH_PROC_EVENT is disabled at build time or EnableProcEvent is false this
+; option has no effect
+UpdateOnProcEvent=true
+; Enable TASKSTAT netlink process data if WITH_PROC_ACCT is enabled
+; If build flag not enabled this option has no effect
 EnableProcAcct=true
 ; Enable TCP server module
 EnableTCPServer=true
 ; Enable UDP server module
 EnableUDSServer=false
-; Cache startup data in profiling mode
+; Cache startup data in profiling mode if built with WITH_STARTUP_DATA
+; If WITH_STARTUP_DATA is disabled at build time this option has no effect
 EnableStartupData=false
 ; LXC containers path if WITH_LXC feature is enabled
 ContainersPath=/var/lib/lxc

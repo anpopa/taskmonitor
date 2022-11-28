@@ -19,7 +19,6 @@
 #include <thread>
 #include <utility>
 
-#include "../source/ProcEvent.h"
 #include "../tests/dummy/Application.h"
 
 using namespace tkm::monitor;

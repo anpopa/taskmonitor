@@ -47,7 +47,8 @@ protected:
 
 GTestTCPInterface::GTestTCPInterface()
 {
-  app = std::make_unique<Application>("TKM", "TaskMonitor Application", "assets/taskmonitor.conf");
+  app = std::make_unique<Application>(
+      "TKM", "TaskMonitor Application", "assets/taskmonitor_var0.conf");
   m_ownThread = std::make_unique<std::thread>(appRun);
 }
 
@@ -94,17 +95,20 @@ TEST_F(GTestTCPInterface, RequestData_NoModules)
   EXPECT_EQ(m_reader->connect(), 0);
 
   if (getuid() == 0) {
+#ifdef WITH_PROC_ACCT
     App()->m_procAcct = std::make_shared<ProcAcct>(App()->getOptions());
     App()->getProcAcct()->setEventSource(true);
+#endif
 
     App()->m_procRegistry = std::make_shared<ProcRegistry>(App()->getOptions());
     App()->getProcRegistry()->setEventSource(true);
-
+#ifdef WITH_PROC_EVENT
     App()->m_procEvent = std::make_shared<ProcEvent>(App()->getOptions());
     App()->getProcEvent()->setEventSource(true);
 
     // Generate some data
     system("uname -a");
+    sleep(1);
 
     EXPECT_EQ(m_reader->getProcAcctCount(), 0);
     EXPECT_EQ(m_reader->requestData(tkm::msg::collector::Request_Type_GetProcAcct), true);
@@ -120,12 +124,13 @@ TEST_F(GTestTCPInterface, RequestData_NoModules)
     EXPECT_EQ(m_reader->requestData(tkm::msg::collector::Request_Type_GetProcEventStats), true);
     usleep(100000);
     EXPECT_EQ(m_reader->getProcEventCount(), 1);
-  }
 
-  EXPECT_EQ(m_reader->getCtxInfoCount(), 0);
-  EXPECT_EQ(m_reader->requestData(tkm::msg::collector::Request_Type_GetContextInfo), true);
-  usleep(100000);
-  EXPECT_EQ(m_reader->getCtxInfoCount(), 1);
+    EXPECT_EQ(m_reader->getCtxInfoCount(), 0);
+    EXPECT_EQ(m_reader->requestData(tkm::msg::collector::Request_Type_GetContextInfo), true);
+    usleep(100000);
+    EXPECT_EQ(m_reader->getCtxInfoCount(), 1);
+#endif
+  }
 
   EXPECT_EQ(m_reader->getSysProcStatCount(), 0);
   EXPECT_EQ(m_reader->requestData(tkm::msg::collector::Request_Type_GetSysProcStat), true);
@@ -158,9 +163,13 @@ TEST_F(GTestTCPInterface, RequestData_NoModules)
   EXPECT_EQ(m_reader->getSysProcWirelessCount(), 0);
 
   if (getuid() == 0) {
+#ifdef WITH_PROC_ACCT
     App()->getProcAcct()->setEventSource(false);
+#endif
     App()->getProcRegistry()->setEventSource(false);
+#ifdef WITH_PROC_EVENT
     App()->getProcEvent()->setEventSource(false);
+#endif
   }
 }
 
@@ -170,15 +179,17 @@ TEST_F(GTestTCPInterface, RequestData)
   sleep(1);
   EXPECT_EQ(m_reader->connect(), 0);
 
+#ifdef WITH_PROC_ACCT
   App()->m_procAcct = std::make_shared<ProcAcct>(App()->getOptions());
   App()->getProcAcct()->setEventSource(true);
+#endif
 
   App()->m_procRegistry = std::make_shared<ProcRegistry>(App()->getOptions());
   App()->getProcRegistry()->setEventSource(true);
-
+#ifdef WITH_PROC_EVENT
   App()->m_procEvent = std::make_shared<ProcEvent>(App()->getOptions());
   App()->getProcEvent()->setEventSource(true);
-
+#endif
   App()->m_sysProcStat = std::make_shared<SysProcStat>(App()->getOptions());
   App()->getSysProcStat()->setEventSource(true);
 
@@ -197,22 +208,26 @@ TEST_F(GTestTCPInterface, RequestData)
   App()->m_sysProcWireless = std::make_shared<SysProcWireless>(App()->getOptions());
   App()->getSysProcWireless()->setEventSource(true);
 
+#ifdef WITH_PROC_EVENT
   // Generate some data
   system("uname -a");
   App()->getProcRegistry()->update();
+#endif
   App()->getSysProcStat()->update();
   App()->getSysProcMemInfo()->update();
   App()->getSysProcDiskStats()->update();
   App()->getSysProcPressure()->update();
   App()->getSysProcBuddyInfo()->update();
   App()->getSysProcWireless()->update();
-  sleep(1);
+  sleep(3);
 
+#ifdef WITH_PROC_ACCT
   EXPECT_EQ(m_reader->getProcAcctCount(), 0);
   EXPECT_EQ(m_reader->requestData(tkm::msg::collector::Request_Type_GetProcAcct), true);
   usleep(100000);
   EXPECT_GE(m_reader->getProcAcctCount(), 0);
-
+#endif
+#ifdef WITH_PROC_EVENT
   EXPECT_EQ(m_reader->getProcInfoCount(), 0);
   EXPECT_EQ(m_reader->requestData(tkm::msg::collector::Request_Type_GetProcInfo), true);
   usleep(100000);
@@ -227,6 +242,7 @@ TEST_F(GTestTCPInterface, RequestData)
   EXPECT_EQ(m_reader->requestData(tkm::msg::collector::Request_Type_GetContextInfo), true);
   usleep(100000);
   EXPECT_EQ(m_reader->getCtxInfoCount(), 1);
+#endif
 
   EXPECT_EQ(m_reader->getSysProcStatCount(), 0);
   EXPECT_EQ(m_reader->requestData(tkm::msg::collector::Request_Type_GetSysProcStat), true);
@@ -258,9 +274,13 @@ TEST_F(GTestTCPInterface, RequestData)
   usleep(100000);
   EXPECT_GE(m_reader->getSysProcWirelessCount(), 0);
 
+#ifdef WITH_PROC_ACCT
   App()->getProcAcct()->setEventSource(false);
+#endif
   App()->getProcRegistry()->setEventSource(false);
+#ifdef WITH_PROC_EVENT
   App()->getProcEvent()->setEventSource(false);
+#endif
   App()->getSysProcStat()->setEventSource(false);
   App()->getSysProcMemInfo()->setEventSource(false);
   App()->getSysProcDiskStats()->setEventSource(false);

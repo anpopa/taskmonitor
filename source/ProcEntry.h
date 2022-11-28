@@ -56,7 +56,9 @@ public:
 private:
   void initInfoData(void);
   void updateInfoData(void);
+#ifdef WITH_PROC_ACCT
   bool updateProcAcct(void);
+#endif
   bool updateProcInfo(void);
 
 private:

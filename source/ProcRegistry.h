@@ -78,6 +78,7 @@ private:
   auto getProcNameForPID(int pid) -> std::string;
   bool isBlacklisted(const std::string &name);
   void createProcessEntry(int pid, const std::string &name);
+  void updateProcessList(void);
 
 private:
   bswi::util::SafeList<std::shared_ptr<ContextEntry>> m_contextList{"ProcRegistryContextList"};

@@ -23,6 +23,7 @@ ProcEntry::ProcEntry(int pid, const std::string &name)
   initInfoData();
 }
 
+#ifdef WITH_PROC_ACCT
 bool ProcEntry::updateProcAcct(void)
 {
   if (App()->getProcAcctCollectorCounter() == 0) {
@@ -41,6 +42,7 @@ bool ProcEntry::updateProcAcct(void)
 
   return true;
 }
+#endif
 
 bool ProcEntry::updateProcInfo(void)
 {
@@ -98,9 +100,16 @@ void ProcEntry::initInfoData(void)
   }
 
   m_info.set_comm(m_name);
-  m_info.set_ctx_id(tkm::getContextId(m_pid));
-  m_info.set_ctx_name(tkm::getContextName(App()->getOptions()->getFor(Options::Key::ContainersPath),
-                                          m_info.ctx_id()));
+
+  // If need to run as root for context identification
+  if (getuid() == 0) {
+    m_info.set_ctx_id(tkm::getContextId(m_pid));
+    m_info.set_ctx_name(tkm::getContextName(
+        App()->getOptions()->getFor(Options::Key::ContainersPath), m_info.ctx_id()));
+  } else {
+    m_info.set_ctx_id(0);
+    m_info.set_ctx_name("generic");
+  }
 }
 
 void ProcEntry::updateInfoData(void)
@@ -169,7 +178,11 @@ void ProcEntry::updateInfoData(void)
 bool ProcEntry::update(const std::string &sourceName)
 {
   if (tkmDefaults.valFor(Defaults::Val::ProcAcct) == sourceName) {
+#ifdef WITH_PROC_ACCT
     return updateProcAcct();
+#else
+    return false;
+#endif
   }
   return updateProcInfo();
 }
@@ -177,9 +190,11 @@ bool ProcEntry::update(const std::string &sourceName)
 bool ProcEntry::update(void)
 {
   auto status = updateProcInfo();
+#ifdef WITH_PROC_ACCT
   if (status) {
     status = updateProcAcct();
   }
+#endif
   return status;
 }
 

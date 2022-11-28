@@ -89,6 +89,22 @@ Application::Application(const std::string &name,
     }
   }
 
+#ifdef WITH_PROC_EVENT
+  if (m_options->getFor(Options::Key::EnableProcEvent) == tkmDefaults.valFor(Defaults::Val::True)) {
+    m_procEvent = std::make_shared<ProcEvent>(m_options);
+    m_procEvent->setEventSource();
+  }
+#endif
+
+#ifdef WITH_PROC_ACCT
+  if (m_options->getFor(Options::Key::EnableProcAcct) == tkmDefaults.valFor(Defaults::Val::True)) {
+    if (isProfMode(m_options)) {
+      m_procAcct = std::make_shared<ProcAcct>(m_options);
+      m_procAcct->setEventSource();
+    }
+  }
+#endif
+
 #ifdef WITH_STARTUP_DATA
   if (m_options->getFor(Options::Key::EnableStartupData) ==
       tkmDefaults.valFor(Defaults::Val::True)) {
@@ -98,17 +114,6 @@ Application::Application(const std::string &name,
     }
   }
 #endif
-
-  // Create and initialize NetLink modules
-  m_procEvent = std::make_shared<ProcEvent>(m_options);
-  m_procEvent->setEventSource();
-
-  if (m_options->getFor(Options::Key::EnableProcAcct) == tkmDefaults.valFor(Defaults::Val::True)) {
-    if (isProfMode(m_options)) {
-      m_procAcct = std::make_shared<ProcAcct>(m_options);
-      m_procAcct->setEventSource();
-    }
-  }
 
   // Create and initialize data sources
   m_procRegistry = std::make_shared<ProcRegistry>(m_options);

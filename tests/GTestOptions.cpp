@@ -71,6 +71,10 @@ TEST_F(GTestOptions, Options_Defaults)
                    tkmDefaults.getFor(Defaults::Default::SelfLowerPriority).c_str());
   EXPECT_STRCASEEQ(opts->getFor(Options::Key::ReadProcAtInit).c_str(),
                    tkmDefaults.getFor(Defaults::Default::ReadProcAtInit).c_str());
+  EXPECT_STRCASEEQ(opts->getFor(Options::Key::EnableProcEvent).c_str(),
+                   tkmDefaults.getFor(Defaults::Default::EnableProcEvent).c_str());
+  EXPECT_STRCASEEQ(opts->getFor(Options::Key::UpdateOnProcEvent).c_str(),
+                   tkmDefaults.getFor(Defaults::Default::UpdateOnProcEvent).c_str());
   EXPECT_STRCASEEQ(opts->getFor(Options::Key::EnableProcAcct).c_str(),
                    tkmDefaults.getFor(Defaults::Default::EnableProcAcct).c_str());
   EXPECT_STRCASEEQ(opts->getFor(Options::Key::EnableTCPServer).c_str(),
@@ -101,7 +105,7 @@ TEST_F(GTestOptions, Options_NotDefaults)
 {
   std::unique_ptr<Options> opts = nullptr;
 
-  opts = std::make_unique<Options>("assets/taskmonitor.conf");
+  opts = std::make_unique<Options>("assets/taskmonitor_var0.conf");
   EXPECT_EQ(opts->hasConfigFile(), true);
 
   EXPECT_STRCASEEQ(opts->getFor(Options::Key::RuntimeDirectory).c_str(), "/tmp/taskmonitor");
@@ -118,6 +122,8 @@ TEST_F(GTestOptions, Options_NotDefaults)
   EXPECT_STRCASEEQ(opts->getFor(Options::Key::ProfModeIfPath).c_str(), "/tmp/taskmonitor");
   EXPECT_STRCASEEQ(opts->getFor(Options::Key::SelfLowerPriority).c_str(), "false");
   EXPECT_STRCASEEQ(opts->getFor(Options::Key::ReadProcAtInit).c_str(), "false");
+  EXPECT_STRCASEEQ(opts->getFor(Options::Key::EnableProcEvent).c_str(), "false");
+  EXPECT_STRCASEEQ(opts->getFor(Options::Key::UpdateOnProcEvent).c_str(), "false");
   EXPECT_STRCASEEQ(opts->getFor(Options::Key::EnableProcAcct).c_str(), "false");
   EXPECT_STRCASEEQ(opts->getFor(Options::Key::EnableTCPServer).c_str(), "false");
   EXPECT_STRCASEEQ(opts->getFor(Options::Key::EnableUDSServer).c_str(), "true");

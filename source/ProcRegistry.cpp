@@ -295,8 +295,7 @@ void ProcRegistry::createProcessEntry(int pid, const std::string &name)
 
   logDebug() << "Add process monitoring for pid=" << pid << " name=" << name
              << " context=" << procEntry->getData().ctx_name();
-  m_procList.append(procEntry);
-  m_procList.commit(); // sync commit
+  m_procList.append(procEntry, true);
 
   bool found = false;
   m_contextList.foreach ([&found, &procEntry](const std::shared_ptr<ContextEntry> &ctxEntry) {
@@ -308,21 +307,37 @@ void ProcRegistry::createProcessEntry(int pid, const std::string &name)
   if (!found) {
     std::shared_ptr<ContextEntry> ctxEntry = std::make_shared<ContextEntry>(
         procEntry->getData().ctx_id(), procEntry->getData().ctx_name());
-    m_contextList.append(ctxEntry);
-    m_contextList.commit(); // sync commit
+    m_contextList.append(ctxEntry, true);
   }
 }
 
 bool ProcRegistry::update(UpdateLane lane)
 {
+#ifndef WITH_PROC_EVENT
+  updateProcessList();
+#else
+  if (App()->getProcEvent() != nullptr) {
+    if (m_options->getFor(Options::Key::UpdateOnProcEvent) !=
+        tkmDefaults.valFor(Defaults::Val::True)) {
+      updateProcessList();
+    }
+  } else {
+    updateProcessList();
+  }
+#endif
+
   // We update ProcInfo data on Pace interval and ProcAcct on Slow interval
   if ((lane != UpdateLane::Pace) && (lane != UpdateLane::Slow)) {
     return true;
   }
 
   m_procList.foreach ([&lane](const std::shared_ptr<ProcEntry> &entry) {
-    if ((lane == UpdateLane::Slow) && (App()->getProcAcct() != nullptr)) {
-      entry->update(tkmDefaults.valFor(Defaults::Val::ProcAcct));
+    if (lane == UpdateLane::Slow) {
+#ifdef WITH_PROC_ACCT
+      if (App()->getProcAcct() != nullptr) {
+        entry->update(tkmDefaults.valFor(Defaults::Val::ProcAcct));
+      }
+#endif
     } else {
       entry->update(tkmDefaults.valFor(Defaults::Val::ProcInfo));
     }
@@ -333,8 +348,35 @@ bool ProcRegistry::update(UpdateLane lane)
 
 bool ProcRegistry::update(void)
 {
+#ifndef WITH_PROC_EVENT
+  updateProcessList();
+#else
+  if (App()->getProcEvent() != nullptr) {
+    if (m_options->getFor(Options::Key::UpdateOnProcEvent) !=
+        tkmDefaults.valFor(Defaults::Val::True)) {
+      updateProcessList();
+    }
+  } else {
+    updateProcessList();
+  }
+#endif
   m_procList.foreach ([](const std::shared_ptr<ProcEntry> &entry) { entry->update(); });
   return true;
+}
+
+void ProcRegistry::updateProcessList(void)
+{
+  const std::filesystem::path procPath{"/proc"};
+  for (auto const &procEntry : std::filesystem::directory_iterator{procPath}) {
+    if (procEntry.is_directory()) {
+      try {
+        int pid = std::stoi(procEntry.path().filename());
+        addProcEntry(pid);
+      } catch (...) {
+        continue;
+      }
+    }
+  }
 }
 
 static bool doCommitProcList(const std::shared_ptr<ProcRegistry> mgr)
@@ -352,7 +394,7 @@ static bool doCommitContextList(const std::shared_ptr<ProcRegistry> mgr)
 static bool doCollectAndSendProcAcct(const std::shared_ptr<ProcRegistry> mgr,
                                      const ProcRegistry::Request &rq)
 {
-
+#ifdef WITH_PROC_ACCT
   // We ignore unexpected request for procacct data if not enabled
   if (App()->getProcAcct() == nullptr) {
     return true;
@@ -372,7 +414,9 @@ static bool doCollectAndSendProcAcct(const std::shared_ptr<ProcRegistry> mgr,
     data.mutable_payload()->PackFrom(entry->getAcct());
     rq.collector->sendData(data);
   });
-
+#endif
+  static_cast<void>(mgr);
+  static_cast<void>(rq);
   return true;
 }
 

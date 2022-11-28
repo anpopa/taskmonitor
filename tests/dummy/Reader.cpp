@@ -13,6 +13,9 @@
 #include "../tests/dummy/Application.h"
 #include "Logger.h"
 #include <filesystem>
+#include <netdb.h>
+#include <netinet/tcp.h>
+#include <sys/socket.h>
 
 namespace tkm::monitor
 {

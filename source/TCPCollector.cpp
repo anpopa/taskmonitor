@@ -161,15 +161,20 @@ static bool doCreateSession(const std::shared_ptr<TCPCollector> collector)
   collector->getSessionInfo().set_slow_lane_interval(App()->getSlowLaneInterval());
 
   collector->getSessionInfo().add_pace_lane_sources(msg::monitor::SessionInfo_DataSource_ProcInfo);
-  collector->getSessionInfo().add_pace_lane_sources(msg::monitor::SessionInfo_DataSource_ProcEvent);
   collector->getSessionInfo().add_pace_lane_sources(
       msg::monitor::SessionInfo_DataSource_ContextInfo);
-
+#ifdef WITH_PROC_EVENT
+  if (App()->getProcEvent() != nullptr) {
+    collector->getSessionInfo().add_pace_lane_sources(
+        msg::monitor::SessionInfo_DataSource_ProcEvent);
+  }
+#endif
+#ifdef WITH_PROC_ACCT
   if (App()->getProcAcct() != nullptr) {
     collector->getSessionInfo().add_slow_lane_sources(
         msg::monitor::SessionInfo_DataSource_ProcAcct);
   }
-
+#endif
   if (App()->getSysProcStat() != nullptr) {
     collector->getSessionInfo().add_fast_lane_sources(
         msg::monitor::SessionInfo_DataSource_SysProcStat);
@@ -209,19 +214,32 @@ static bool doCreateSession(const std::shared_ptr<TCPCollector> collector)
 
 static bool doGetStartupData(const std::shared_ptr<TCPCollector> collector)
 {
+#ifdef WITH_STARTUP_DATA
   if (App()->getStartupData() != nullptr) {
     StartupData::Request regrq = {.action = StartupData::Action::CollectAndSend,
                                   .collector = collector};
     return App()->getStartupData()->pushRequest(regrq);
   }
   return true;
+#else
+  static_cast<void>(collector);
+  return true;
+#endif
 }
 
 static bool doGetProcAcct(const std::shared_ptr<TCPCollector> collector)
 {
-  ProcRegistry::Request rq = {.action = ProcRegistry::Action::CollectAndSendProcAcct,
-                              .collector = collector};
-  return App()->getProcRegistry()->pushRequest(rq);
+#ifdef WITH_PROC_ACCT
+  if (App()->getProcAcct() != nullptr) {
+    ProcRegistry::Request rq = {.action = ProcRegistry::Action::CollectAndSendProcAcct,
+                                .collector = collector};
+    return App()->getProcRegistry()->pushRequest(rq);
+  }
+  return true;
+#else
+  static_cast<void>(collector);
+  return true;
+#endif
 }
 
 static bool doGetProcInfo(const std::shared_ptr<TCPCollector> collector)
@@ -243,8 +261,16 @@ static bool doGetSysProcWireless(const std::shared_ptr<TCPCollector> collector)
 
 static bool doGetProcEventStats(const std::shared_ptr<TCPCollector> collector)
 {
-  ProcEvent::Request rq = {.action = ProcEvent::Action::CollectAndSend, .collector = collector};
-  return App()->getProcEvent()->pushRequest(rq);
+#ifdef WITH_PROC_EVENT
+  if (App()->getProcEvent() != nullptr) {
+    ProcEvent::Request rq = {.action = ProcEvent::Action::CollectAndSend, .collector = collector};
+    return App()->getProcEvent()->pushRequest(rq);
+  }
+  return true;
+#else
+  static_cast<void>(collector);
+  return true;
+#endif
 }
 
 static bool doGetSysProcMemInfo(const std::shared_ptr<TCPCollector> collector)

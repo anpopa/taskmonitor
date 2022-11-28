@@ -19,7 +19,6 @@
 #include <thread>
 #include <utility>
 
-#include "../source/ProcRegistry.h"
 #include "../tests/dummy/Application.h"
 
 using namespace tkm::monitor;
@@ -46,7 +45,8 @@ protected:
 
 GTestProcRegistry::GTestProcRegistry()
 {
-  app = std::make_unique<Application>("TKM", "TaskMonitor Application", "assets/taskmonitor.conf");
+  app = std::make_unique<Application>(
+      "TKM", "TaskMonitor Application", "assets/taskmonitor_var0.conf");
   if (getuid() == 0) {
     m_ownThread = std::make_unique<std::thread>(appRun);
   }
@@ -64,13 +64,13 @@ GTestProcRegistry::~GTestProcRegistry()
 void GTestProcRegistry::SetUp()
 {
   if (getuid() == 0) {
-    // Create ProcRegistry
     App()->m_procRegistry = std::make_shared<ProcRegistry>(App()->getOptions());
     App()->getProcRegistry()->setEventSource();
 
-    // Create ProcAcct
+#ifdef WITH_PROC_ACCT
     App()->m_procAcct = std::make_shared<ProcAcct>(App()->getOptions());
     App()->getProcAcct()->setEventSource();
+#endif
   }
 }
 
@@ -78,7 +78,9 @@ void GTestProcRegistry::TearDown()
 {
   if (getuid() == 0) {
     App()->getProcRegistry()->setEventSource(false);
+#ifdef WITH_PROC_ACCT
     App()->getProcAcct()->setEventSource(false);
+#endif
   }
 }
 
@@ -94,9 +96,6 @@ TEST_F(GTestProcRegistry, UpdateProcessList)
 
     const std::shared_ptr<ProcEntry> testEntry = App()->getProcRegistry()->getProcEntry(getpid());
     EXPECT_NE(testEntry, nullptr);
-
-    EXPECT_EQ(App()->getProcRegistry()->update(), true);
-    EXPECT_EQ(testEntry->getAcct().ac_pid(), getpid());
     EXPECT_STRCASEEQ(testEntry->getName().c_str(), "GTestProcRegist");
 
     App()->getProcRegistry()->updProcEntry(getpid());
@@ -128,14 +127,14 @@ TEST_F(GTestProcRegistry, Request_CommitProcList)
 
     const std::shared_ptr<ProcEntry> testEntry = App()->getProcRegistry()->getProcEntry(getpid());
     EXPECT_NE(testEntry, nullptr);
-
-    EXPECT_EQ(App()->getProcRegistry()->update(), true);
-    EXPECT_EQ(testEntry->getAcct().ac_pid(), getpid());
     EXPECT_STRCASEEQ(testEntry->getName().c_str(), "GTestProcRegist");
 
+#ifdef WITH_PROC_EVENT
+    // This will not work if we scan the procfs since entry will be readded
     App()->getProcRegistry()->remProcEntry(getpid());
     sleep(1);
     EXPECT_EQ(App()->getProcRegistry()->getProcEntry(getpid()), nullptr);
+#endif
   }
 }
 
@@ -150,9 +149,6 @@ TEST_F(GTestProcRegistry, Request_InitFromProc)
 
     const std::shared_ptr<ProcEntry> testEntry = App()->getProcRegistry()->getProcEntry(getpid());
     EXPECT_NE(testEntry, nullptr);
-
-    EXPECT_EQ(App()->getProcRegistry()->update(), true);
-    EXPECT_EQ(testEntry->getAcct().ac_pid(), getpid());
     EXPECT_STRCASEEQ(testEntry->getName().c_str(), "GTestProcRegist");
   }
 }

@@ -11,6 +11,10 @@ configure_file(
     ${CMAKE_BINARY_DIR}/tests/assets/taskmonitor.conf)
 
 configure_file(
+    ${CMAKE_SOURCE_DIR}/tests/assets/taskmonitor_var0.conf
+    ${CMAKE_BINARY_DIR}/tests/assets/taskmonitor_var0.conf)
+
+configure_file(
     ${CMAKE_SOURCE_DIR}/tests/assets/taskmonitor_var1.conf
     ${CMAKE_BINARY_DIR}/tests/assets/taskmonitor_var1.conf)
 
@@ -22,8 +26,6 @@ configure_file(
 set(APPLICATION_TEST_SRCS
     ${CMAKE_SOURCE_DIR}/source/Options.cpp
     ${CMAKE_SOURCE_DIR}/source/Helpers.cpp
-    ${CMAKE_SOURCE_DIR}/source/ProcAcct.cpp
-    ${CMAKE_SOURCE_DIR}/source/ProcEvent.cpp
     ${CMAKE_SOURCE_DIR}/source/Application.cpp
     ${CMAKE_SOURCE_DIR}/source/ProcEntry.cpp
     ${CMAKE_SOURCE_DIR}/source/ContextEntry.cpp
@@ -41,6 +43,12 @@ set(APPLICATION_TEST_SRCS
     )
 if(WITH_STARTUP_DATA)
     LIST(APPEND APPLICATION_TEST_SRCS ${CMAKE_SOURCE_DIR}/source/StartupData.cpp)
+endif()
+if(WITH_PROC_EVENT)
+    LIST(APPEND APPLICATION_TEST_SRCS ${CMAKE_SOURCE_DIR}/source/ProcEvent.cpp)
+endif()
+if(WITH_PROC_ACCT)
+    LIST(APPEND APPLICATION_TEST_SRCS ${CMAKE_SOURCE_DIR}/source/ProcAcct.cpp)
 endif()
 add_executable(GTestApplication ${APPLICATION_TEST_SRCS} GTestApplication.cpp)
 target_link_libraries(GTestApplication
@@ -110,12 +118,14 @@ endif()
 set(PROCACCT_TEST_SRCS
     ${CMAKE_SOURCE_DIR}/source/Helpers.cpp
     ${CMAKE_SOURCE_DIR}/source/Options.cpp
-    ${CMAKE_SOURCE_DIR}/source/ProcAcct.cpp
     ${CMAKE_SOURCE_DIR}/source/ProcEntry.cpp
     ${CMAKE_SOURCE_DIR}/source/ContextEntry.cpp
     ${CMAKE_SOURCE_DIR}/source/ProcRegistry.cpp
     ${CMAKE_SOURCE_DIR}/tests/dummy/Application.cpp
     )
+if(WITH_PROC_ACCT)
+    LIST(APPEND PROCACCT_TEST_SRCS ${CMAKE_SOURCE_DIR}/source/ProcAcct.cpp)
+endif()
 add_executable(GTestProcAcct ${PROCACCT_TEST_SRCS} GTestProcAcct.cpp)
 target_link_libraries(GTestProcAcct
 	BSWInfra
@@ -137,12 +147,14 @@ endif()
 set(PROCENTRY_TEST_SRCS
     ${CMAKE_SOURCE_DIR}/source/Helpers.cpp
     ${CMAKE_SOURCE_DIR}/source/Options.cpp
-    ${CMAKE_SOURCE_DIR}/source/ProcAcct.cpp
     ${CMAKE_SOURCE_DIR}/source/ProcEntry.cpp
     ${CMAKE_SOURCE_DIR}/source/ContextEntry.cpp
     ${CMAKE_SOURCE_DIR}/source/ProcRegistry.cpp
     ${CMAKE_SOURCE_DIR}/tests/dummy/Application.cpp
     )
+if(WITH_PROC_ACCT)
+    LIST(APPEND PROCENTRY_TEST_SRCS ${CMAKE_SOURCE_DIR}/source/ProcAcct.cpp)
+endif()
 add_executable(GTestProcEntry ${PROCENTRY_TEST_SRCS} GTestProcEntry.cpp)
 target_link_libraries(GTestProcEntry
 	BSWInfra
@@ -161,44 +173,52 @@ if(WITH_DEBUG_DEPLOY)
 endif()
 
 # ProcEvent module tests
-set(PROCENTRY_TEST_SRCS
-    ${CMAKE_SOURCE_DIR}/source/Helpers.cpp
-    ${CMAKE_SOURCE_DIR}/source/Options.cpp
-    ${CMAKE_SOURCE_DIR}/source/ProcAcct.cpp
-    ${CMAKE_SOURCE_DIR}/source/ProcEntry.cpp
-    ${CMAKE_SOURCE_DIR}/source/ProcEvent.cpp
-    ${CMAKE_SOURCE_DIR}/source/ContextEntry.cpp
-    ${CMAKE_SOURCE_DIR}/source/ProcRegistry.cpp
-    ${CMAKE_SOURCE_DIR}/tests/dummy/Application.cpp
-    )
-add_executable(GTestProcEvent ${PROCENTRY_TEST_SRCS} GTestProcEvent.cpp)
-target_link_libraries(GTestProcEvent
-	BSWInfra
-    pthread
-    stdc++fs
-    tkm::tkm
-    ${PROTOBUF_LIBRARY}
-    ${LIBLXC_LIBRARIES_ABS}
-    ${LIBNL_LIBRARIES_ABS}
-    ${LIBNLGENL_LIBRARIES_ABS}
-	${GMOCK_LIBRARIES}
-	${GTEST_LIBRARIES})
-add_test(NAME GTestProcEvent WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/tests COMMAND GTestProcEvent)
-if(WITH_DEBUG_DEPLOY)
-    install(TARGETS GTestProcEvent RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}")
-endif()
+if(WITH_PROC_EVENT)
+    set(PROCENTRY_TEST_SRCS
+        ${CMAKE_SOURCE_DIR}/source/Helpers.cpp
+        ${CMAKE_SOURCE_DIR}/source/Options.cpp
+        ${CMAKE_SOURCE_DIR}/source/ProcEntry.cpp
+        ${CMAKE_SOURCE_DIR}/source/ProcEvent.cpp
+        ${CMAKE_SOURCE_DIR}/source/ContextEntry.cpp
+        ${CMAKE_SOURCE_DIR}/source/ProcRegistry.cpp
+        ${CMAKE_SOURCE_DIR}/tests/dummy/Application.cpp
+        )
+    if(WITH_PROC_ACCT)
+        LIST(APPEND PROCENTRY_TEST_SRCS ${CMAKE_SOURCE_DIR}/source/ProcAcct.cpp)
+    endif()
+    add_executable(GTestProcEvent ${PROCENTRY_TEST_SRCS} GTestProcEvent.cpp)
+    target_link_libraries(GTestProcEvent
+        BSWInfra
+        pthread
+        stdc++fs
+        tkm::tkm
+        ${PROTOBUF_LIBRARY}
+        ${LIBLXC_LIBRARIES_ABS}
+        ${LIBNL_LIBRARIES_ABS}
+        ${LIBNLGENL_LIBRARIES_ABS}
+        ${GMOCK_LIBRARIES}
+        ${GTEST_LIBRARIES})
+    add_test(NAME GTestProcEvent WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/tests COMMAND GTestProcEvent)
+    if(WITH_DEBUG_DEPLOY)
+        install(TARGETS GTestProcEvent RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}")
+    endif()
+endif(WITH_PROC_EVENT)
 
 # ProcRegistry module tests
 set(PROCREGISTRY_TEST_SRCS
     ${CMAKE_SOURCE_DIR}/source/Helpers.cpp
     ${CMAKE_SOURCE_DIR}/source/Options.cpp
-    ${CMAKE_SOURCE_DIR}/source/ProcAcct.cpp
     ${CMAKE_SOURCE_DIR}/source/ProcEntry.cpp
-    ${CMAKE_SOURCE_DIR}/source/ProcEvent.cpp
     ${CMAKE_SOURCE_DIR}/source/ContextEntry.cpp
     ${CMAKE_SOURCE_DIR}/source/ProcRegistry.cpp
     ${CMAKE_SOURCE_DIR}/tests/dummy/Application.cpp
     )
+if(WITH_PROC_EVENT)
+    LIST(APPEND PROCREGISTRY_TEST_SRCS ${CMAKE_SOURCE_DIR}/source/ProcEvent.cpp)
+endif()
+if(WITH_PROC_ACCT)
+    LIST(APPEND PROCREGISTRY_TEST_SRCS ${CMAKE_SOURCE_DIR}/source/ProcAcct.cpp)
+endif()
 add_executable(GTestProcRegistry ${PROCREGISTRY_TEST_SRCS} GTestProcRegistry.cpp)
 target_link_libraries(GTestProcRegistry
 	BSWInfra
@@ -221,11 +241,13 @@ set(SYSPROCSTAT_TEST_SRCS
     ${CMAKE_SOURCE_DIR}/source/Helpers.cpp
     ${CMAKE_SOURCE_DIR}/source/Options.cpp
     ${CMAKE_SOURCE_DIR}/source/SysProcStat.cpp
-    ${CMAKE_SOURCE_DIR}/source/StartupData.cpp
     ${CMAKE_SOURCE_DIR}/tests/dummy/Application.cpp
     ${CMAKE_SOURCE_DIR}/tests/dummy/Collector.cpp
     ${CMAKE_SOURCE_DIR}/tests/dummy/Client.cpp
     )
+if(WITH_STARTUP_DATA)
+    LIST(APPEND SYSPROCSTAT_TEST_SRCS ${CMAKE_SOURCE_DIR}/source/StartupData.cpp)
+endif()
 add_executable(GTestSysProcStat ${SYSPROCSTAT_TEST_SRCS} GTestSysProcStat.cpp)
 target_link_libraries(GTestSysProcStat
 	BSWInfra
@@ -248,11 +270,13 @@ set(SYSPROCWIRELESS_TEST_SRCS
     ${CMAKE_SOURCE_DIR}/source/Helpers.cpp
     ${CMAKE_SOURCE_DIR}/source/Options.cpp
     ${CMAKE_SOURCE_DIR}/source/SysProcWireless.cpp
-    ${CMAKE_SOURCE_DIR}/source/StartupData.cpp
     ${CMAKE_SOURCE_DIR}/tests/dummy/Application.cpp
     ${CMAKE_SOURCE_DIR}/tests/dummy/Collector.cpp
     ${CMAKE_SOURCE_DIR}/tests/dummy/Client.cpp
     )
+if(WITH_STARTUP_DATA)
+    LIST(APPEND SYSPROCWIRELESS_TEST_SRCS ${CMAKE_SOURCE_DIR}/source/StartupData.cpp)
+endif()
 add_executable(GTestSysProcWireless ${SYSPROCWIRELESS_TEST_SRCS} GTestSysProcWireless.cpp)
 target_link_libraries(GTestSysProcWireless
 	BSWInfra
@@ -275,11 +299,13 @@ set(SYSPROCPRESSURE_TEST_SRCS
     ${CMAKE_SOURCE_DIR}/source/Helpers.cpp
     ${CMAKE_SOURCE_DIR}/source/Options.cpp
     ${CMAKE_SOURCE_DIR}/source/SysProcPressure.cpp
-    ${CMAKE_SOURCE_DIR}/source/StartupData.cpp
     ${CMAKE_SOURCE_DIR}/tests/dummy/Application.cpp
     ${CMAKE_SOURCE_DIR}/tests/dummy/Collector.cpp
     ${CMAKE_SOURCE_DIR}/tests/dummy/Client.cpp
     )
+if(WITH_STARTUP_DATA)
+    LIST(APPEND SYSPROCPRESSURE_TEST_SRCS ${CMAKE_SOURCE_DIR}/source/StartupData.cpp)
+endif()
 add_executable(GTestSysProcPressure ${SYSPROCPRESSURE_TEST_SRCS} GTestSysProcPressure.cpp)
 target_link_libraries(GTestSysProcPressure
 	BSWInfra
@@ -302,11 +328,13 @@ set(SYSPROCMEMINFO_TEST_SRCS
     ${CMAKE_SOURCE_DIR}/source/Helpers.cpp
     ${CMAKE_SOURCE_DIR}/source/Options.cpp
     ${CMAKE_SOURCE_DIR}/source/SysProcMemInfo.cpp
-    ${CMAKE_SOURCE_DIR}/source/StartupData.cpp
     ${CMAKE_SOURCE_DIR}/tests/dummy/Application.cpp
     ${CMAKE_SOURCE_DIR}/tests/dummy/Collector.cpp
     ${CMAKE_SOURCE_DIR}/tests/dummy/Client.cpp
     )
+if(WITH_STARTUP_DATA)
+    LIST(APPEND SYSPROCMEMINFO_TEST_SRCS ${CMAKE_SOURCE_DIR}/source/StartupData.cpp)
+endif()
 add_executable(GTestSysProcMemInfo ${SYSPROCMEMINFO_TEST_SRCS} GTestSysProcMemInfo.cpp)
 target_link_libraries(GTestSysProcMemInfo
 	BSWInfra
@@ -329,11 +357,13 @@ set(SYSPROCDISKSTATS_TEST_SRCS
     ${CMAKE_SOURCE_DIR}/source/Helpers.cpp
     ${CMAKE_SOURCE_DIR}/source/Options.cpp
     ${CMAKE_SOURCE_DIR}/source/SysProcDiskStats.cpp
-    ${CMAKE_SOURCE_DIR}/source/StartupData.cpp
     ${CMAKE_SOURCE_DIR}/tests/dummy/Application.cpp
     ${CMAKE_SOURCE_DIR}/tests/dummy/Collector.cpp
     ${CMAKE_SOURCE_DIR}/tests/dummy/Client.cpp
     )
+if(WITH_STARTUP_DATA)
+    LIST(APPEND SYSPROCDISKSTATS_TEST_SRCS ${CMAKE_SOURCE_DIR}/source/StartupData.cpp)
+endif()
 add_executable(GTestSysProcDiskStats ${SYSPROCDISKSTATS_TEST_SRCS} GTestSysProcDiskStats.cpp)
 target_link_libraries(GTestSysProcDiskStats
 	BSWInfra
@@ -356,11 +386,13 @@ set(SYSPROCDBUDDYINFO_TEST_SRCS
     ${CMAKE_SOURCE_DIR}/source/Helpers.cpp
     ${CMAKE_SOURCE_DIR}/source/Options.cpp
     ${CMAKE_SOURCE_DIR}/source/SysProcBuddyInfo.cpp
-    ${CMAKE_SOURCE_DIR}/source/StartupData.cpp
     ${CMAKE_SOURCE_DIR}/tests/dummy/Application.cpp
     ${CMAKE_SOURCE_DIR}/tests/dummy/Collector.cpp
     ${CMAKE_SOURCE_DIR}/tests/dummy/Client.cpp
     )
+if(WITH_STARTUP_DATA)
+    LIST(APPEND SYSPROCDBUDDYINFO_TEST_SRCS ${CMAKE_SOURCE_DIR}/source/StartupData.cpp)
+endif()
 add_executable(GTestSysProcBuddyInfo ${SYSPROCDBUDDYINFO_TEST_SRCS} GTestSysProcBuddyInfo.cpp)
 target_link_libraries(GTestSysProcBuddyInfo
 	BSWInfra
@@ -379,30 +411,32 @@ if(WITH_DEBUG_DEPLOY)
 endif()
 
 # StartupData module tests
-set(STARTUPDATA_TEST_SRCS
-    ${CMAKE_SOURCE_DIR}/source/Helpers.cpp
-    ${CMAKE_SOURCE_DIR}/source/Options.cpp
-    ${CMAKE_SOURCE_DIR}/source/StartupData.cpp
-    ${CMAKE_SOURCE_DIR}/tests/dummy/Application.cpp
-    ${CMAKE_SOURCE_DIR}/tests/dummy/Collector.cpp
-    ${CMAKE_SOURCE_DIR}/tests/dummy/Client.cpp
-    )
-add_executable(GTestStartupData ${STARTUPDATA_TEST_SRCS} GTestStartupData.cpp)
-target_link_libraries(GTestStartupData
-	BSWInfra
-    pthread
-    stdc++fs
-    tkm::tkm
-    ${PROTOBUF_LIBRARY}
-    ${LIBLXC_LIBRARIES_ABS}
-    ${LIBNL_LIBRARIES_ABS}
-    ${LIBNLGENL_LIBRARIES_ABS}
-	${GMOCK_LIBRARIES}
-	${GTEST_LIBRARIES})
-add_test(NAME GTestStartupData WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/tests COMMAND GTestStartupData)
-if(WITH_DEBUG_DEPLOY)
-    install(TARGETS GTestStartupData RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}")
-endif()
+if(WITH_STARTUP_DATA)
+    set(STARTUPDATA_TEST_SRCS
+        ${CMAKE_SOURCE_DIR}/source/Helpers.cpp
+        ${CMAKE_SOURCE_DIR}/source/Options.cpp
+        ${CMAKE_SOURCE_DIR}/source/StartupData.cpp
+        ${CMAKE_SOURCE_DIR}/tests/dummy/Application.cpp
+        ${CMAKE_SOURCE_DIR}/tests/dummy/Collector.cpp
+        ${CMAKE_SOURCE_DIR}/tests/dummy/Client.cpp
+        )
+    add_executable(GTestStartupData ${STARTUPDATA_TEST_SRCS} GTestStartupData.cpp)
+    target_link_libraries(GTestStartupData
+        BSWInfra
+        pthread
+        stdc++fs
+        tkm::tkm
+        ${PROTOBUF_LIBRARY}
+        ${LIBLXC_LIBRARIES_ABS}
+        ${LIBNL_LIBRARIES_ABS}
+        ${LIBNLGENL_LIBRARIES_ABS}
+        ${GMOCK_LIBRARIES}
+        ${GTEST_LIBRARIES})
+    add_test(NAME GTestStartupData WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/tests COMMAND GTestStartupData)
+    if(WITH_DEBUG_DEPLOY)
+        install(TARGETS GTestStartupData RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}")
+    endif()
+endif(WITH_STARTUP_DATA)
 
 # TCPInterface module tests
 set(TCPINTERFACE_TEST_SRCS
@@ -410,12 +444,9 @@ set(TCPINTERFACE_TEST_SRCS
     ${CMAKE_SOURCE_DIR}/source/Options.cpp
     ${CMAKE_SOURCE_DIR}/source/TCPServer.cpp
     ${CMAKE_SOURCE_DIR}/source/TCPCollector.cpp
-    ${CMAKE_SOURCE_DIR}/source/ProcAcct.cpp
-    ${CMAKE_SOURCE_DIR}/source/ProcEvent.cpp
     ${CMAKE_SOURCE_DIR}/source/ProcEntry.cpp
     ${CMAKE_SOURCE_DIR}/source/ContextEntry.cpp
     ${CMAKE_SOURCE_DIR}/source/ProcRegistry.cpp
-    ${CMAKE_SOURCE_DIR}/source/StartupData.cpp
     ${CMAKE_SOURCE_DIR}/source/SysProcStat.cpp
     ${CMAKE_SOURCE_DIR}/source/SysProcMemInfo.cpp
     ${CMAKE_SOURCE_DIR}/source/SysProcPressure.cpp
@@ -425,6 +456,15 @@ set(TCPINTERFACE_TEST_SRCS
     ${CMAKE_SOURCE_DIR}/tests/dummy/Application.cpp
     ${CMAKE_SOURCE_DIR}/tests/dummy/Reader.cpp
     )
+if(WITH_PROC_EVENT)
+    LIST(APPEND TCPINTERFACE_TEST_SRCS ${CMAKE_SOURCE_DIR}/source/ProcEvent.cpp)
+endif()
+if(WITH_PROC_ACCT)
+    LIST(APPEND TCPINTERFACE_TEST_SRCS ${CMAKE_SOURCE_DIR}/source/ProcAcct.cpp)
+endif()
+if(WITH_STARTUP_DATA)
+    LIST(APPEND TCPINTERFACE_TEST_SRCS ${CMAKE_SOURCE_DIR}/source/StartupData.cpp)
+endif()
 add_executable(GTestTCPInterface ${TCPINTERFACE_TEST_SRCS} GTestTCPInterface.cpp)
 target_link_libraries(GTestTCPInterface
 	BSWInfra
@@ -448,12 +488,9 @@ set(UDSINTERFACE_TEST_SRCS
     ${CMAKE_SOURCE_DIR}/source/Options.cpp
     ${CMAKE_SOURCE_DIR}/source/UDSServer.cpp
     ${CMAKE_SOURCE_DIR}/source/UDSCollector.cpp
-    ${CMAKE_SOURCE_DIR}/source/ProcAcct.cpp
-    ${CMAKE_SOURCE_DIR}/source/ProcEvent.cpp
     ${CMAKE_SOURCE_DIR}/source/ProcEntry.cpp
     ${CMAKE_SOURCE_DIR}/source/ContextEntry.cpp
     ${CMAKE_SOURCE_DIR}/source/ProcRegistry.cpp
-    ${CMAKE_SOURCE_DIR}/source/StartupData.cpp
     ${CMAKE_SOURCE_DIR}/source/SysProcStat.cpp
     ${CMAKE_SOURCE_DIR}/source/SysProcMemInfo.cpp
     ${CMAKE_SOURCE_DIR}/source/SysProcPressure.cpp
@@ -463,6 +500,15 @@ set(UDSINTERFACE_TEST_SRCS
     ${CMAKE_SOURCE_DIR}/tests/dummy/Application.cpp
     ${CMAKE_SOURCE_DIR}/tests/dummy/Reader.cpp
     )
+if(WITH_PROC_EVENT)
+    LIST(APPEND UDSINTERFACE_TEST_SRCS ${CMAKE_SOURCE_DIR}/source/ProcEvent.cpp)
+endif()
+if(WITH_PROC_ACCT)
+    LIST(APPEND UDSINTERFACE_TEST_SRCS ${CMAKE_SOURCE_DIR}/source/ProcAcct.cpp)
+endif()
+if(WITH_STARTUP_DATA)
+    LIST(APPEND UDSINTERFACE_TEST_SRCS ${CMAKE_SOURCE_DIR}/source/StartupData.cpp)
+endif()
 add_executable(GTestUDSInterface ${UDSINTERFACE_TEST_SRCS} GTestUDSInterface.cpp)
 target_link_libraries(GTestUDSInterface
 	BSWInfra

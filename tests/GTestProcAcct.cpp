@@ -18,7 +18,6 @@
 #include <thread>
 #include <utility>
 
-#include "../source/ProcAcct.h"
 #include "../tests/dummy/Application.h"
 
 using namespace tkm::monitor;
@@ -45,7 +44,8 @@ protected:
 
 GTestProcAcct::GTestProcAcct()
 {
-  app = std::make_unique<Application>("TKM", "TaskMonitor Application", "assets/taskmonitor.conf");
+  app = std::make_unique<Application>(
+      "TKM", "TaskMonitor Application", "assets/taskmonitor_var0.conf");
   if (getuid() == 0) {
     m_ownThread = std::make_unique<std::thread>(appRun);
   }
@@ -66,24 +66,29 @@ void GTestProcAcct::SetUp()
   App()->m_procRegistry = std::make_shared<ProcRegistry>(App()->getOptions());
   App()->getProcRegistry()->setEventSource();
 
-  // Create ProcAcct
+#ifdef WITH_PROC_ACCT
   App()->m_procAcct = std::make_shared<ProcAcct>(App()->getOptions());
   App()->getProcAcct()->setEventSource();
+#endif
 }
 
 void GTestProcAcct::TearDown()
 {
   App()->getProcRegistry()->setEventSource(false);
+#ifdef WITH_PROC_ACCT
   App()->getProcAcct()->setEventSource(false);
+#endif
 }
 
 TEST_F(GTestProcAcct, RequestAccounting)
 {
-  if (getuid() == 0) {
-    EXPECT_EQ(App()->getProcRegistry()->getProcEntry(getpid()), nullptr);
-    App()->getProcRegistry()->addProcEntry(getpid()); // Add self to proc list
-    EXPECT_NE(App()->getProcRegistry()->getProcEntry(getpid()), nullptr);
 
+  EXPECT_EQ(App()->getProcRegistry()->getProcEntry(getpid()), nullptr);
+  App()->getProcRegistry()->addProcEntry(getpid()); // Add self to proc list
+  EXPECT_NE(App()->getProcRegistry()->getProcEntry(getpid()), nullptr);
+
+#ifdef WITH_PROC_ACCT
+  if (getuid() == 0) {
     EXPECT_TRUE(App()->getProcAcct()->requestTaskAcct(getpid()));
     sleep(1);
 
@@ -91,6 +96,7 @@ TEST_F(GTestProcAcct, RequestAccounting)
     EXPECT_EQ(testEntry->getAcct().ac_pid(), getpid());
     EXPECT_STRCASEEQ(testEntry->getAcct().ac_comm().c_str(), "GTestProcAcct");
   }
+#endif
 }
 
 int main(int argc, char **argv)

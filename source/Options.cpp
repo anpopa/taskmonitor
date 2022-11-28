@@ -187,6 +187,13 @@ auto Options::getFor(Key key) -> string const
       return prop.value_or(tkmDefaults.getFor(Defaults::Default::ReadProcAtInit));
     }
     return tkmDefaults.getFor(Defaults::Default::ReadProcAtInit);
+  case Key::EnableProcEvent:
+    if (hasConfigFile()) {
+      const optional<string> prop =
+          m_configFile->getPropertyValue("monitor", -1, "EnableProcEvent");
+      return prop.value_or(tkmDefaults.getFor(Defaults::Default::EnableProcEvent));
+    }
+    return tkmDefaults.getFor(Defaults::Default::EnableProcEvent);
   case Key::EnableProcAcct:
     if (hasConfigFile()) {
       const optional<string> prop = m_configFile->getPropertyValue("monitor", -1, "EnableProcAcct");
@@ -214,6 +221,13 @@ auto Options::getFor(Key key) -> string const
       return prop.value_or(tkmDefaults.getFor(Defaults::Default::EnableStartupData));
     }
     return tkmDefaults.getFor(Defaults::Default::EnableStartupData);
+  case Key::UpdateOnProcEvent:
+    if (hasConfigFile()) {
+      const optional<string> prop =
+          m_configFile->getPropertyValue("monitor", -1, "UpdateOnProcEvent");
+      return prop.value_or(tkmDefaults.getFor(Defaults::Default::UpdateOnProcEvent));
+    }
+    return tkmDefaults.getFor(Defaults::Default::UpdateOnProcEvent);
   case Key::StartupDataCleanupTime:
     if (hasConfigFile()) {
       const optional<string> prop =
