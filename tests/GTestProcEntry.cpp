@@ -89,24 +89,23 @@ TEST_F(GTestProcEntry, Update)
   App()->getProcRegistry()->addProcEntry(getpid()); // Add self to proc list
   EXPECT_NE(App()->getProcRegistry()->getProcEntry(getpid()), nullptr);
 
+  const std::shared_ptr<ProcEntry> testEntry = App()->getProcRegistry()->getProcEntry(getpid());
+  EXPECT_NE(testEntry, nullptr);
+
+  testEntry->update();
+  sleep(1);
+
+  const auto infCpuTime = testEntry->getData().cpu_time();
+  EXPECT_STRCASEEQ(testEntry->getName().c_str(), "GTestProcEntry");
+  EXPECT_STRCASEEQ(testEntry->getData().comm().c_str(), "GTestProcEntry");
+  EXPECT_EQ(testEntry->getData().pid(), getpid());
+
   if (getuid() == 0) {
-    const std::shared_ptr<ProcEntry> testEntry = App()->getProcRegistry()->getProcEntry(getpid());
-    EXPECT_NE(testEntry, nullptr);
-
-    testEntry->update();
-    sleep(1);
-
-    const auto accCpuTime = testEntry->getAcct().cpu().cpu_count();
-    const auto infCpuTime = testEntry->getData().cpu_time();
-
 #ifdef WITH_PROC_ACCT
+    const auto accCpuTime = testEntry->getAcct().cpu().cpu_count();
     EXPECT_EQ(testEntry->getAcct().ac_pid(), getpid());
     EXPECT_STRCASEEQ(testEntry->getAcct().ac_comm().c_str(), "GTestProcEntry");
 #endif
-    EXPECT_STRCASEEQ(testEntry->getName().c_str(), "GTestProcEntry");
-    EXPECT_STRCASEEQ(testEntry->getData().comm().c_str(), "GTestProcEntry");
-    EXPECT_EQ(testEntry->getData().pid(), getpid());
-
     testEntry->update(tkmDefaults.valFor(Defaults::Val::ProcAcct));
 #ifdef WITH_PROC_ACCT
     EXPECT_GT(testEntry->getAcct().cpu().cpu_count(), accCpuTime);

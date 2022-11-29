@@ -93,43 +93,53 @@ TEST_F(GTestUDSInterface, RequestData_NoModules)
   sleep(1);
   EXPECT_EQ(m_reader->connect(), 0);
 
-  if (getuid() == 0) {
 #ifdef WITH_PROC_ACCT
-    App()->m_procAcct = std::make_shared<ProcAcct>(App()->getOptions());
-    App()->getProcAcct()->setEventSource(true);
+  App()->m_procAcct = std::make_shared<ProcAcct>(App()->getOptions());
+  App()->getProcAcct()->setEventSource(true);
 #endif
-
-    App()->m_procRegistry = std::make_shared<ProcRegistry>(App()->getOptions());
-    App()->getProcRegistry()->setEventSource(true);
 #ifdef WITH_PROC_EVENT
+  if (getuid() == 0) {
     App()->m_procEvent = std::make_shared<ProcEvent>(App()->getOptions());
     App()->getProcEvent()->setEventSource(true);
+  }
+#endif
+  App()->m_procRegistry = std::make_shared<ProcRegistry>(App()->getOptions());
+  App()->getProcRegistry()->setEventSource(true);
 
-    // Generate some data
-    system("uname -a");
-    sleep(1);
+  // Generate some data
+#ifdef WITH_PROC_EVENT
+  if (getuid() == 0) {
+    system("sleep 3");
+  }
+#else
+  App()->getProcRegistry()->update();
+  sleep(3);
+#endif
 
-    EXPECT_EQ(m_reader->getProcAcctCount(), 0);
-    EXPECT_EQ(m_reader->requestData(tkm::msg::collector::Request_Type_GetProcAcct), true);
-    usleep(100000);
-    EXPECT_GE(m_reader->getProcAcctCount(), 0);
-
-    EXPECT_EQ(m_reader->getProcInfoCount(), 0);
-    EXPECT_EQ(m_reader->requestData(tkm::msg::collector::Request_Type_GetProcInfo), true);
-    usleep(100000);
-    EXPECT_EQ(m_reader->getProcInfoCount(), 1);
-
+#ifdef WITH_PROC_ACCT
+  EXPECT_EQ(m_reader->getProcAcctCount(), 0);
+  EXPECT_EQ(m_reader->requestData(tkm::msg::collector::Request_Type_GetProcAcct), true);
+  usleep(100000);
+  EXPECT_GE(m_reader->getProcAcctCount(), 0);
+#endif
+#ifdef WITH_PROC_EVENT
+  if (getuid() == 0) {
     EXPECT_EQ(m_reader->getProcEventCount(), 0);
     EXPECT_EQ(m_reader->requestData(tkm::msg::collector::Request_Type_GetProcEventStats), true);
     usleep(100000);
     EXPECT_EQ(m_reader->getProcEventCount(), 1);
-
-    EXPECT_EQ(m_reader->getCtxInfoCount(), 0);
-    EXPECT_EQ(m_reader->requestData(tkm::msg::collector::Request_Type_GetContextInfo), true);
-    usleep(100000);
-    EXPECT_EQ(m_reader->getCtxInfoCount(), 1);
-#endif
   }
+#endif
+
+  EXPECT_EQ(m_reader->getProcInfoCount(), 0);
+  EXPECT_EQ(m_reader->requestData(tkm::msg::collector::Request_Type_GetProcInfo), true);
+  usleep(100000);
+  EXPECT_EQ(m_reader->getProcInfoCount(), 1);
+
+  EXPECT_EQ(m_reader->getCtxInfoCount(), 0);
+  EXPECT_EQ(m_reader->requestData(tkm::msg::collector::Request_Type_GetContextInfo), true);
+  usleep(100000);
+  EXPECT_EQ(m_reader->getCtxInfoCount(), 1);
 
   EXPECT_EQ(m_reader->getSysProcStatCount(), 0);
   EXPECT_EQ(m_reader->requestData(tkm::msg::collector::Request_Type_GetSysProcStat), true);
@@ -161,15 +171,15 @@ TEST_F(GTestUDSInterface, RequestData_NoModules)
   usleep(100000);
   EXPECT_EQ(m_reader->getSysProcWirelessCount(), 0);
 
-  if (getuid() == 0) {
 #ifdef WITH_PROC_ACCT
-    App()->getProcAcct()->setEventSource(false);
+  App()->getProcAcct()->setEventSource(false);
 #endif
-    App()->getProcRegistry()->setEventSource(false);
+  App()->getProcRegistry()->setEventSource(false);
 #ifdef WITH_PROC_EVENT
+  if (getuid() == 0) {
     App()->getProcEvent()->setEventSource(false);
-#endif
   }
+#endif
 }
 
 TEST_F(GTestUDSInterface, RequestData)
@@ -186,8 +196,10 @@ TEST_F(GTestUDSInterface, RequestData)
   App()->m_procRegistry = std::make_shared<ProcRegistry>(App()->getOptions());
   App()->getProcRegistry()->setEventSource(true);
 #ifdef WITH_PROC_EVENT
-  App()->m_procEvent = std::make_shared<ProcEvent>(App()->getOptions());
-  App()->getProcEvent()->setEventSource(true);
+  if (getuid() == 0) {
+    App()->m_procEvent = std::make_shared<ProcEvent>(App()->getOptions());
+    App()->getProcEvent()->setEventSource(true);
+  }
 #endif
   App()->m_sysProcStat = std::make_shared<SysProcStat>(App()->getOptions());
   App()->getSysProcStat()->setEventSource(true);
@@ -207,18 +219,22 @@ TEST_F(GTestUDSInterface, RequestData)
   App()->m_sysProcWireless = std::make_shared<SysProcWireless>(App()->getOptions());
   App()->getSysProcWireless()->setEventSource(true);
 
-#ifdef WITH_PROC_EVENT
   // Generate some data
-  system("uname -a");
-  App()->getProcRegistry()->update();
-#endif
   App()->getSysProcStat()->update();
   App()->getSysProcMemInfo()->update();
   App()->getSysProcDiskStats()->update();
   App()->getSysProcPressure()->update();
   App()->getSysProcBuddyInfo()->update();
   App()->getSysProcWireless()->update();
+
+#ifdef WITH_PROC_EVENT
+  if (getuid() == 0) {
+    system("sleep 3");
+  }
+#else
+  App()->getProcRegistry()->update();
   sleep(3);
+#endif
 
 #ifdef WITH_PROC_ACCT
   EXPECT_EQ(m_reader->getProcAcctCount(), 0);
@@ -226,22 +242,23 @@ TEST_F(GTestUDSInterface, RequestData)
   usleep(100000);
   EXPECT_GE(m_reader->getProcAcctCount(), 0);
 #endif
-#ifdef WITH_PROC_EVENT
   EXPECT_EQ(m_reader->getProcInfoCount(), 0);
   EXPECT_EQ(m_reader->requestData(tkm::msg::collector::Request_Type_GetProcInfo), true);
   usleep(100000);
   EXPECT_EQ(m_reader->getProcInfoCount(), 1);
-
-  EXPECT_EQ(m_reader->getProcEventCount(), 0);
-  EXPECT_EQ(m_reader->requestData(tkm::msg::collector::Request_Type_GetProcEventStats), true);
-  usleep(100000);
-  EXPECT_EQ(m_reader->getProcEventCount(), 1);
+#ifdef WITH_PROC_EVENT
+  if (getuid() == 0) {
+    EXPECT_EQ(m_reader->getProcEventCount(), 0);
+    EXPECT_EQ(m_reader->requestData(tkm::msg::collector::Request_Type_GetProcEventStats), true);
+    usleep(100000);
+    EXPECT_EQ(m_reader->getProcEventCount(), 1);
+  }
+#endif
 
   EXPECT_EQ(m_reader->getCtxInfoCount(), 0);
   EXPECT_EQ(m_reader->requestData(tkm::msg::collector::Request_Type_GetContextInfo), true);
   usleep(100000);
   EXPECT_EQ(m_reader->getCtxInfoCount(), 1);
-#endif
 
   EXPECT_EQ(m_reader->getSysProcStatCount(), 0);
   EXPECT_EQ(m_reader->requestData(tkm::msg::collector::Request_Type_GetSysProcStat), true);
@@ -278,7 +295,9 @@ TEST_F(GTestUDSInterface, RequestData)
 #endif
   App()->getProcRegistry()->setEventSource(false);
 #ifdef WITH_PROC_EVENT
-  App()->getProcEvent()->setEventSource(false);
+  if (getuid() == 0) {
+    App()->getProcEvent()->setEventSource(false);
+  }
 #endif
   App()->getSysProcStat()->setEventSource(false);
   App()->getSysProcMemInfo()->setEventSource(false);

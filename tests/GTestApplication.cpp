@@ -42,30 +42,26 @@ GTestApplication::~GTestApplication() {}
 
 TEST_F(GTestApplication, CreateAndStopApplication_NoConfig)
 {
-  if (getuid() == 0) {
-    EXPECT_NO_THROW(m_app =
-                        std::make_unique<Application>("TaskMonitor", "TaskMonitor", std::string()));
-    EXPECT_EQ(m_app->getOptions()->hasConfigFile(), false);
+  EXPECT_NO_THROW(m_app =
+                      std::make_unique<Application>("TaskMonitor", "TaskMonitor", std::string()));
+  EXPECT_EQ(m_app->getOptions()->hasConfigFile(), false);
 
-    m_stopThread = std::make_unique<std::thread>(appStop);
-    EXPECT_NO_THROW(App()->run());
-    m_stopThread->join();
-    m_app.reset();
-  }
+  m_stopThread = std::make_unique<std::thread>(appStop);
+  EXPECT_NO_THROW(App()->run());
+  m_stopThread->join();
+  m_app.reset();
 }
 
 TEST_F(GTestApplication, CreateAndStopApplication)
 {
-  if (getuid() == 0) {
-    EXPECT_NO_THROW(m_app = std::make_unique<Application>(
-                        "TaskMonitor", "TaskMonitor", "assets/taskmonitor.conf"));
-    EXPECT_EQ(m_app->getOptions()->hasConfigFile(), true);
+  EXPECT_NO_THROW(m_app = std::make_unique<Application>(
+                      "TaskMonitor", "TaskMonitor", "assets/taskmonitor.conf"));
+  EXPECT_EQ(m_app->getOptions()->hasConfigFile(), true);
 
-    m_stopThread = std::make_unique<std::thread>(appStop);
-    EXPECT_NO_THROW(App()->run());
-    m_stopThread->join();
-    m_app.reset();
-  }
+  m_stopThread = std::make_unique<std::thread>(appStop);
+  EXPECT_NO_THROW(App()->run());
+  m_stopThread->join();
+  m_app.reset();
 }
 
 int main(int argc, char **argv)
