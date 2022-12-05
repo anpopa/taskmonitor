@@ -12,8 +12,8 @@ As part of the project group a set of tools is provided to store and process the
 | ------ | ------ | ------ |
 | taskmonitor | https://gitlab.com/taskmonitor/taskmonitor | System daemon running on target system (this project) |
 | libtaskmonitor | https://gitlab.com/taskmonitor/libtaskmonitor | Protobuf interfaces to communicate with the daemon |
-| tkm-reader | https://gitlab.com/taskmonitor/tkm-reader | A simple reader that output data in SQLite and JSON formats |
-| tkm-collector | https://gitlab.com/taskmonitor/tkm-collector | A data collector, SQL based, to be used in CI systems |
+| tkmreader | https://gitlab.com/taskmonitor/tkm-reader | A simple reader that output data in SQLite and JSON formats |
+| tkmcollector | https://gitlab.com/taskmonitor/tkm-collector | A data collector, SQL based, to be used in CI systems |
 
 ## Documentation
 For more information about TaskMonitor check the manuals:   
@@ -30,7 +30,7 @@ TaskMonitor depends on the following libraries
 
 | Library | Reference | Info |
 | ------ | ------ | ------ |
-| libnl3 | https://www.infradead.org/~tgr/libnl | Used for netlink interfaces to taskstats |
+| libnl3 | https://www.infradead.org/~tgr/libnl | Used for netlink interfaces to taskstats if WITH_PROC_ACCT is enabled |
 | libtaskmonitor | https://gitlab.com/taskmonitor/libtaskmonitor | TaskMonitor interfaces |
 | protobuf | https://developers.google.com/protocol-buffers | Data serialization (libtaskmonitor dependency) |
 | libsystemd | https://github.com/systemd/systemd/tree/main/src/libsystemd | Optional if WITH_SYSTEMD is ON |
@@ -42,7 +42,10 @@ TaskMonitor depends on the following libraries
 | ------ | ------ | ------ |
 | WITH_SYSTEMD | ON | Enable systemd service, watchdog and journald support |
 | WITH_STARTUP_DATA | ON | Support startup data cache with timeout |
+| WITH_PROC_EVENT | ON | Enable ProcEvent module and support for event based process list|
+| WITH_PROC_ACCT | ON | Enable ProcAcct module to provide TASKSTATS data |
 | WITH_LXC | OFF | Use liblxc to set the context name for containers |
+| WITH_TESTS | OFF | Build gtests for testing and coverage |
 | WITH_INSTALL_CONFIG | ON | Install default taskmonitor.conf on target |
 | WITH_INSTALL_LICENSE | ON | Install license file on target for QA checks |
 

@@ -54,7 +54,7 @@ bool ProcEntry::updateProcInfo(void)
   setUpdatePending(true);
 
   try {
-    updateInfoData();
+    status = updateInfoData();
   } catch (std::exception &e) {
     logError() << "Fail to update info data for PID " << m_pid << ". Exception: " << e.what();
     status = false;
@@ -97,6 +97,8 @@ void ProcEntry::initInfoData(void)
     auto cpuTime =
         std::stoul(tokens[13 + afterNameOffset]) + std::stoul(tokens[14 + afterNameOffset]);
     m_info.set_cpu_time(cpuTime);
+  } else {
+    throw std::runtime_error("Fail to read /proc/" + std::to_string(m_pid) + "/stat file");
   }
 
   m_info.set_comm(m_name);
@@ -112,11 +114,16 @@ void ProcEntry::initInfoData(void)
   }
 }
 
-void ProcEntry::updateInfoData(void)
+bool ProcEntry::updateInfoData(void)
 {
   std::string line;
 
   std::ifstream statStream{"/proc/" + std::to_string(m_pid) + "/stat"};
+
+  if (!statStream.is_open()) {
+    return false;
+  }
+
   if (std::getline(statStream, line)) {
     std::vector<std::string> tokens;
     std::stringstream ss(line);
@@ -149,9 +156,15 @@ void ProcEntry::updateInfoData(void)
       m_info.set_cpu_percent(static_cast<uint32_t>(((newCPUTime - oldCPUTime) * 1000000) /
                                                    static_cast<uint64_t>(durationUs)));
     }
+  } else {
+    return false;
   }
 
   std::ifstream statmStream{"/proc/" + std::to_string(m_pid) + "/statm"};
+  if (!statmStream.is_open()) {
+    return false;
+  }
+
   if (std::getline(statmStream, line)) {
     std::vector<std::string> tokens;
     std::stringstream ss(line);
@@ -172,7 +185,11 @@ void ProcEntry::updateInfoData(void)
     m_info.set_mem_vmsize(std::stoul(tokens[0]) * pageSize / 1024);
     m_info.set_mem_vmrss(std::stoul(tokens[1]) * pageSize / 1024);
     m_info.set_mem_shared(std::stoul(tokens[2]) * pageSize / 1024);
+  } else {
+    return false;
   }
+
+  return true;
 }
 
 bool ProcEntry::update(const std::string &sourceName)
