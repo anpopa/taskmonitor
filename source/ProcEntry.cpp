@@ -77,30 +77,29 @@ void ProcEntry::initInfoData(void)
   }
 
   std::string line;
-  if (std::getline(statStream, line)) {
-    std::vector<std::string> tokens;
-    std::stringstream ss(line);
-    std::string buf;
-
-    while (ss >> buf) {
-      tokens.push_back(buf);
-    }
-
-    if (tokens.size() < 52) {
-      throw std::runtime_error("Parse fail for /proc/" + std::to_string(m_pid) + "stat file");
-    }
-
-    auto afterNameOffset = tokens.size() - 52;
-    m_info.set_pid(static_cast<uint32_t>(std::stoul(tokens[0])));
-    m_info.set_ppid(static_cast<uint32_t>(std::stoul(tokens[3 + afterNameOffset])));
-
-    auto cpuTime =
-        std::stoul(tokens[13 + afterNameOffset]) + std::stoul(tokens[14 + afterNameOffset]);
-    m_info.set_cpu_time(cpuTime);
-  } else {
+  if (!std::getline(statStream, line)) {
     throw std::runtime_error("Fail to read /proc/" + std::to_string(m_pid) + "/stat file");
   }
 
+  std::vector<std::string> tokens;
+  std::stringstream ss(line);
+  std::string buf;
+
+  while (ss >> buf) {
+    tokens.push_back(buf);
+  }
+
+  if (tokens.size() < 52) {
+    throw std::runtime_error("Parse fail for /proc/" + std::to_string(m_pid) + "stat file");
+  }
+
+  auto afterNameOffset = tokens.size() - 52;
+  m_info.set_pid(static_cast<uint32_t>(std::stoul(tokens[0])));
+  m_info.set_ppid(static_cast<uint32_t>(std::stoul(tokens[3 + afterNameOffset])));
+
+  auto cpuTime =
+      std::stoul(tokens[13 + afterNameOffset]) + std::stoul(tokens[14 + afterNameOffset]);
+  m_info.set_cpu_time(cpuTime);
   m_info.set_comm(m_name);
 
   // If need to run as root for context identification
@@ -116,48 +115,46 @@ void ProcEntry::initInfoData(void)
 
 bool ProcEntry::updateInfoData(void)
 {
-  std::string line;
-
   std::ifstream statStream{"/proc/" + std::to_string(m_pid) + "/stat"};
-
   if (!statStream.is_open()) {
     return false;
   }
 
-  if (std::getline(statStream, line)) {
-    std::vector<std::string> tokens;
-    std::stringstream ss(line);
-    std::string buf;
-
-    while (ss >> buf) {
-      tokens.push_back(buf);
-    }
-
-    if (tokens.size() < 52) {
-      throw std::runtime_error("Fail to parse stat file");
-    }
-
-    auto afterNameOffset = tokens.size() - 52;
-    uint64_t oldCPUTime = m_info.cpu_time();
-    uint64_t newCPUTime =
-        std::stoul(tokens[13 + afterNameOffset]) + std::stoul(tokens[14 + afterNameOffset]);
-
-    m_info.set_cpu_time(newCPUTime);
-
-    auto timeNow = std::chrono::steady_clock::now();
-    using USec = std::chrono::microseconds;
-
-    if (m_lastUpdateTime.time_since_epoch().count() == 0) {
-      m_lastUpdateTime = timeNow;
-      m_info.set_cpu_percent(0);
-    } else {
-      auto durationUs = std::chrono::duration_cast<USec>(timeNow - m_lastUpdateTime).count();
-      m_lastUpdateTime = timeNow;
-      m_info.set_cpu_percent(static_cast<uint32_t>(((newCPUTime - oldCPUTime) * 1000000) /
-                                                   static_cast<uint64_t>(durationUs)));
-    }
-  } else {
+  std::string line;
+  if (!std::getline(statStream, line)) {
     return false;
+  }
+
+  std::vector<std::string> tokens;
+  std::string buf;
+
+  std::stringstream ss(line);
+  while (ss >> buf) {
+    tokens.push_back(buf);
+  }
+
+  if (tokens.size() < 52) {
+    throw std::runtime_error("Fail to parse stat file");
+  }
+
+  auto afterNameOffset = tokens.size() - 52;
+  uint64_t oldCPUTime = m_info.cpu_time();
+  uint64_t newCPUTime =
+      std::stoul(tokens[13 + afterNameOffset]) + std::stoul(tokens[14 + afterNameOffset]);
+
+  m_info.set_cpu_time(newCPUTime);
+
+  auto timeNow = std::chrono::steady_clock::now();
+  using USec = std::chrono::microseconds;
+
+  if (m_lastUpdateTime.time_since_epoch().count() == 0) {
+    m_lastUpdateTime = timeNow;
+    m_info.set_cpu_percent(0);
+  } else {
+    auto durationUs = std::chrono::duration_cast<USec>(timeNow - m_lastUpdateTime).count();
+    m_lastUpdateTime = timeNow;
+    m_info.set_cpu_percent(static_cast<uint32_t>(((newCPUTime - oldCPUTime) * 1000000) /
+                                                 static_cast<uint64_t>(durationUs)));
   }
 
   std::ifstream statmStream{"/proc/" + std::to_string(m_pid) + "/statm"};
@@ -165,29 +162,27 @@ bool ProcEntry::updateInfoData(void)
     return false;
   }
 
-  if (std::getline(statmStream, line)) {
-    std::vector<std::string> tokens;
-    std::stringstream ss(line);
-    std::string buf;
-
-    while (ss >> buf) {
-      tokens.push_back(buf);
-    }
-
-    // We are only interested in the first 3 values
-    if (tokens.size() < 3) {
-      throw std::runtime_error("Fail to parse statm file");
-    }
-
-    const auto pageSize = static_cast<uint64_t>(::sysconf(_SC_PAGESIZE));
-
-    // Store memory sizes in Kb
-    m_info.set_mem_vmsize(std::stoul(tokens[0]) * pageSize / 1024);
-    m_info.set_mem_vmrss(std::stoul(tokens[1]) * pageSize / 1024);
-    m_info.set_mem_shared(std::stoul(tokens[2]) * pageSize / 1024);
-  } else {
+  if (!std::getline(statmStream, line)) {
     return false;
   }
+
+  tokens.clear();
+
+  std::stringstream ssm(line);
+  while (ssm >> buf) {
+    tokens.push_back(buf);
+  }
+
+  // We are only interested in the first 3 values
+  if (tokens.size() < 3) {
+    throw std::runtime_error("Fail to parse statm file");
+  }
+
+  // Store memory sizes in Kb
+  const auto pageSize = static_cast<uint64_t>(::sysconf(_SC_PAGESIZE));
+  m_info.set_mem_vmsize(std::stoul(tokens[0]) * pageSize / 1024);
+  m_info.set_mem_vmrss(std::stoul(tokens[1]) * pageSize / 1024);
+  m_info.set_mem_shared(std::stoul(tokens[2]) * pageSize / 1024);
 
   return true;
 }
