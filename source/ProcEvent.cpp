@@ -60,8 +60,8 @@ ProcEvent::ProcEvent(const std::shared_ptr<Options> options)
         struct __attribute__((aligned(NLMSG_ALIGNTO))) {
           struct nlmsghdr nl_hdr;
           struct __attribute__((__packed__)) {
-            struct cn_msg cn_msg;
             struct proc_event proc_ev;
+            struct cn_msg cn_msg;
           };
         } nlcn_msg;
         ssize_t rc;
@@ -216,8 +216,8 @@ void ProcEvent::startMonitoring(void)
   struct __attribute__((aligned(NLMSG_ALIGNTO))) {
     struct nlmsghdr nl_hdr;
     struct __attribute__((__packed__)) {
-      struct cn_msg cn_msg;
       enum proc_cn_mcast_op cn_mcast;
+      struct cn_msg cn_msg;
     };
   } nlcn_msg;
 
