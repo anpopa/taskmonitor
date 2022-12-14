@@ -114,3 +114,11 @@ The output data from tkmreader is a timeseries structured in several tables. Eac
 Data can be visualized directly from table or queried using SQL for complex scenarios.
 
 <img src="./assets/TaskMonitor-RPI4-SQLiteBrowser_Screenshot1.png" alt="Grafana Dashboard" width="800"/>
+
+#### Useful SQL scripts
+The project provides some useful SQL scripts as reference: 
++ [System CPU usage](./assets/tkm_system_cpu_usage.sql)
++ [System Memory usage](./assets/tkm_system_mem_usage.sql)
++ [System Pressure information](./assets/tkm_system_psi_usage.sql)
++ [Process CPU usage](./assets/tkm_process_cpu_usage.sql)
++ [Process Memory usage](./assets/tkm_process_mem_usage.sql)
