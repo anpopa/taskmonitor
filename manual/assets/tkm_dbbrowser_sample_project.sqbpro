@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?><sqlb_project><db path="/home/alinp/Work/Shared/data.tkm.db" readonly="1" foreign_keys="1" case_sensitive_like="0" temp_store="0" wal_autocheckpoint="1000" synchronous="2"/><attached/><window><main_tabs open="structure browser pragmas query" current="3"/></window><tab_structure><column_width id="0" width="300"/><column_width id="1" width="0"/><column_width id="2" width="100"/><column_width id="3" width="8964"/><column_width id="4" width="0"/><expanded_item id="0" parent="1"/><expanded_item id="1" parent="1"/><expanded_item id="2" parent="1"/><expanded_item id="3" parent="1"/></tab_structure><tab_browse><current_table name="4,14:maintkmContextInfo"/><default_encoding codec=""/><browse_table_settings><table schema="main" name="tkmContextInfo" show_row_id="0" encoding="" plot_x_axis="" unlock_view_pk="_rowid_"><sort/><column_widths><column index="1" value="45"/><column index="2" value="87"/><column index="3" value="110"/><column index="4" value="90"/><column index="5" value="153"/><column index="6" value="98"/><column index="7" value="98"/><column index="8" value="116"/><column index="9" value="85"/><column index="10" value="118"/><column index="11" value="70"/></column_widths><filter_values/><conditional_formats/><row_id_formats/><display_formats/><hidden_columns/><plot_y_axes/><global_filter/></table><table schema="main" name="tkmProcAcct" show_row_id="0" encoding="" plot_x_axis="" unlock_view_pk="_rowid_"><sort/><column_widths><column index="1" value="45"/><column index="2" value="87"/><column index="3" value="110"/><column index="4" value="90"/><column index="5" value="125"/><column index="6" value="48"/><column index="7" value="48"/><column index="8" value="45"/><column index="9" value="53"/><column index="10" value="83"/><column index="11" value="83"/><column index="12" value="73"/><column index="13" value="119"/><column index="14" value="135"/><column index="15" value="102"/><column index="16" value="123"/><column index="17" value="104"/><column index="18" value="104"/><column index="19" value="82"/><column index="20" value="82"/><column index="21" value="62"/><column index="22" value="55"/><column index="23" value="94"/><column index="24" value="124"/><column index="25" value="145"/><column index="26" value="84"/><column index="27" value="113"/><column index="28" value="134"/><column index="29" value="142"/><column index="30" value="146"/><column index="31" value="87"/><column index="32" value="90"/><column index="33" value="106"/><column index="34" value="109"/><column index="35" value="114"/><column index="36" value="143"/><column index="37" value="165"/><column index="38" value="113"/><column index="39" value="142"/><column index="40" value="164"/><column index="41" value="70"/></column_widths><filter_values/><conditional_formats/><row_id_formats/><display_formats/><hidden_columns/><plot_y_axes/><global_filter/></table><table schema="main" name="tkmProcEvent" show_row_id="0" encoding="" plot_x_axis="" unlock_view_pk="_rowid_"><sort/><column_widths><column index="1" value="45"/><column index="2" value="87"/><column index="3" value="110"/><column index="4" value="90"/><column index="5" value="77"/><column index="6" value="76"/><column index="7" value="72"/><column index="8" value="71"/><column index="9" value="70"/><column index="10" value="70"/></column_widths><filter_values/><conditional_formats/><row_id_formats/><display_formats/><hidden_columns/><plot_y_axes/><global_filter/></table><table schema="main" name="tkmProcInfo" show_row_id="0" encoding="" plot_x_axis="" unlock_view_pk="_rowid_"><sort/><column_widths><column index="1" value="45"/><column index="2" value="87"/><column index="3" value="110"/><column index="4" value="90"/><column index="5" value="125"/><column index="6" value="45"/><column index="7" value="45"/><column index="8" value="153"/><column index="9" value="98"/><column index="10" value="65"/><column index="11" value="83"/><column index="12" value="55"/><column index="13" value="55"/><column index="14" value="86"/><column index="15" value="70"/></column_widths><filter_values/><conditional_formats/><row_id_formats/><display_formats/><hidden_columns/><plot_y_axes/><global_filter/></table><table schema="main" name="tkmSessions" show_row_id="0" encoding="" plot_x_axis="" unlock_view_pk="_rowid_"><sort/><column_widths><column index="1" value="45"/><column index="2" value="181"/><column index="3" value="153"/><column index="4" value="77"/><column index="5" value="113"/><column index="6" value="105"/><column index="7" value="51"/></column_widths><filter_values/><conditional_formats/><row_id_formats/><display_formats/><hidden_columns/><plot_y_axes/><global_filter/></table><table schema="main" name="tkmSysProcDiskStats" show_row_id="0" encoding="" plot_x_axis="" unlock_view_pk="_rowid_"><sort/><column_widths><column index="1" value="45"/><column index="2" value="87"/><column index="3" value="110"/><column index="4" value="90"/><column index="5" value="46"/><column index="6" value="47"/><column index="7" value="81"/><column index="8" value="118"/><column index="9" value="97"/><column index="10" value="84"/><column index="11" value="121"/><column index="13" value="88"/><column index="14" value="94"/><column index="15" value="61"/><column index="16" value="105"/><column index="17" value="70"/></column_widths><filter_values/><conditional_formats/><row_id_formats/><display_formats/><hidden_columns/><plot_y_axes/><global_filter/></table><table schema="main" name="tkmSysProcMemInfo" show_row_id="0" encoding="" plot_x_axis="" unlock_view_pk="_rowid_"><sort/><column_widths><column index="1" value="45"/><column index="2" value="87"/><column index="3" value="110"/><column index="4" value="90"/><column index="5" value="73"/><column index="6" value="69"/><column index="7" value="73"/><column index="8" value="88"/><column index="9" value="123"/><column index="10" value="75"/><column index="11" value="71"/><column index="12" value="90"/><column index="13" value="121"/><column index="14" value="69"/><column index="15" value="65"/><column index="16" value="70"/></column_widths><filter_values/><conditional_formats/><row_id_formats/><display_formats/><hidden_columns/><plot_y_axes/><global_filter/></table><table schema="main" name="tkmSysProcPressure" show_row_id="0" encoding="" plot_x_axis="" unlock_view_pk="_rowid_"><sort/><column_widths><column index="1" value="45"/><column index="2" value="87"/><column index="3" value="110"/><column index="4" value="90"/><column index="5" value="110"/><column index="6" value="110"/><column index="7" value="117"/><column index="8" value="102"/><column index="9" value="98"/><column index="10" value="98"/><column index="11" value="105"/><column index="12" value="90"/><column index="13" value="115"/><column index="14" value="115"/><column index="15" value="123"/><column index="16" value="108"/><column index="17" value="103"/><column index="18" value="103"/><column index="19" value="111"/><column index="20" value="96"/><column index="21" value="99"/><column index="22" value="99"/><column index="23" value="106"/><column index="24" value="92"/><column index="25" value="87"/><column index="26" value="87"/><column index="27" value="94"/><column index="28" value="80"/><column index="29" value="70"/></column_widths><filter_values/><conditional_formats/><row_id_formats/><display_formats/><hidden_columns/><plot_y_axes/><global_filter/></table><table schema="main" name="tkmSysProcStat" show_row_id="0" encoding="" plot_x_axis="" unlock_view_pk="_rowid_"><sort/><column_widths><column index="1" value="45"/><column index="2" value="87"/><column index="3" value="110"/><column index="4" value="90"/><column index="6" value="78"/><column index="7" value="83"/><column index="8" value="82"/><column index="9" value="85"/><column index="10" value="70"/></column_widths><filter_values/><conditional_formats/><row_id_formats/><display_formats/><hidden_columns/><plot_y_axes/><global_filter/></table><table schema="main" name="tkmSysProcWireless" show_row_id="0" encoding="" plot_x_axis="" unlock_view_pk="_rowid_"><sort/><column_widths><column index="1" value="45"/><column index="2" value="87"/><column index="3" value="110"/><column index="4" value="90"/><column index="5" value="47"/><column index="6" value="50"/><column index="7" value="85"/><column index="8" value="90"/><column index="9" value="93"/><column index="10" value="109"/><column index="11" value="108"/><column index="12" value="102"/><column index="13" value="109"/><column index="14" value="102"/><column index="15" value="101"/><column index="16" value="70"/></column_widths><filter_values/><conditional_formats/><row_id_formats/><display_formats/><hidden_columns/><plot_y_axes/><global_filter/></table></browse_table_settings></tab_browse><tab_sql><sql name="SystemCPU">-- Get system CPU usage statistics
+SELECT
+    datetime(SystemTime,'unixepoch') as 'SystemTime',
+	datetime(ReceiveTime,'unixepoch') as 'ReceiveTime',
+	MonotonicTime as 'MonotonicTime',
+	CPUStatAll as 'Total',
+	CPUStatUsr as 'User',
+	CPUStatSys as 'System',
+	CPUStatIow as 'IoWait'
+FROM
+	tkmSysProcStat
+WHERE
+    -- Change to core name to get results per core eg 'cpu0'
+	CPUStatName IS 'cpu'
+	-- Condition for a specific session
+		-- AND SessionId IS (SELECT Id FROM tkmSessions WHERE Name IS 'Collector.100363.1670947874')</sql><sql name="SystemMemory">-- Get system Memory usage statistics (in MB)
+SELECT
+    datetime(SystemTime,'unixepoch') as 'SystemTime',
+	datetime(ReceiveTime,'unixepoch') as 'ReceiveTime',
+	MonotonicTime as 'MonotonicTime',
+	round(MemTotal / 1024, 2) as 'Total',
+	round(MemFree / 1024, 2) as 'Free',
+	round(MemAvail / 1024, 2) as 'Available',
+	MemAvailPercent as 'Available%',
+	round(SwapTotal / 1024, 2) as 'SWAP Total',
+	round(SwapFree / 1024, 2) as 'SWAP Free',
+	round(CmaTotal / 1024, 2) as 'CMA Total',
+	round(CmaFree / 1024, 2) as 'CMA Free'
+FROM
+	tkmSysProcMemInfo
+-- Condition for a specific session
+	-- WHERE SessionId IS (SELECT Id FROM tkmSessions WHERE Name IS 'Collector.100363.1670947874')</sql><sql name="SystemPressure">-- Get system PSI usage statistics
+SELECT
+    datetime(SystemTime,'unixepoch') as 'SystemTime',
+	datetime(ReceiveTime,'unixepoch') as 'ReceiveTime',
+	MonotonicTime as 'MonotonicTime',
+	CPUSomeAvg10 as 'CPUSomeAvg10',
+	MEMSomeAvg10 as 'MEMSomeAvg10',
+	IOSomeAvg10 as 'IOSomeAvg10'
+FROM
+	tkmSysProcPressure
+-- Condition for a specific session
+	-- WHERE SessionId IS (SELECT Id FROM tkmSessions WHERE Name IS 'Collector.100363.1670947874')</sql><sql name="ProcessCPU">-- Get process CPU usage statistics
+SELECT
+    datetime(SystemTime,'unixepoch') as 'SystemTime',
+	datetime(ReceiveTime,'unixepoch') as 'ReceiveTime',
+	MonotonicTime as 'MonotonicTime',
+	CPUTime as 'Time',
+	CPUPercent as 'Percent'
+FROM
+	tkmProcInfo
+WHERE
+    -- Change to process name to get results for your process
+	Comm IS 'taskmonitor'
+	-- Condition for specific instance (PID)
+		-- AND PID IS '3630'
+	-- Condition for a specific session
+		-- AND SessionId IS (SELECT Id FROM tkmSessions WHERE Name IS 'Collector.100363.1670947874')</sql><sql name="ProcessMemory">-- Get process Memory usage statistics in KB
+SELECT
+    datetime(SystemTime,'unixepoch') as 'SystemTime',
+	datetime(ReceiveTime,'unixepoch') as 'ReceiveTime',
+	MonotonicTime as 'MonotonicTime',
+	VmSize as 'Size',
+	VmRSS as 'RSS',
+	MemShared as 'Shared'
+FROM
+	tkmProcInfo
+WHERE
+    -- Change to process name to get results for your process
+	Comm IS 'taskmonitor'
+	-- Condition for specific instance (PID)
+		-- AND PID IS '3630'
+	-- Condition for a specific session
+		-- AND SessionId IS (SELECT Id FROM tkmSessions WHERE Name IS 'Collector.100363.1670947874')</sql><current_tab id="4"/></tab_sql></sqlb_project>

@@ -5,8 +5,8 @@ This manual will describe how to use TaskMonitor system components to collect an
 We assume the TaskMonitor service is installed and running on a Linux based target. This can be a real hardware (embedded device or Linux machine) or a virtual machine. We will refer to this device as *the target*.
 
 The TaskMonitor target device should be running with the following settings:
-1. Profiling mode is enabled (see [taskmonitor.conf:L34](./config/taskmonitor.conf.in#L34))
-2. TCP server is enabled (assume default port 3357, [taskmonitor.conf:L68](./config/taskmonitor.conf.in#L68))
+1. Profiling mode is enabled (see [taskmonitor.conf:L46](../config/taskmonitor.conf.in#L46))
+2. TCP server is enabled (assume default port 3357, [taskmonitor.conf:L76](../config/taskmonitor.conf.in#L76))
 3. Target device can accept connections on TaskMonitor TCP port (check device firewall configuration) 
 
 ## Data acquisition
@@ -102,7 +102,7 @@ In Grafana add a new SQLite datasouce named *SQLite* with the following settings
 Please note that Path option is pointing to the target bind mount directory for the output file. The tkmreader output will be open in read only mode by this data source.
 
 #### Import and customize sample dashboard
-For reference download and import the dashboard provided for RPI4 target device. You can customize this dashboard for your specific target by editing the SQL queries for each panel if needed. You can find the dashboard here: [RPI4 Dashboard Sample](./manual/assets/RPI4-1666962900527.json)
+For reference download and import the dashboard provided for RPI4 target device. You can customize this dashboard for your specific target by editing the SQL queries for each panel if needed. You can find the dashboard here: [RPI4 Dashboard Sample](./assets/RPI4-1671016536308.json)
 
 #### Start data collector
 Grafana dashboard for target device setup is complete. You can start *tkmreader* to collect the data. The dashboard will show live data:
@@ -116,9 +116,13 @@ Data can be visualized directly from table or queried using SQL for complex scen
 <img src="./assets/TaskMonitor-RPI4-SQLiteBrowser_Screenshot1.png" alt="Grafana Dashboard" width="800"/>
 
 #### Useful SQL scripts
-The project provides some useful SQL scripts as reference: 
+Here are some useful SQL sample query: 
 + [System CPU usage](./assets/tkm_system_cpu_usage.sql)
 + [System Memory usage](./assets/tkm_system_mem_usage.sql)
 + [System Pressure information](./assets/tkm_system_psi_usage.sql)
 + [Process CPU usage](./assets/tkm_process_cpu_usage.sql)
 + [Process Memory usage](./assets/tkm_process_mem_usage.sql)
+
+#### DB Browser Project
+Sample project for DB browser: 
++ [DB Browser Project](./assets/tkm_dbbrowser_sample_project.sqbpro)

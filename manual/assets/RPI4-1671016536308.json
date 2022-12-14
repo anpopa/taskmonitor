@@ -39,7 +39,7 @@
       "type": "grafana",
       "id": "grafana",
       "name": "Grafana",
-      "version": "9.1.6"
+      "version": "9.3.1"
     },
     {
       "type": "panel",
@@ -134,7 +134,7 @@
         "showThresholdLabels": false,
         "showThresholdMarkers": true
       },
-      "pluginVersion": "9.1.6",
+      "pluginVersion": "9.3.1",
       "targets": [
         {
           "columns": [],
@@ -213,7 +213,7 @@
         "showThresholdLabels": false,
         "showThresholdMarkers": true
       },
-      "pluginVersion": "9.1.6",
+      "pluginVersion": "9.3.1",
       "targets": [
         {
           "datasource": {
@@ -279,7 +279,7 @@
         "showThresholdLabels": false,
         "showThresholdMarkers": true
       },
-      "pluginVersion": "9.1.6",
+      "pluginVersion": "9.3.1",
       "targets": [
         {
           "datasource": {
@@ -388,9 +388,9 @@
           "format": "table",
           "global_query_id": "",
           "hide": false,
-          "queryText": "PRAGMA read_uncommitted = 1;\nSELECT\n   ReceiveTime,\n   CPUStatAll as 'all',\n   CPUStatUsr as 'usr',\n   CPUStatSys as 'sys'\nFROM \n   tkmSysProcStat  NOLOCK \nWHERE CPUStatName = 'cpu' AND ReceiveTime > ${__from:date:seconds} ORDER BY ReceiveTime;",
+          "queryText": "PRAGMA read_uncommitted = 1;\nSELECT\n   ReceiveTime,\n   CPUStatAll as 'all',\n   CPUStatUsr as 'usr',\n   CPUStatSys as 'sys',\n   CPUStatIow as 'iow'\nFROM \n   tkmSysProcStat  NOLOCK \nWHERE CPUStatName = 'cpu' AND ReceiveTime > ${__from:date:seconds} ORDER BY ReceiveTime;",
           "queryType": "table",
-          "rawQueryText": "PRAGMA read_uncommitted = 1;\nSELECT\n   ReceiveTime,\n   CPUStatAll as 'all',\n   CPUStatUsr as 'usr',\n   CPUStatSys as 'sys'\nFROM \n   tkmSysProcStat  NOLOCK \nWHERE CPUStatName = 'cpu' AND ReceiveTime > ${__from:date:seconds} ORDER BY ReceiveTime;",
+          "rawQueryText": "PRAGMA read_uncommitted = 1;\nSELECT\n   ReceiveTime,\n   CPUStatAll as 'all',\n   CPUStatUsr as 'usr',\n   CPUStatSys as 'sys',\n   CPUStatIow as 'iow'\nFROM \n   tkmSysProcStat  NOLOCK \nWHERE CPUStatName = 'cpu' AND ReceiveTime > ${__from:date:seconds} ORDER BY ReceiveTime;",
           "refId": "A",
           "root_selector": "",
           "source": "url",
@@ -732,6 +732,9 @@
             "lineWidth": 1,
             "scaleDistribution": {
               "type": "linear"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
             }
           },
           "mappings": [],
@@ -834,6 +837,9 @@
             "lineWidth": 1,
             "scaleDistribution": {
               "type": "linear"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
             }
           },
           "mappings": [],
@@ -955,16 +961,16 @@
         "showUnfilled": true,
         "text": {}
       },
-      "pluginVersion": "9.1.6",
+      "pluginVersion": "9.3.1",
       "targets": [
         {
           "datasource": {
             "type": "frser-sqlite-datasource",
             "uid": "${DS_SQLITE}"
           },
-          "queryText": "PRAGMA read_uncommitted = 1;\nSELECT DISTINCT\nComm,CpuPercent\nFROM tkmProcInfo NOLOCK\nWHERE  ${__to:date:seconds} - ReceiveTime < 10\nGROUP BY PID;",
+          "queryText": "PRAGMA read_uncommitted = 1;\nSELECT\nComm,CpuPercent\nFROM tkmProcInfo NOLOCK\nWHERE  ${__to:date:seconds} - ReceiveTime < 10\nGROUP BY PID;",
           "queryType": "table",
-          "rawQueryText": "PRAGMA read_uncommitted = 1;\nSELECT DISTINCT\nComm,CpuPercent\nFROM tkmProcInfo NOLOCK\nWHERE  ${__to:date:seconds} - ReceiveTime < 10\nGROUP BY PID;",
+          "rawQueryText": "PRAGMA read_uncommitted = 1;\nSELECT\nComm,CpuPercent\nFROM tkmProcInfo NOLOCK\nWHERE  ${__to:date:seconds} - ReceiveTime < 10\nGROUP BY PID;",
           "refId": "A",
           "timeColumns": [
             "time",
@@ -1043,16 +1049,16 @@
         },
         "showUnfilled": true
       },
-      "pluginVersion": "9.1.6",
+      "pluginVersion": "9.3.1",
       "targets": [
         {
           "datasource": {
             "type": "frser-sqlite-datasource",
             "uid": "${DS_SQLITE}"
           },
-          "queryText": "PRAGMA read_uncommitted = 1;\nSELECT DISTINCT\nComm,VmRSS\nFROM tkmProcInfo NOLOCK\nWHERE  ${__to:date:seconds} - ReceiveTime < 10\nGROUP BY Comm LIMIT 100;",
+          "queryText": "PRAGMA read_uncommitted = 1;\nSELECT\nComm,VmRSS\nFROM tkmProcInfo NOLOCK\nWHERE  ${__to:date:seconds} - ReceiveTime < 10\nGROUP BY PID LIMIT 100;",
           "queryType": "table",
-          "rawQueryText": "PRAGMA read_uncommitted = 1;\nSELECT DISTINCT\nComm,VmRSS\nFROM tkmProcInfo NOLOCK\nWHERE  ${__to:date:seconds} - ReceiveTime < 10\nGROUP BY Comm LIMIT 100;",
+          "rawQueryText": "PRAGMA read_uncommitted = 1;\nSELECT\nComm,VmRSS\nFROM tkmProcInfo NOLOCK\nWHERE  ${__to:date:seconds} - ReceiveTime < 10\nGROUP BY PID LIMIT 100;",
           "refId": "A",
           "timeColumns": [
             "time",
@@ -1205,16 +1211,16 @@
           }
         ]
       },
-      "pluginVersion": "9.1.6",
+      "pluginVersion": "9.3.1",
       "targets": [
         {
           "datasource": {
             "type": "frser-sqlite-datasource",
             "uid": "${DS_SQLITE}"
           },
-          "queryText": "PRAGMA read_uncommitted = 1;\nSELECT DISTINCT\nReceiveTime,Comm,PID, PPID,ContextName,CpuTime,CpuPercent,VmRSS\nFROM tkmProcInfo NOLOCK\nWHERE  ${__to:date:seconds} - ReceiveTime < 5\nGROUP BY PID LIMIT 100;",
+          "queryText": "PRAGMA read_uncommitted = 1;\nSELECT\nReceiveTime,Comm,PID, PPID,ContextName,CpuTime,CpuPercent,VmRSS\nFROM tkmProcInfo NOLOCK\nWHERE  ${__to:date:seconds} - ReceiveTime < 5\nGROUP BY PID LIMIT 100;",
           "queryType": "table",
-          "rawQueryText": "PRAGMA read_uncommitted = 1;\nSELECT DISTINCT\nReceiveTime,Comm,PID, PPID,ContextName,CpuTime,CpuPercent,VmRSS\nFROM tkmProcInfo NOLOCK\nWHERE  ${__to:date:seconds} - ReceiveTime < 5\nGROUP BY PID LIMIT 100;",
+          "rawQueryText": "PRAGMA read_uncommitted = 1;\nSELECT\nReceiveTime,Comm,PID, PPID,ContextName,CpuTime,CpuPercent,VmRSS\nFROM tkmProcInfo NOLOCK\nWHERE  ${__to:date:seconds} - ReceiveTime < 5\nGROUP BY PID LIMIT 100;",
           "refId": "A",
           "timeColumns": [
             "time",
@@ -1354,16 +1360,16 @@
           }
         ]
       },
-      "pluginVersion": "9.1.6",
+      "pluginVersion": "9.3.1",
       "targets": [
         {
           "datasource": {
             "type": "frser-sqlite-datasource",
             "uid": "${DS_SQLITE}"
           },
-          "queryText": "PRAGMA read_uncommitted = 1;\nSELECT DISTINCT\nReceiveTime,ContextName,TotalCpuTime,TotalCpuPercent,TotalVmRSS\nFROM tkmContextInfo NOLOCK\nWHERE  ${__to:date:seconds} - ReceiveTime < 10\nGROUP BY ContextId LIMIT 100;",
+          "queryText": "PRAGMA read_uncommitted = 1;\nSELECT\nReceiveTime,ContextName,TotalCpuTime,TotalCpuPercent,TotalVmRSS\nFROM tkmContextInfo NOLOCK\nWHERE  ${__to:date:seconds} - ReceiveTime < 10\nGROUP BY ContextId LIMIT 100;",
           "queryType": "table",
-          "rawQueryText": "PRAGMA read_uncommitted = 1;\nSELECT DISTINCT\nReceiveTime,ContextName,TotalCpuTime,TotalCpuPercent,TotalVmRSS\nFROM tkmContextInfo NOLOCK\nWHERE  ${__to:date:seconds} - ReceiveTime < 10\nGROUP BY ContextId LIMIT 100;",
+          "rawQueryText": "PRAGMA read_uncommitted = 1;\nSELECT\nReceiveTime,ContextName,TotalCpuTime,TotalCpuPercent,TotalVmRSS\nFROM tkmContextInfo NOLOCK\nWHERE  ${__to:date:seconds} - ReceiveTime < 10\nGROUP BY ContextId LIMIT 100;",
           "refId": "A",
           "timeColumns": [
             "time",
@@ -1395,7 +1401,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               },
               {
                 "color": "red",
@@ -1461,7 +1468,7 @@
         "showHeader": true,
         "sortBy": []
       },
-      "pluginVersion": "9.1.6",
+      "pluginVersion": "9.3.1",
       "targets": [
         {
           "datasource": {
@@ -1502,7 +1509,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               },
               {
                 "color": "red",
@@ -1676,7 +1684,7 @@
         "showHeader": true,
         "sortBy": []
       },
-      "pluginVersion": "9.1.6",
+      "pluginVersion": "9.3.1",
       "targets": [
         {
           "datasource": {
@@ -1717,7 +1725,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               },
               {
                 "color": "red",
@@ -1848,7 +1857,7 @@
           }
         ]
       },
-      "pluginVersion": "9.1.6",
+      "pluginVersion": "9.3.1",
       "targets": [
         {
           "datasource": {
@@ -1887,7 +1896,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               },
               {
                 "color": "red",
@@ -2066,7 +2076,7 @@
           }
         ]
       },
-      "pluginVersion": "9.1.6",
+      "pluginVersion": "9.3.1",
       "targets": [
         {
           "columns": [],
@@ -2077,9 +2087,9 @@
           "filters": [],
           "format": "table",
           "global_query_id": "",
-          "queryText": "PRAGMA read_uncommitted = 1;\nSELECT DISTINCT\nReceiveTime,AcComm,AcUid,AcPid,AcPPid,AcUTime,AcSTime,CpuCount,CpuRunRealTotal,CpuRunVirtualTotal,CoreMem,VirtMem,IOReadChar,IOWriteChar,IOReadSyscalls,IOWriteSyscalls \nFROM tkmProcAcct NOLOCK\nWHERE ReceiveTime > ${__from:date:seconds} \nGROUP BY AcComm LIMIT 100;",
+          "queryText": "PRAGMA read_uncommitted = 1;\nSELECT\nReceiveTime,AcComm,AcUid,AcPid,AcPPid,AcUTime,AcSTime,CpuCount,CpuRunRealTotal,CpuRunVirtualTotal,CoreMem,VirtMem,IOReadChar,IOWriteChar,IOReadSyscalls,IOWriteSyscalls \nFROM tkmProcAcct NOLOCK\nWHERE ReceiveTime > ${__from:date:seconds} \nGROUP BY AcPid LIMIT 100;",
           "queryType": "table",
-          "rawQueryText": "PRAGMA read_uncommitted = 1;\nSELECT DISTINCT\nReceiveTime,AcComm,AcUid,AcPid,AcPPid,AcUTime,AcSTime,CpuCount,CpuRunRealTotal,CpuRunVirtualTotal,CoreMem,VirtMem,IOReadChar,IOWriteChar,IOReadSyscalls,IOWriteSyscalls \nFROM tkmProcAcct NOLOCK\nWHERE ReceiveTime > ${__from:date:seconds} \nGROUP BY AcComm LIMIT 100;",
+          "rawQueryText": "PRAGMA read_uncommitted = 1;\nSELECT\nReceiveTime,AcComm,AcUid,AcPid,AcPPid,AcUTime,AcSTime,CpuCount,CpuRunRealTotal,CpuRunVirtualTotal,CoreMem,VirtMem,IOReadChar,IOWriteChar,IOReadSyscalls,IOWriteSyscalls \nFROM tkmProcAcct NOLOCK\nWHERE ReceiveTime > ${__from:date:seconds} \nGROUP BY AcPid LIMIT 100;",
           "refId": "A",
           "root_selector": "",
           "source": "url",
@@ -2126,6 +2136,6 @@
   "timezone": "",
   "title": "RPI4",
   "uid": "lbLJ7eynz2",
-  "version": 6,
+  "version": 3,
   "weekStart": ""
 }
