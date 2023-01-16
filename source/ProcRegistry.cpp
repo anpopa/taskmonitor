@@ -366,8 +366,8 @@ bool ProcRegistry::update(void)
 
 void ProcRegistry::updateProcessList(void)
 {
-  const std::filesystem::path procPath{"/proc"};
-  for (auto const &procEntry : std::filesystem::directory_iterator{procPath}) {
+  const fs::path procPath{"/proc"};
+  for (auto const &procEntry : fs::directory_iterator{procPath}) {
     if (procEntry.is_directory()) {
       try {
         int pid = std::stoi(procEntry.path().filename());
