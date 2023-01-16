@@ -1,3 +1,10 @@
+* Thu Nov 16 2023 Alin Popa <alin.popa@fxdata.ro> - 1.5.5
+- add unit tests
+- improve documentation
+- add sample SQL scripts in the manual
+- fix build with newest kernels
+- performance optimizations
+
 * Thu Nov 10 2022 Alin Popa <alin.popa@fxdata.ro> - 1.5.4
 - Update to libtaskmonitor v1.0.4
 - Add VmSize and MemShared data support
