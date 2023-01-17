@@ -57,16 +57,14 @@ ProcEvent::ProcEvent(const std::shared_ptr<Options> options)
 
   lateSetup(
       [this]() {
-        struct __attribute__((aligned(NLMSG_ALIGNTO))) {
-          struct nlmsghdr nl_hdr;
-          struct __attribute__((__packed__)) {
-            struct proc_event proc_ev;
-            struct cn_msg cn_msg;
-          };
-        } nlcn_msg;
+        __attribute__((aligned(NLMSG_ALIGNTO))) char
+            msg_buf[sizeof(struct nlmsghdr) + sizeof(struct cn_msg) + sizeof(struct proc_event)]{};
+        struct nlmsghdr *nl_hdr = reinterpret_cast<struct nlmsghdr *>(msg_buf);
+        struct cn_msg *cn_msg = reinterpret_cast<struct cn_msg *>(NLMSG_DATA(nl_hdr));
+        struct proc_event *proc_ev = reinterpret_cast<struct proc_event *>(&cn_msg->data[0]);
         ssize_t rc;
 
-        rc = recv(m_sockFd, &nlcn_msg, sizeof(nlcn_msg), 0);
+        rc = recv(m_sockFd, &msg_buf, sizeof(msg_buf), 0);
         if (rc == 0) {
           return true;
         } else if (rc == -1) {
@@ -74,69 +72,66 @@ ProcEvent::ProcEvent(const std::shared_ptr<Options> options)
           return false;
         }
 
-        switch (nlcn_msg.proc_ev.what) {
+        switch (proc_ev->what) {
         case proc_event::what::PROC_EVENT_NONE:
           logDebug() << "ProcEvent Set mcast listen OK";
           break;
         case proc_event::what::PROC_EVENT_FORK: {
           logInfo() << "proc.event[fork]:"
-                    << " parent_pid=" << nlcn_msg.proc_ev.event_data.fork.parent_pid
-                    << " parent_tgid=" << nlcn_msg.proc_ev.event_data.fork.parent_tgid
-                    << " child_pid=" << nlcn_msg.proc_ev.event_data.fork.child_pid
-                    << " child_tgid=" << nlcn_msg.proc_ev.event_data.fork.child_tgid;
+                    << " parent_pid=" << proc_ev->event_data.fork.parent_pid
+                    << " parent_tgid=" << proc_ev->event_data.fork.parent_tgid
+                    << " child_pid=" << proc_ev->event_data.fork.child_pid
+                    << " child_tgid=" << proc_ev->event_data.fork.child_tgid;
           m_eventData.set_fork_count(m_eventData.fork_count() + 1);
 
           // We only add a process entry in registry for processes
-          if (nlcn_msg.proc_ev.event_data.fork.child_pid ==
-              nlcn_msg.proc_ev.event_data.fork.child_tgid) {
+          if (proc_ev->event_data.fork.child_pid == proc_ev->event_data.fork.child_tgid) {
             if (m_options->getFor(Options::Key::UpdateOnProcEvent) ==
                 tkmDefaults.valFor(Defaults::Val::True)) {
-              App()->getProcRegistry()->addProcEntry(nlcn_msg.proc_ev.event_data.fork.child_tgid);
+              App()->getProcRegistry()->addProcEntry(proc_ev->event_data.fork.child_tgid);
             }
           }
           break;
         }
         case proc_event::what::PROC_EVENT_EXEC: {
           logInfo() << "proc.event[exec]:"
-                    << " process_pid=" << nlcn_msg.proc_ev.event_data.exec.process_pid
-                    << " process_tgid=" << nlcn_msg.proc_ev.event_data.exec.process_tgid;
+                    << " process_pid=" << proc_ev->event_data.exec.process_pid
+                    << " process_tgid=" << proc_ev->event_data.exec.process_tgid;
           m_eventData.set_exec_count(m_eventData.exec_count() + 1);
           if (m_options->getFor(Options::Key::UpdateOnProcEvent) ==
               tkmDefaults.valFor(Defaults::Val::True)) {
-            App()->getProcRegistry()->updProcEntry(nlcn_msg.proc_ev.event_data.exec.process_pid);
+            App()->getProcRegistry()->updProcEntry(proc_ev->event_data.exec.process_pid);
           }
           break;
         }
         case proc_event::what::PROC_EVENT_UID: {
           logInfo() << "proc.event[uid]:"
-                    << " process_pid=" << nlcn_msg.proc_ev.event_data.id.process_pid
-                    << " process_tgid=" << nlcn_msg.proc_ev.event_data.id.process_tgid
-                    << " ruid=" << nlcn_msg.proc_ev.event_data.id.r.ruid
-                    << " euid=" << nlcn_msg.proc_ev.event_data.id.e.euid;
+                    << " process_pid=" << proc_ev->event_data.id.process_pid
+                    << " process_tgid=" << proc_ev->event_data.id.process_tgid
+                    << " ruid=" << proc_ev->event_data.id.r.ruid
+                    << " euid=" << proc_ev->event_data.id.e.euid;
           m_eventData.set_uid_count(m_eventData.uid_count() + 1);
           break;
         }
         case proc_event::what::PROC_EVENT_GID: {
           logInfo() << "proc.event[gid]:"
-                    << " process_pid=" << nlcn_msg.proc_ev.event_data.id.process_pid
-                    << " process_tgid=" << nlcn_msg.proc_ev.event_data.id.process_tgid
-                    << " rgid=" << nlcn_msg.proc_ev.event_data.id.r.rgid
-                    << " egid=" << nlcn_msg.proc_ev.event_data.id.e.egid;
+                    << " process_pid=" << proc_ev->event_data.id.process_pid
+                    << " process_tgid=" << proc_ev->event_data.id.process_tgid
+                    << " rgid=" << proc_ev->event_data.id.r.rgid
+                    << " egid=" << proc_ev->event_data.id.e.egid;
           m_eventData.set_gid_count(m_eventData.gid_count() + 1);
           break;
         }
         case proc_event::what::PROC_EVENT_EXIT: {
           logInfo() << "proc.event[exit]:"
-                    << " process_pid=" << nlcn_msg.proc_ev.event_data.id.process_pid
-                    << " process_tgid=" << nlcn_msg.proc_ev.event_data.id.process_tgid
-                    << " exit_code=" << nlcn_msg.proc_ev.event_data.exit.exit_code;
+                    << " process_pid=" << proc_ev->event_data.id.process_pid
+                    << " process_tgid=" << proc_ev->event_data.id.process_tgid
+                    << " exit_code=" << proc_ev->event_data.exit.exit_code;
           m_eventData.set_exit_count(m_eventData.exit_count() + 1);
-          if (nlcn_msg.proc_ev.event_data.exit.process_pid ==
-              nlcn_msg.proc_ev.event_data.exit.process_tgid) {
+          if (proc_ev->event_data.exit.process_pid == proc_ev->event_data.exit.process_tgid) {
             if (m_options->getFor(Options::Key::UpdateOnProcEvent) ==
                 tkmDefaults.valFor(Defaults::Val::True)) {
-              App()->getProcRegistry()->remProcEntry(nlcn_msg.proc_ev.event_data.exit.process_pid,
-                                                     true);
+              App()->getProcRegistry()->remProcEntry(proc_ev->event_data.exit.process_pid, true);
             }
           }
           break;
@@ -213,25 +208,23 @@ auto ProcEvent::requestHandler(const Request &request) -> bool
 
 void ProcEvent::startMonitoring(void)
 {
-  struct __attribute__((aligned(NLMSG_ALIGNTO))) {
-    struct nlmsghdr nl_hdr;
-    struct __attribute__((__packed__)) {
-      enum proc_cn_mcast_op cn_mcast;
-      struct cn_msg cn_msg;
-    };
-  } nlcn_msg;
+  __attribute__((aligned(NLMSG_ALIGNTO))) char
+      msg_buf[sizeof(struct nlmsghdr) + sizeof(struct cn_msg) + sizeof(enum proc_cn_mcast_op)]{};
+  struct nlmsghdr *nl_hdr = reinterpret_cast<struct nlmsghdr *>(msg_buf);
+  struct cn_msg *cn_msg = reinterpret_cast<struct cn_msg *>(NLMSG_DATA(nl_hdr));
+  enum proc_cn_mcast_op *cn_mcast = reinterpret_cast<enum proc_cn_mcast_op *>(&cn_msg->data[0]);
 
-  memset(&nlcn_msg, 0, sizeof(nlcn_msg));
-  nlcn_msg.nl_hdr.nlmsg_len = sizeof(nlcn_msg);
-  nlcn_msg.nl_hdr.nlmsg_pid = static_cast<uint32_t>(getpid());
-  nlcn_msg.nl_hdr.nlmsg_type = NLMSG_DONE;
+  nl_hdr->nlmsg_len = sizeof(msg_buf);
+  nl_hdr->nlmsg_pid = static_cast<uint32_t>(getpid());
+  nl_hdr->nlmsg_type = NLMSG_DONE;
 
-  nlcn_msg.cn_msg.id.idx = CN_IDX_PROC;
-  nlcn_msg.cn_msg.id.val = CN_VAL_PROC;
-  nlcn_msg.cn_msg.len = sizeof(enum proc_cn_mcast_op);
-  nlcn_msg.cn_mcast = PROC_CN_MCAST_LISTEN;
+  cn_msg->id.idx = CN_IDX_PROC;
+  cn_msg->id.val = CN_VAL_PROC;
+  cn_msg->len = sizeof(enum proc_cn_mcast_op);
 
-  if (send(m_sockFd, &nlcn_msg, sizeof(nlcn_msg), 0) == -1) {
+  *cn_mcast = PROC_CN_MCAST_LISTEN;
+
+  if (send(m_sockFd, &msg_buf, sizeof(msg_buf), 0) == -1) {
     logError() << "Netlink send error";
   }
 }

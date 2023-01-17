@@ -180,6 +180,7 @@ void ProcRegistry::updProcEntry(int pid)
       if (isBlacklisted(procName)) {
         m_procList.remove(entry);
       } else {
+        logDebug() << "Update process name for pid=" << pid << " name=" << procName;
         entry->setName(procName);
       }
     }
