@@ -1,3 +1,7 @@
+* Thu Nov 17 2023 Alin Popa <alin.popa@fxdata.ro> - 1.5.6
+- fix netlink for proc event
+- fix build on old platform
+
 * Thu Nov 16 2023 Alin Popa <alin.popa@fxdata.ro> - 1.5.5
 - add unit tests
 - improve documentation
