@@ -369,7 +369,11 @@ void ProcRegistry::updateProcessList(void)
 {
   const fs::path procPath{"/proc"};
   for (auto const &procEntry : fs::directory_iterator{procPath}) {
+#if __has_include(<filesystem>)
     if (procEntry.is_directory()) {
+#else
+    if (fs::is_directory(procEntry.status())) {
+#endif
       try {
         int pid = std::stoi(procEntry.path().filename());
         addProcEntry(pid);
