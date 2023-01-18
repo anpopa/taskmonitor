@@ -12,6 +12,7 @@
 #include "ProcEntry.h"
 #include "Application.h"
 #include "Helpers.h"
+#include "Logger.h"
 
 namespace tkm::monitor
 {
