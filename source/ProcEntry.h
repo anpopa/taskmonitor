@@ -66,6 +66,9 @@ private:
   tkm::msg::monitor::ProcAcct m_acct;
   tkm::msg::monitor::ProcInfoEntry m_info;
   bool m_updateProcAcctPending = false;
+#ifdef WITH_LXC
+  size_t m_contextNameResolveCount = 0;
+#endif
   std::string m_name{};
   int m_pid = 0;
 };

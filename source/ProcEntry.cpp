@@ -16,6 +16,10 @@
 namespace tkm::monitor
 {
 
+#ifdef WITH_LXC
+constexpr size_t ContextNameMaxRetry = 10;
+#endif
+
 ProcEntry::ProcEntry(int pid, const std::string &name)
 : m_name(name)
 , m_pid(pid)
@@ -52,6 +56,16 @@ bool ProcEntry::updateProcInfo(void)
     return true;
   }
   setUpdatePending(true);
+
+#ifdef WITH_LXC
+  if (m_contextNameResolveCount++ < ContextNameMaxRetry) {
+    if (m_info.ctx_name() == "unknown") {
+      m_info.set_ctx_id(tkm::getContextId(m_pid));
+      m_info.set_ctx_name(tkm::getContextName(
+          App()->getOptions()->getFor(Options::Key::ContainersPath), m_info.ctx_id()));
+    }
+  }
+#endif
 
   try {
     status = updateInfoData();
