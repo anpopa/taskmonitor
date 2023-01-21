@@ -48,6 +48,8 @@ static auto getContainerNameForContext(const std::string &contPath, uint64_t ctx
     free(names[i]);
     lxc_container_put(activeContainers[i]);
   }
+  free(names);
+  free(activeContainers);
 
   return contName;
 }
