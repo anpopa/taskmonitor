@@ -94,10 +94,17 @@ UDSCollector::UDSCollector(int fd)
           case tkm::msg::collector::Request_Type_GetSysProcWireless:
             status = doGetSysProcWireless(getShared());
             break;
+          case tkm::msg::collector::Request_Type_KeepAlive:
+            status = true;
+            break;
           default:
             logDebug() << "Unknown type " << collectorMessage.type();
             status = false;
             break;
+          }
+
+          if (status) {
+            setLastUpdateTime(std::chrono::steady_clock::now());
           }
         } while (status);
 
@@ -108,7 +115,15 @@ UDSCollector::UDSCollector(int fd)
       bswi::event::IEventSource::Priority::Normal);
 
   // For UDSCollector we don't sent ProcAcct so we skip incProcAcctCollectorCounter()
-  setFinalize([this]() { logInfo() << "Ended connection with collector: " << getFD(); });
+  setFinalize([this]() {
+    logInfo() << "Ended connection with collector: " << getFD();
+
+    // The collector event source is about to be removed.
+    // Request state manager to remove this collector without event source removal.
+    StateManager::Request rq = {.action = StateManager::Action::RemoveCollector,
+                                .collector = getShared()};
+    App()->getStateManager()->pushRequest(rq);
+  });
 }
 
 void UDSCollector::setEventSource(bool enabled)
@@ -123,9 +138,6 @@ void UDSCollector::setEventSource(bool enabled)
 UDSCollector::~UDSCollector()
 {
   logDebug() << "UDSCollector " << getFD() << " destructed";
-  if (getFD() > 0) {
-    ::close(getFD());
-  }
 }
 
 static bool doCreateSession(const std::shared_ptr<UDSCollector> collector)
@@ -145,6 +157,10 @@ static bool doCreateSession(const std::shared_ptr<UDSCollector> collector)
   collector->getSessionInfo().set_hash(collector->getDescriptor().id());
   collector->getSessionInfo().set_core_count(static_cast<uint32_t>(sysconf(_SC_NPROCESSORS_ONLN)));
   logInfo() << "Send new sessionID=" << collector->getSessionInfo().hash();
+
+  auto keepAliveInterval =
+      std::stoul(App()->getOptions()->getFor(Options::Key::CollectorInactiveTimeout));
+  collector->getSessionInfo().set_keep_alive_interval(keepAliveInterval);
 
   collector->getSessionInfo().set_fast_lane_interval(App()->getFastLaneInterval());
   collector->getSessionInfo().set_pace_lane_interval(App()->getPaceLaneInterval());

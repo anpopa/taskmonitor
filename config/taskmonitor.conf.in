@@ -44,6 +44,11 @@ ContainersPath=/var/lib/lxc
 ; mode is set. If set to 'none' or path does not exist production mode is
 ; selected by default
 ProfModeIfPath=/run/taskmonitor
+; Collector inactivity timeout. A client collector should send any request or
+; the KeepAlive message at least half this interval time to keep the session alive.
+; If no data request or the KeepAlive is missed the session is closed.
+; Minimum value is 3000000us (3 seconds).
+CollectorInactiveTimeout=10000000
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Production mode options

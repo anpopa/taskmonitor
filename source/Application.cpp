@@ -115,6 +115,10 @@ Application::Application(const std::string &name,
   }
 #endif
 
+  // Create state manager
+  m_stateManager = std::make_shared<StateManager>(m_options);
+  m_stateManager->setEventSource();
+
   // Create and initialize data sources
   m_procRegistry = std::make_shared<ProcRegistry>(m_options);
   m_procRegistry->setUpdateLane(IDataSource::UpdateLane::Any);

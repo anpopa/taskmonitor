@@ -15,6 +15,7 @@
 #include <unistd.h>
 
 #include "Application.h"
+#include "StateManager.h"
 #include "TCPCollector.h"
 #include "TCPServer.h"
 
@@ -65,6 +66,11 @@ TCPServer::TCPServer(const std::shared_ptr<Options> options)
         std::shared_ptr<TCPCollector> collector = std::make_shared<TCPCollector>(collectorFd);
         collector->getDescriptor().CopyFrom(descriptor);
         collector->setEventSource();
+
+        // Request StateManager to monitor collector for inactivity
+        StateManager::Request monitorRequest = {.action = StateManager::Action::MonitorCollector,
+                                                .collector = collector};
+        App()->getStateManager()->pushRequest(monitorRequest);
 
         return true;
       },

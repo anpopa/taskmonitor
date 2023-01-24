@@ -14,6 +14,9 @@
 #include <taskmonitor/taskmonitor.h>
 
 #include "../bswinfra/source/Pollable.h"
+#include "../bswinfra/source/Timer.h"
+#include "IApplication.h"
+#include "Logger.h"
 
 using namespace bswi::event;
 
@@ -28,6 +31,7 @@ public:
   , m_reader(std::make_unique<tkm::EnvelopeReader>(fd))
   , m_writer(std::make_unique<tkm::EnvelopeWriter>(fd))
   {
+    setLastUpdateTime(std::chrono::steady_clock::now());
   }
 
   ~ICollector() { disconnect(); }
@@ -67,15 +71,25 @@ public:
     writeEnvelope(envelope);
   }
 
-public:
-  ICollector(ICollector const &) = delete;
-  void operator=(ICollector const &) = delete;
-
   auto getDescriptor(void) -> tkm::msg::collector::Descriptor & { return m_descriptor; }
   auto getSessionInfo(void) -> tkm::msg::monitor::SessionInfo & { return m_sessionInfo; }
   auto getFD(void) -> int { return m_fd; }
 
+  void setLastUpdateTime(std::chrono::time_point<std::chrono::steady_clock> newTime)
+  {
+    m_lastUpdateTime = newTime;
+  }
+  auto getLastUpdateTime(void) -> std::chrono::time_point<std::chrono::steady_clock>
+  {
+    return m_lastUpdateTime;
+  }
+
+public:
+  ICollector(ICollector const &) = delete;
+  void operator=(ICollector const &) = delete;
+
 private:
+  std::chrono::time_point<std::chrono::steady_clock> m_lastUpdateTime{};
   std::unique_ptr<tkm::EnvelopeReader> m_reader = nullptr;
   std::unique_ptr<tkm::EnvelopeWriter> m_writer = nullptr;
   tkm::msg::collector::Descriptor m_descriptor{};

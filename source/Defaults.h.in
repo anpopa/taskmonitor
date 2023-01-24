@@ -47,9 +47,11 @@ public:
     TCPServerAddress,
     TCPServerPort,
     UDSServerSocketPath,
+    CollectorInactiveTimeout,
   };
 
   enum class Val { True, False, None, ProcAcct, ProcInfo };
+  enum class Arg { WithEventSource };
 
   Defaults()
   {
@@ -80,20 +82,25 @@ public:
     m_table.insert(std::pair<Default, std::string>(Default::TCPServerPort, "3357"));
     m_table.insert(std::pair<Default, std::string>(Default::UDSServerSocketPath,
                                                    "/run/taskmonitor/taskmonitor.sock"));
+    m_table.insert(std::pair<Default, std::string>(Default::CollectorInactiveTimeout, "10000000"));
 
     m_vals.insert(std::pair<Val, std::string>(Val::True, "true"));
     m_vals.insert(std::pair<Val, std::string>(Val::False, "false"));
     m_vals.insert(std::pair<Val, std::string>(Val::None, "none"));
     m_vals.insert(std::pair<Val, std::string>(Val::ProcAcct, "ProcAcct"));
     m_vals.insert(std::pair<Val, std::string>(Val::ProcInfo, "ProcInfo"));
+
+    m_args.insert(std::pair<Arg, std::string>(Arg::WithEventSource, "WithEventSource"));
   }
 
   auto getFor(Default key) -> std::string & { return m_table.at(key); }
   auto valFor(Val key) -> std::string & { return m_vals.at(key); }
+  auto argFor(Arg key) -> std::string & { return m_args.at(key); }
 
 private:
   std::map<Default, std::string> m_table;
   std::map<Val, std::string> m_vals;
+  std::map<Arg, std::string> m_args;
 };
 
 static Defaults tkmDefaults{};

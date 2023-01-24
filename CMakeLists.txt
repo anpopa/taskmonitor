@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.7.2)
 project(TaskMonitor
         LANGUAGES CXX
-        VERSION 1.5.6
+        VERSION 1.5.7
 )
 
 set(CMAKE_PROJECT_HOMEPAGE_URL "https://gitlab.com/taskmonitor/taskmonitor")
@@ -194,6 +194,7 @@ add_executable(taskmonitor
     source/ProcEntry.cpp
     source/ContextEntry.cpp
     source/ProcRegistry.cpp
+    source/StateManager.cpp
     source/TCPCollector.cpp
     source/TCPServer.cpp
     source/UDSCollector.cpp

@@ -9,6 +9,7 @@
  *-
  */
 
+#include <cstdlib>
 #include <taskmonitor/taskmonitor.h>
 
 #include "Application.h"
@@ -101,10 +102,17 @@ TCPCollector::TCPCollector(int fd)
           case tkm::msg::collector::Request_Type_GetSysProcWireless:
             status = doGetSysProcWireless(getShared());
             break;
+          case tkm::msg::collector::Request_Type_KeepAlive:
+            status = true;
+            break;
           default:
             logDebug() << "Unknown type " << collectorMessage.type();
             status = false;
             break;
+          }
+
+          if (status) {
+            setLastUpdateTime(std::chrono::steady_clock::now());
           }
         } while (status);
 
@@ -116,8 +124,17 @@ TCPCollector::TCPCollector(int fd)
 
   setFinalize([this]() {
     logInfo() << "Ended connection with collector: " << getFD();
+
+    // The collector event source is about to be removed.
+    // Request state manager to remove this collector without event source removal.
+    StateManager::Request rq = {.action = StateManager::Action::RemoveCollector,
+                                .collector = getShared()};
+    App()->getStateManager()->pushRequest(rq);
+
+    // Decrement ProcAcct collector usage counter
     App()->decProcAcctCollectorCounter();
   });
+
   App()->incProcAcctCollectorCounter();
 }
 
@@ -133,9 +150,6 @@ void TCPCollector::setEventSource(bool enabled)
 TCPCollector::~TCPCollector()
 {
   logDebug() << "TCPCollector " << getFD() << " destructed";
-  if (getFD() > 0) {
-    ::close(getFD());
-  }
 }
 
 static bool doCreateSession(const std::shared_ptr<TCPCollector> collector)
@@ -155,6 +169,10 @@ static bool doCreateSession(const std::shared_ptr<TCPCollector> collector)
   collector->getSessionInfo().set_hash(collector->getDescriptor().id());
   collector->getSessionInfo().set_core_count(static_cast<uint32_t>(sysconf(_SC_NPROCESSORS_ONLN)));
   logInfo() << "Send new sessionID=" << collector->getSessionInfo().hash();
+
+  auto keepAliveInterval =
+      std::stoul(App()->getOptions()->getFor(Options::Key::CollectorInactiveTimeout));
+  collector->getSessionInfo().set_keep_alive_interval(keepAliveInterval);
 
   collector->getSessionInfo().set_fast_lane_interval(App()->getFastLaneInterval());
   collector->getSessionInfo().set_pace_lane_interval(App()->getPaceLaneInterval());

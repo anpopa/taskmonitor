@@ -24,6 +24,7 @@
 #endif
 #include "ProcEntry.h"
 #include "ProcRegistry.h"
+#include "StateManager.h"
 #include "SysProcBuddyInfo.h"
 #include "SysProcDiskStats.h"
 #include "SysProcMemInfo.h"
@@ -74,32 +75,18 @@ public:
   auto getTCPServer(void) -> const std::shared_ptr<TCPServer> { return m_netServer; }
   auto getUDSServer(void) -> const std::shared_ptr<UDSServer> { return m_udsServer; }
   auto getProcRegistry(void) -> const std::shared_ptr<ProcRegistry> { return m_procRegistry; }
+  auto getStateManager(void) -> const std::shared_ptr<StateManager> { return m_stateManager; }
 #ifdef WITH_PROC_ACCT
-  auto getProcAcct(void) -> const std::shared_ptr<ProcAcct>
-  {
-    return m_procAcct;
-  }
+  auto getProcAcct(void) -> const std::shared_ptr<ProcAcct> { return m_procAcct; }
 #endif
 #ifdef WITH_PROC_EVENT
-  auto getProcEvent(void) -> const std::shared_ptr<ProcEvent>
-  {
-    return m_procEvent;
-  }
+  auto getProcEvent(void) -> const std::shared_ptr<ProcEvent> { return m_procEvent; }
 #endif
 #ifdef WITH_STARTUP_DATA
-  auto getStartupData(void) -> const std::shared_ptr<StartupData>
-  {
-    return m_startupData;
-  }
+  auto getStartupData(void) -> const std::shared_ptr<StartupData> { return m_startupData; }
 #endif
-  auto getSysProcStat(void) -> const std::shared_ptr<SysProcStat>
-  {
-    return m_sysProcStat;
-  }
-  auto getSysProcMemInfo(void) -> const std::shared_ptr<SysProcMemInfo>
-  {
-    return m_sysProcMemInfo;
-  }
+  auto getSysProcStat(void) -> const std::shared_ptr<SysProcStat> { return m_sysProcStat; }
+  auto getSysProcMemInfo(void) -> const std::shared_ptr<SysProcMemInfo> { return m_sysProcMemInfo; }
   auto getSysProcWireless(void) -> const std::shared_ptr<SysProcWireless>
   {
     return m_sysProcWireless;
@@ -116,40 +103,19 @@ public:
   {
     return m_sysProcBuddyInfo;
   }
-  bool hasConfigFile(void)
-  {
-    return m_options->hasConfigFile();
-  }
+  bool hasConfigFile(void) { return m_options->hasConfigFile(); }
   auto getConfigFile(void) -> const std::shared_ptr<bswi::kf::KeyFile>
   {
     return m_options->getConfigFile();
   }
 
-  void incProcAcctCollectorCounter(void)
-  {
-    m_procAcctCollectorCounter++;
-  }
-  void decProcAcctCollectorCounter(void)
-  {
-    m_procAcctCollectorCounter--;
-  }
-  auto getProcAcctCollectorCounter(void) -> unsigned short
-  {
-    return m_procAcctCollectorCounter;
-  }
+  void incProcAcctCollectorCounter(void) { m_procAcctCollectorCounter++; }
+  void decProcAcctCollectorCounter(void) { m_procAcctCollectorCounter--; }
+  auto getProcAcctCollectorCounter(void) -> unsigned short { return m_procAcctCollectorCounter; }
 
-  auto getFastLaneInterval(void) -> uint64_t
-  {
-    return m_fastLaneInterval;
-  }
-  auto getPaceLaneInterval(void) -> uint64_t
-  {
-    return m_paceLaneInterval;
-  }
-  auto getSlowLaneInterval(void) -> uint64_t
-  {
-    return m_slowLaneInterval;
-  }
+  auto getFastLaneInterval(void) -> uint64_t { return m_fastLaneInterval; }
+  auto getPaceLaneInterval(void) -> uint64_t { return m_paceLaneInterval; }
+  auto getSlowLaneInterval(void) -> uint64_t { return m_slowLaneInterval; }
 
 public:
   Application(Application const &) = delete;
@@ -163,6 +129,7 @@ private:
   std::shared_ptr<Options> m_options = nullptr;
   std::shared_ptr<TCPServer> m_netServer = nullptr;
   std::shared_ptr<UDSServer> m_udsServer = nullptr;
+  std::shared_ptr<StateManager> m_stateManager = nullptr;
 #ifdef WITH_PROC_ACCT
   std::shared_ptr<ProcAcct> m_procAcct = nullptr;
 #endif

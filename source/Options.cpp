@@ -228,6 +228,24 @@ auto Options::getFor(Key key) -> string const
       return prop.value_or(tkmDefaults.getFor(Defaults::Default::UpdateOnProcEvent));
     }
     return tkmDefaults.getFor(Defaults::Default::UpdateOnProcEvent);
+  case Key::CollectorInactiveTimeout:
+    if (hasConfigFile()) {
+      const optional<string> prop =
+          m_configFile->getPropertyValue("monitor", -1, "CollectorInactiveTimeout");
+
+      try {
+        auto interval = std::stoul(
+            prop.value_or(tkmDefaults.getFor(Defaults::Default::CollectorInactiveTimeout)));
+        if (interval < 3000000) {
+          return tkmDefaults.getFor(Defaults::Default::CollectorInactiveTimeout);
+        }
+      } catch (...) {
+        return tkmDefaults.getFor(Defaults::Default::CollectorInactiveTimeout);
+      }
+
+      return prop.value_or(tkmDefaults.getFor(Defaults::Default::CollectorInactiveTimeout));
+    }
+    return tkmDefaults.getFor(Defaults::Default::ProfModeFastLaneInt);
   case Key::StartupDataCleanupTime:
     if (hasConfigFile()) {
       const optional<string> prop =

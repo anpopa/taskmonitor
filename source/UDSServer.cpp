@@ -66,6 +66,11 @@ UDSServer::UDSServer(const std::shared_ptr<Options> options)
         collector->getDescriptor().CopyFrom(descriptor);
         collector->setEventSource();
 
+        // Request StateManager to monitor collector for inactivity
+        StateManager::Request monitorRequest = {.action = StateManager::Action::MonitorCollector,
+                                                .collector = collector};
+        App()->getStateManager()->pushRequest(monitorRequest);
+
         return true;
       },
       m_sockFd,

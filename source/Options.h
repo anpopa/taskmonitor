@@ -49,6 +49,7 @@ public:
     TCPServerAddress,
     TCPServerPort,
     UDSServerSocketPath,
+    CollectorInactiveTimeout,
   };
 
 public:
