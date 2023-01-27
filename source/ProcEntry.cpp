@@ -21,9 +21,9 @@ constexpr size_t ContextNameMaxRetry = 10;
 #endif
 
 ProcEntry::ProcEntry(int pid, const std::string &name)
-: m_name(name)
-, m_pid(pid)
+: m_pid(pid)
 {
+  setName(name);
   initInfoData();
 }
 
@@ -114,7 +114,6 @@ void ProcEntry::initInfoData(void)
   auto cpuTime =
       std::stoul(tokens[13 + afterNameOffset]) + std::stoul(tokens[14 + afterNameOffset]);
   m_info.set_cpu_time(cpuTime);
-  m_info.set_comm(m_name);
 
   // If need to run as root for context identification
   if (getuid() == 0) {

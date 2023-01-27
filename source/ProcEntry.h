@@ -35,23 +35,20 @@ public:
   bool update(const std::string &sourceName) override;
   bool update(void) override;
 
+#ifdef WITH_PROC_ACCT
   auto getAcct(void) -> tkm::msg::monitor::ProcAcct & { return m_acct; }
   void setAcct(tkm::msg::monitor::ProcAcct &acct) { m_acct.CopyFrom(acct); }
+  bool getUpdateProcAcctPending(void) { return m_updateProcAcctPending; }
+  void setUpdateProcAcctPending(bool state) { m_updateProcAcctPending = state; }
+#endif
 
   auto getData(void) -> tkm::msg::monitor::ProcInfoEntry & { return m_info; }
   void setData(tkm::msg::monitor::ProcInfoEntry &proc) { m_info.CopyFrom(proc); }
 
-  auto getName(void) -> std::string & { return m_name; }
-  void setName(const std::string &name)
-  {
-    m_name = name;
-    m_info.set_comm(name);
-  }
+  auto getName(void) -> const std::string & { return m_info.comm(); }
+  void setName(const std::string &name) { m_info.set_comm(name); }
   auto getPid(void) -> int { return m_pid; }
   auto getContextId(void) -> uint64_t { return m_info.ctx_id(); }
-
-  bool getUpdateProcAcctPending(void) { return m_updateProcAcctPending; }
-  void setUpdateProcAcctPending(bool state) { m_updateProcAcctPending = state; }
 
 private:
   void initInfoData(void);
@@ -63,13 +60,14 @@ private:
 
 private:
   std::chrono::time_point<std::chrono::steady_clock> m_lastUpdateTime{};
-  tkm::msg::monitor::ProcAcct m_acct;
   tkm::msg::monitor::ProcInfoEntry m_info;
+#ifdef WITH_PROC_ACCT
+  tkm::msg::monitor::ProcAcct m_acct;
   bool m_updateProcAcctPending = false;
+#endif
 #ifdef WITH_LXC
   size_t m_contextNameResolveCount = 0;
 #endif
-  std::string m_name{};
   int m_pid = 0;
 };
 
