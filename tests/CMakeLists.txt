@@ -30,6 +30,7 @@ set(APPLICATION_TEST_SRCS
     ${CMAKE_SOURCE_DIR}/source/ProcEntry.cpp
     ${CMAKE_SOURCE_DIR}/source/ContextEntry.cpp
     ${CMAKE_SOURCE_DIR}/source/ProcRegistry.cpp
+    ${CMAKE_SOURCE_DIR}/source/StateManager.cpp
     ${CMAKE_SOURCE_DIR}/source/TCPCollector.cpp
     ${CMAKE_SOURCE_DIR}/source/TCPServer.cpp
     ${CMAKE_SOURCE_DIR}/source/UDSCollector.cpp
@@ -447,6 +448,7 @@ set(TCPINTERFACE_TEST_SRCS
     ${CMAKE_SOURCE_DIR}/source/ProcEntry.cpp
     ${CMAKE_SOURCE_DIR}/source/ContextEntry.cpp
     ${CMAKE_SOURCE_DIR}/source/ProcRegistry.cpp
+    ${CMAKE_SOURCE_DIR}/source/StateManager.cpp
     ${CMAKE_SOURCE_DIR}/source/SysProcStat.cpp
     ${CMAKE_SOURCE_DIR}/source/SysProcMemInfo.cpp
     ${CMAKE_SOURCE_DIR}/source/SysProcPressure.cpp
@@ -491,6 +493,7 @@ set(UDSINTERFACE_TEST_SRCS
     ${CMAKE_SOURCE_DIR}/source/ProcEntry.cpp
     ${CMAKE_SOURCE_DIR}/source/ContextEntry.cpp
     ${CMAKE_SOURCE_DIR}/source/ProcRegistry.cpp
+    ${CMAKE_SOURCE_DIR}/source/StateManager.cpp
     ${CMAKE_SOURCE_DIR}/source/SysProcStat.cpp
     ${CMAKE_SOURCE_DIR}/source/SysProcMemInfo.cpp
     ${CMAKE_SOURCE_DIR}/source/SysProcPressure.cpp

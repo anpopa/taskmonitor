@@ -15,8 +15,6 @@
 
 #include "../bswinfra/source/Pollable.h"
 #include "../bswinfra/source/Timer.h"
-#include "IApplication.h"
-#include "Logger.h"
 
 using namespace bswi::event;
 

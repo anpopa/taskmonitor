@@ -61,6 +61,9 @@ GTestTCPInterface::~GTestTCPInterface()
 
 void GTestTCPInterface::SetUp()
 {
+  App()->m_stateManager = std::make_shared<StateManager>(App()->getOptions());
+  App()->getStateManager()->setEventSource(true);
+
   App()->m_netServer = std::make_shared<TCPServer>(App()->getOptions());
   App()->getTCPServer()->setEventSource(true);
 
@@ -71,6 +74,7 @@ void GTestTCPInterface::SetUp()
 void GTestTCPInterface::TearDown()
 {
   App()->getTCPServer()->setEventSource(false);
+  App()->getStateManager()->setEventSource(false);
   m_reader->setEventSource(false);
 }
 

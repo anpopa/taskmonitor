@@ -24,6 +24,7 @@
 #endif
 #include "ProcEntry.h"
 #include "ProcRegistry.h"
+#include "StateManager.h"
 #include "SysProcBuddyInfo.h"
 #include "SysProcDiskStats.h"
 #include "SysProcMemInfo.h"
@@ -74,6 +75,7 @@ public:
   auto getTCPServer(void) -> const std::shared_ptr<TCPServer> { return m_netServer; }
   auto getUDSServer(void) -> const std::shared_ptr<UDSServer> { return m_udsServer; }
   auto getProcRegistry(void) -> const std::shared_ptr<ProcRegistry> { return m_procRegistry; }
+  auto getStateManager(void) -> const std::shared_ptr<StateManager> { return m_stateManager; }
 #ifdef WITH_PROC_ACCT
   auto getProcAcct(void) -> const std::shared_ptr<ProcAcct>
   {
@@ -129,6 +131,7 @@ public:
   std::shared_ptr<Options> m_options = nullptr;
   std::shared_ptr<TCPServer> m_netServer = nullptr;
   std::shared_ptr<UDSServer> m_udsServer = nullptr;
+  std::shared_ptr<StateManager> m_stateManager = nullptr;
 #ifdef WITH_PROC_ACCT
   std::shared_ptr<ProcAcct> m_procAcct = nullptr;
 #endif
