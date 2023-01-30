@@ -36,25 +36,17 @@ Application::Application(const std::string &name,
                          const std::string &configFile)
 : bswi::app::IApplication(name, description)
 {
-  bool profModeEnabled = false;
-
   if (Application::appInstance != nullptr) {
     throw bswi::except::SingleInstance();
   }
   appInstance = this;
 
   m_options = std::make_shared<Options>(configFile);
-
-  auto profCond = m_options->getFor(Options::Key::ProfModeIfPath);
-  if (profCond != tkmDefaults.valFor(Defaults::Val::None)) {
-    if (fs::exists(profCond)) {
-      logInfo() << "Profiling mode enabled";
-      profModeEnabled = true;
-    }
-  }
+  bool profModeEnabled = isProfMode(m_options);
 
   // Set update lanes intervals based on runtime mode
   if (profModeEnabled) {
+    logInfo() << "Profiling mode enabled";
     m_fastLaneInterval = std::stoul(m_options->getFor(Options::Key::ProfModeFastLaneInt));
     m_paceLaneInterval = std::stoul(m_options->getFor(Options::Key::ProfModePaceLaneInt));
     m_slowLaneInterval = std::stoul(m_options->getFor(Options::Key::ProfModeSlowLaneInt));
@@ -68,11 +60,11 @@ Application::Application(const std::string &name,
              << " pace=" << m_paceLaneInterval << " slow=" << m_slowLaneInterval;
 
   if (m_options->getFor(Options::Key::EnableTCPServer) == tkmDefaults.valFor(Defaults::Val::True)) {
-    m_netServer = std::make_shared<TCPServer>(m_options);
-    m_netServer->setEventSource();
-    if (isProfMode(m_options)) {
+    if (profModeEnabled) {
+      m_netServer = std::make_shared<TCPServer>(m_options);
       try {
         m_netServer->bindAndListen();
+        m_netServer->setEventSource();
       } catch (std::exception &e) {
         logError() << "Fail to start TCP server. Exception: " << e.what();
       }
@@ -81,8 +73,8 @@ Application::Application(const std::string &name,
 
   if (m_options->getFor(Options::Key::EnableUDSServer) == tkmDefaults.valFor(Defaults::Val::True)) {
     m_udsServer = std::make_shared<UDSServer>(m_options);
-    m_udsServer->setEventSource();
     try {
+      m_udsServer->setEventSource();
       m_udsServer->start();
     } catch (std::exception &e) {
       logError() << "Fail to start UDS server. Exception: " << e.what();
@@ -98,7 +90,7 @@ Application::Application(const std::string &name,
 
 #ifdef WITH_PROC_ACCT
   if (m_options->getFor(Options::Key::EnableProcAcct) == tkmDefaults.valFor(Defaults::Val::True)) {
-    if (isProfMode(m_options)) {
+    if (profModeEnabled) {
       m_procAcct = std::make_shared<ProcAcct>(m_options);
       m_procAcct->setEventSource();
     }
@@ -108,7 +100,7 @@ Application::Application(const std::string &name,
 #ifdef WITH_STARTUP_DATA
   if (m_options->getFor(Options::Key::EnableStartupData) ==
       tkmDefaults.valFor(Defaults::Val::True)) {
-    if (isProfMode(m_options)) {
+    if (profModeEnabled) {
       m_startupData = std::make_shared<StartupData>(m_options);
       m_startupData->setEventSource();
     }
