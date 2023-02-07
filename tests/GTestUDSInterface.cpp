@@ -65,6 +65,8 @@ void GTestUDSInterface::SetUp()
   App()->getStateManager()->setEventSource(true);
 
   App()->m_udsServer = std::make_shared<UDSServer>(App()->getOptions());
+  App()->getUDSServer()->setEventSource(true);
+
   m_reader = std::make_shared<Reader>(App()->getOptions(), Reader::Type::UNIX);
   m_reader->setEventSource(true);
 }

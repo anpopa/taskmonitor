@@ -74,8 +74,8 @@ Application::Application(const std::string &name,
   if (m_options->getFor(Options::Key::EnableUDSServer) == tkmDefaults.valFor(Defaults::Val::True)) {
     m_udsServer = std::make_shared<UDSServer>(m_options);
     try {
-      m_udsServer->setEventSource();
       m_udsServer->start();
+      m_udsServer->setEventSource();
     } catch (std::exception &e) {
       logError() << "Fail to start UDS server. Exception: " << e.what();
     }
