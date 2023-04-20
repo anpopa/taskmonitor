@@ -76,7 +76,7 @@ void PressureStat::updateStats(void)
           } else if (keyVal[0] == "avg300") {
             data.set_avg300(std::stof(keyVal[1]));
           } else if (keyVal[0] == "total") {
-            data.set_total(std::stoul(keyVal[1]));
+            data.set_total(std::stoull(keyVal[1]));
           }
         }
       }
