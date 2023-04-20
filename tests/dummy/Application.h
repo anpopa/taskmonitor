@@ -46,6 +46,8 @@ namespace tkm::monitor
 class Application final : public bswi::app::IApplication
 {
 public:
+  enum class Action { ResetProcEvent, SyncProcList };
+
   explicit Application(const std::string &name,
                        const std::string &description,
                        const std::string &configFile);
@@ -71,6 +73,9 @@ public:
       m_mainEventLoop->stop();
     }
   }
+
+  auto pushAction(const Action &action) -> int { return m_actionQueue->push(action); }
+
   auto getOptions(void) -> const std::shared_ptr<Options> { return m_options; }
   auto getTCPServer(void) -> const std::shared_ptr<TCPServer> { return m_netServer; }
   auto getUDSServer(void) -> const std::shared_ptr<UDSServer> { return m_udsServer; }
@@ -126,6 +131,7 @@ public:
 public:
   Application(Application const &) = delete;
   void operator=(Application const &) = delete;
+  bool actionHandler(const Action &action);
 
 public:
   std::shared_ptr<Options> m_options = nullptr;
@@ -151,6 +157,7 @@ public:
   std::atomic<unsigned short> m_procAcctCollectorCounter = 0;
 
 private:
+  std::shared_ptr<AsyncQueue<Application::Action>> m_actionQueue = nullptr;
   static Application *appInstance;
 };
 

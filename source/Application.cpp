@@ -9,6 +9,7 @@
  *-
  */
 
+#include "Logger.h"
 #ifdef WITH_SYSTEMD
 #include <systemd/sd-daemon.h>
 #endif
@@ -43,6 +44,10 @@ Application::Application(const std::string &name,
 
   m_options = std::make_shared<Options>(configFile);
   bool profModeEnabled = isProfMode(m_options);
+
+  m_actionQueue = std::make_shared<AsyncQueue<Application::Action>>(
+      "AppActionQueue", [this](const Action &action) { return actionHandler(action); });
+  addEventSource(m_actionQueue);
 
   // Set update lanes intervals based on runtime mode
   if (profModeEnabled) {
@@ -184,6 +189,35 @@ Application::Application(const std::string &name,
       }
     }
   }
+}
+
+auto Application::actionHandler(const Action &action) -> bool
+{
+  switch (action) {
+  case Application::Action::ResetProcEvent:
+#ifdef WITH_PROC_EVENT
+    if (m_options->getFor(Options::Key::EnableProcEvent) ==
+        tkmDefaults.valFor(Defaults::Val::True)) {
+      m_procEvent = std::make_shared<ProcEvent>(m_options);
+      m_procEvent->setEventSource();
+    } else {
+      logWarn() << "ProcEvent not enabled in configuration";
+    }
+#else
+    logError() << "ProcEvent build time disabled";
+#endif
+    break;
+  case Application::Action::SyncProcList:
+    if (m_procRegistry != nullptr) {
+      m_procRegistry->updateProcessList();
+    }
+    break;
+  default:
+    break;
+  }
+
+  logError() << "Unknown action request";
+  return false;
 }
 
 void Application::enableUpdateLanes(void)

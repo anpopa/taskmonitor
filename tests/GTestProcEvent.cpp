@@ -36,9 +36,6 @@ protected:
   GTestProcEvent();
   virtual ~GTestProcEvent();
 
-  virtual void SetUp();
-  virtual void TearDown();
-
 protected:
   std::unique_ptr<std::thread> m_ownThread = nullptr;
 };
@@ -47,6 +44,15 @@ GTestProcEvent::GTestProcEvent()
 {
   app = std::make_unique<Application>("TKM", "TaskMonitor Application", "assets/taskmonitor.conf");
   if (getuid() == 0) {
+    // Create ProcRegistry
+    App()->m_procRegistry = std::make_shared<ProcRegistry>(App()->getOptions());
+    App()->getProcRegistry()->setEventSource();
+
+    // Create ProcEvent
+    App()->m_procEvent = std::make_shared<ProcEvent>(App()->getOptions());
+    App()->getProcEvent()->setEventSource();
+
+    // Run app
     m_ownThread = std::make_unique<std::thread>(appRun);
   }
 }
@@ -58,27 +64,6 @@ GTestProcEvent::~GTestProcEvent()
     m_ownThread->join();
   }
   app.reset();
-}
-
-void GTestProcEvent::SetUp()
-{
-  if (getuid() == 0) {
-    // Create ProcRegistry
-    App()->m_procRegistry = std::make_shared<ProcRegistry>(App()->getOptions());
-    App()->getProcRegistry()->setEventSource();
-
-    // Create ProcEvent
-    App()->m_procEvent = std::make_shared<ProcEvent>(App()->getOptions());
-    App()->getProcEvent()->setEventSource();
-  }
-}
-
-void GTestProcEvent::TearDown()
-{
-  if (getuid() == 0) {
-    App()->getProcRegistry()->setEventSource(false);
-    App()->getProcEvent()->setEventSource(false);
-  }
 }
 
 TEST_F(GTestProcEvent, Update)

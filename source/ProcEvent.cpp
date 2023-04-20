@@ -15,6 +15,7 @@
 #include <unistd.h>
 
 #include "Application.h"
+#include "Logger.h"
 #include "ProcEvent.h"
 
 namespace tkm::monitor
@@ -148,12 +149,8 @@ ProcEvent::ProcEvent(const std::shared_ptr<Options> options)
 
   // If the event is removed we stop the main application
   setFinalize([this]() {
-    logInfo() << "ProcEvent kernel closed connection";
-    if (m_options->getFor(Options::Key::UpdateOnProcEvent) ==
-        tkmDefaults.valFor(Defaults::Val::True)) {
-      logError() << "ProcEvent source lost. Terminate taskmonitor";
-      App()->stop();
-    }
+    logInfo() << "ProcEvent kernel closed connection. Restarting module";
+    App()->pushAction(Application::Action::ResetProcEvent);
   });
 
   m_queue = std::make_shared<AsyncQueue<ProcEvent::Request>>(
@@ -166,6 +163,7 @@ ProcEvent::~ProcEvent()
     ::close(m_sockFd);
     m_sockFd = -1;
   }
+  logWarn() << "ProcEvent module destructed";
 }
 
 auto ProcEvent::pushRequest(ProcEvent::Request &request) -> int
