@@ -1,3 +1,5 @@
+* Thu Apr 20 2023 Alin Popa <alin.popa@fxdata.ro> - 1.5.9
+- fix PSI crash on total time out of range
 
 * Thu Jan 24 2023 Alin Popa <alin.popa@fxdata.ro> - 1.5.7
 - monitor collectors for inactivity
