@@ -13,6 +13,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 LIST(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" "${CMAKE_CURRENT_SOURCE_DIR}/bswinfra/cmake")
 
 # options
+option(WITH_STATIC_LIBS "Build with static libraries" N)
 option(WITH_LXC "Build with LXC container support" N)
 option(WITH_SYSTEMD "Build with systemd watchdog and journald support" Y)
 option(WITH_STARTUP_DATA "Build with StartupData module support" Y)
@@ -24,6 +25,14 @@ option(WITH_TESTS "Build test suite" N)
 option(WITH_TIDY "Build with clang-tidy" N)
 option(WITH_ASAN "Build with address sanitize" N)
 option(WITH_GCC_HARDEN_FLAGS "Build with GCC harden compile flags" N)
+
+# static library paths
+set(LIBTKM_STATIC_PATH "/usr/lib/libtkm.a" CACHE STRING "The libtaskmonitor static library path")
+set(LIBPROTOBUF_STATIC_PATH "/usr/lib/libprotobuf.a" CACHE STRING "The libprotobuf static library path")
+set(LIBNL3_STATIC_PATH "/usr/lib/libnl-3.a" CACHE STRING "The libnl3 static library path")
+set(LIBNLGENL3_STATIC_PATH "/usr/lib/libnl-genl-3.a" CACHE STRING "The libnl-genl-3 static library path")
+set(LIBLXC_STATIC_PATH "/usr/lib/liblxc.a" CACHE STRING "The liblxc static library path")
+set(LIBSYSTEMD_STATIC_PATH "/usr/lib/libsystemd.a" CACHE STRING "The libsystemd static library path")
 
 # config
 if(WITH_PROC_EVENT)
@@ -209,16 +218,46 @@ add_executable(taskmonitor
     ${BINARY_SRC}
 )
 
+if(WITH_STATIC_LIBS)
+    set(LIBTKM_WRAP ${LIBTKM_STATIC_PATH})
+    set(LIBPROTOBUF_WRAP ${LIBPROTOBUF_STATIC_PATH})
+    if(WITH_PROC_ACCT)
+        set(LIBNL3_WRAP ${LIBNL3_STATIC_PATH})
+        set(LIBNLGENL3_WRAP ${LIBNLGENL3_STATIC_PATH})
+    else()
+        set(LIBNL3_WRAP "")
+        set(LIBNLGENL3_WRAP "")
+    endif()
+    if(WITH_LXC)
+        set(LIBLXC_WRAP ${LIBLXC_STATIC_PATH})
+    else()
+        set(LIBLXC_WRAP "")
+    endif()
+    if(WITH_SYSTEMD)
+        set(LIBSYSTEMD_WRAP ${LIBSYSTEMD_STATIC_PATH})
+    else()
+        set(LIBSYSTEMD_WRAP "")
+    endif()
+else()
+    set(LIBTKM_WRAP tkm::tkm)
+    set(LIBPROTOBUF_WRAP ${PROTOBUF_LIBRARY})
+    set(LIBNL3_WRAP ${LIBNL_LIBRARIES_ABS})
+    set(LIBNLGENL3_WRAP ${LIBNLGENL_LIBRARIES_ABS})
+    set(LIBLXC_WRAP ${LIBLXC_LIBRARIES_ABS})
+    set(LIBSYSTEMD_WRAP ${LIBSYSTEMD_LIBRARIES})
+endif()
+
 target_link_libraries(taskmonitor
     PRIVATE
         BSWInfra
         pthread
         stdc++fs
-        tkm::tkm
-        ${PROTOBUF_LIBRARY}
-        ${LIBNL_LIBRARIES_ABS}
-        ${LIBNLGENL_LIBRARIES_ABS}
-        ${LIBLXC_LIBRARIES_ABS}
+        ${LIBTKM_WRAP}
+        ${LIBPROTOBUF_WRAP}
+        ${LIBNL3_WRAP}
+        ${LIBNLGENL3_WRAP}
+        ${LIBLXC_WRAP}
+        ${LIBSYSTEMD_WRAP}
 )
 
 if(WITH_TESTS)
@@ -250,6 +289,15 @@ endif()
 
 # Status reporting
 message (STATUS "CMAKE_BUILD_TYPE: "        ${CMAKE_BUILD_TYPE})
+message (STATUS "WITH_STATIC_LIBS: "        ${WITH_STATIC_LIBS})
+if(WITH_STATIC_LIBS)
+    message (STATUS "   LIBTKM_STATIC_PATH: "        ${LIBTKM_STATIC_PATH})
+    message (STATUS "   LIBPROTOBUF_STATIC_PATH: "   ${LIBPROTOBUF_STATIC_PATH})
+    message (STATUS "   LIBNL3_STATIC_PATH: "        ${LIBNL3_STATIC_PATH})
+    message (STATUS "   LIBNLGENL3_STATIC_PATH: "    ${LIBNLGENL3_STATIC_PATH})
+    message (STATUS "   LIBLXC_STATIC_PATH: "        ${LIBLXC_STATIC_PATH})
+    message (STATUS "   LIBSYSTEMD_STATIC_PATH: "    ${LIBSYSTEMD_STATIC_PATH})
+endif()
 message (STATUS "WITH_LXC: "                ${WITH_LXC})
 message (STATUS "WITH_SYSTEMD: "            ${WITH_SYSTEMD})
 message (STATUS "WITH_STARTUP_DATA: "       ${WITH_STARTUP_DATA})
