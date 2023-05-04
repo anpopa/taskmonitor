@@ -1,3 +1,6 @@
+* Thu May 4 2023 Alin Popa <alin.popa@fxdata.ro> - 1.5.10
+- add option to link with static version of dependeny libraries
+
 * Thu Apr 20 2023 Alin Popa <alin.popa@fxdata.ro> - 1.5.9
 - fix PSI crash on total time out of range
 
