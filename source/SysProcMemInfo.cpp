@@ -111,14 +111,15 @@ static bool doUpdateStats(const std::shared_ptr<SysProcMemInfo> mgr)
       lineData = LineData::MemFree;
     } else if (line.find("MemAvailable") != std::string::npos) {
       lineData = LineData::MemAvailable;
+      // We have to check SwapCached first to avoid wrong match
+    } else if (line.find("SwapCached") != std::string::npos) {
+      lineData = LineData::SwapCached;
     } else if (line.find("Cached") != std::string::npos) {
       lineData = LineData::MemCached;
     } else if (line.find("SwapTotal") != std::string::npos) {
       lineData = LineData::SwapTotal;
     } else if (line.find("SwapFree") != std::string::npos) {
       lineData = LineData::SwapFree;
-    } else if (line.find("SwapCached") != std::string::npos) {
-      lineData = LineData::SwapCached;
     } else if (line.find("CmaTotal") != std::string::npos) {
       lineData = LineData::CmaTotal;
     } else if (line.find("CmaFree") != std::string::npos) {
