@@ -60,9 +60,8 @@ SELECT
     datetime(SystemTime,'unixepoch') as 'SystemTime',
 	datetime(ReceiveTime,'unixepoch') as 'ReceiveTime',
 	MonotonicTime as 'MonotonicTime',
-	VmSize as 'Size',
-	VmRSS as 'RSS',
-	MemShared as 'Shared'
+	MemRSS as 'RSS',
+	MemPSS as 'PSS'
 FROM
 	tkmProcInfo
 WHERE

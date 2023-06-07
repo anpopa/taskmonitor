@@ -891,9 +891,9 @@
             "type": "frser-sqlite-datasource",
             "uid": "${DS_SQLITE}"
           },
-          "queryText": "PRAGMA read_uncommitted = 1;\nSELECT DISTINCT\nContextName,TotalVmRSS\nFROM tkmContextInfo NOLOCK\nWHERE  ${__to:date:seconds} - ReceiveTime < 10\nGROUP BY ContextId LIMIT 100;",
+          "queryText": "PRAGMA read_uncommitted = 1;\nSELECT DISTINCT\nContextName,TotalMemRSS\nFROM tkmContextInfo NOLOCK\nWHERE  ${__to:date:seconds} - ReceiveTime < 10\nGROUP BY ContextId LIMIT 100;",
           "queryType": "table",
-          "rawQueryText": "PRAGMA read_uncommitted = 1;\nSELECT DISTINCT\nContextName,TotalVmRSS\nFROM tkmContextInfo NOLOCK\nWHERE  ${__to:date:seconds} - ReceiveTime < 10\nGROUP BY ContextId LIMIT 100;",
+          "rawQueryText": "PRAGMA read_uncommitted = 1;\nSELECT DISTINCT\nContextName,TotalMemRSS\nFROM tkmContextInfo NOLOCK\nWHERE  ${__to:date:seconds} - ReceiveTime < 10\nGROUP BY ContextId LIMIT 100;",
           "refId": "A",
           "timeColumns": [
             "time",
@@ -1056,9 +1056,9 @@
             "type": "frser-sqlite-datasource",
             "uid": "${DS_SQLITE}"
           },
-          "queryText": "PRAGMA read_uncommitted = 1;\nSELECT\nComm,VmRSS\nFROM tkmProcInfo NOLOCK\nWHERE  ${__to:date:seconds} - ReceiveTime < 10\nGROUP BY PID LIMIT 100;",
+          "queryText": "PRAGMA read_uncommitted = 1;\nSELECT\nComm,MemRSS\nFROM tkmProcInfo NOLOCK\nWHERE  ${__to:date:seconds} - ReceiveTime < 10\nGROUP BY PID LIMIT 100;",
           "queryType": "table",
-          "rawQueryText": "PRAGMA read_uncommitted = 1;\nSELECT\nComm,VmRSS\nFROM tkmProcInfo NOLOCK\nWHERE  ${__to:date:seconds} - ReceiveTime < 10\nGROUP BY PID LIMIT 100;",
+          "rawQueryText": "PRAGMA read_uncommitted = 1;\nSELECT\nComm,MemRSS\nFROM tkmProcInfo NOLOCK\nWHERE  ${__to:date:seconds} - ReceiveTime < 10\nGROUP BY PID LIMIT 100;",
           "refId": "A",
           "timeColumns": [
             "time",
@@ -1165,7 +1165,7 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "VmRSS"
+              "options": "MemRSS"
             },
             "properties": [
               {
@@ -1218,9 +1218,9 @@
             "type": "frser-sqlite-datasource",
             "uid": "${DS_SQLITE}"
           },
-          "queryText": "PRAGMA read_uncommitted = 1;\nSELECT\nReceiveTime,Comm,PID, PPID,ContextName,CpuTime,CpuPercent,VmRSS\nFROM tkmProcInfo NOLOCK\nWHERE  ${__to:date:seconds} - ReceiveTime < 5\nGROUP BY PID LIMIT 100;",
+          "queryText": "PRAGMA read_uncommitted = 1;\nSELECT\nReceiveTime,Comm,PID, PPID,ContextName,CpuTime,CpuPercent,MemRSS\nFROM tkmProcInfo NOLOCK\nWHERE  ${__to:date:seconds} - ReceiveTime < 5\nGROUP BY PID LIMIT 100;",
           "queryType": "table",
-          "rawQueryText": "PRAGMA read_uncommitted = 1;\nSELECT\nReceiveTime,Comm,PID, PPID,ContextName,CpuTime,CpuPercent,VmRSS\nFROM tkmProcInfo NOLOCK\nWHERE  ${__to:date:seconds} - ReceiveTime < 5\nGROUP BY PID LIMIT 100;",
+          "rawQueryText": "PRAGMA read_uncommitted = 1;\nSELECT\nReceiveTime,Comm,PID, PPID,ContextName,CpuTime,CpuPercent,MemRSS\nFROM tkmProcInfo NOLOCK\nWHERE  ${__to:date:seconds} - ReceiveTime < 5\nGROUP BY PID LIMIT 100;",
           "refId": "A",
           "timeColumns": [
             "time",
@@ -1326,7 +1326,7 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "TotalVmRSS"
+              "options": "TotalMemRSS"
             },
             "properties": [
               {
@@ -1367,9 +1367,9 @@
             "type": "frser-sqlite-datasource",
             "uid": "${DS_SQLITE}"
           },
-          "queryText": "PRAGMA read_uncommitted = 1;\nSELECT\nReceiveTime,ContextName,TotalCpuTime,TotalCpuPercent,TotalVmRSS\nFROM tkmContextInfo NOLOCK\nWHERE  ${__to:date:seconds} - ReceiveTime < 10\nGROUP BY ContextId LIMIT 100;",
+          "queryText": "PRAGMA read_uncommitted = 1;\nSELECT\nReceiveTime,ContextName,TotalCpuTime,TotalCpuPercent,TotalMemRSS\nFROM tkmContextInfo NOLOCK\nWHERE  ${__to:date:seconds} - ReceiveTime < 10\nGROUP BY ContextId LIMIT 100;",
           "queryType": "table",
-          "rawQueryText": "PRAGMA read_uncommitted = 1;\nSELECT\nReceiveTime,ContextName,TotalCpuTime,TotalCpuPercent,TotalVmRSS\nFROM tkmContextInfo NOLOCK\nWHERE  ${__to:date:seconds} - ReceiveTime < 10\nGROUP BY ContextId LIMIT 100;",
+          "rawQueryText": "PRAGMA read_uncommitted = 1;\nSELECT\nReceiveTime,ContextName,TotalCpuTime,TotalCpuPercent,TotalMemRSS\nFROM tkmContextInfo NOLOCK\nWHERE  ${__to:date:seconds} - ReceiveTime < 10\nGROUP BY ContextId LIMIT 100;",
           "refId": "A",
           "timeColumns": [
             "time",
