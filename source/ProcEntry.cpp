@@ -170,32 +170,56 @@ bool ProcEntry::updateInfoData(void)
                                                  static_cast<uint64_t>(durationUs)));
   }
 
-  std::ifstream statmStream{"/proc/" + std::to_string(m_pid) + "/statm"};
-  if (!statmStream.is_open()) {
+  std::ifstream memStream{"/proc/" + std::to_string(m_pid) + "/smaps_rollup"};
+  if (!memStream.is_open()) {
     return false;
   }
-
-  if (!std::getline(statmStream, line)) {
-    return false;
-  }
-
   tokens.clear();
 
-  std::stringstream ssm(line);
-  while (ssm >> buf) {
-    tokens.push_back(buf);
-  }
+  typedef enum _LineMemData { IGN, RSS, PSS } LineMemData;
 
-  // We are only interested in the first 3 values
-  if (tokens.size() < 3) {
-    throw std::runtime_error("Fail to parse statm file");
-  }
+  size_t complete = 2;
+  while (std::getline(memStream, line)) {
+    LineMemData lineData = LineMemData::IGN;
+    std::stringstream ssm(line);
 
-  // Store memory sizes in Kb
-  const auto pageSize = static_cast<uint64_t>(::sysconf(_SC_PAGESIZE));
-  m_info.set_mem_vmsize(std::stoul(tokens[0]) * pageSize / 1024);
-  m_info.set_mem_vmrss(std::stoul(tokens[1]) * pageSize / 1024);
-  m_info.set_mem_shared(std::stoul(tokens[2]) * pageSize / 1024);
+    if (line.rfind("Rss:", 0) != std::string::npos) {
+      lineData = LineMemData::RSS;
+    } else if (line.rfind("Pss:", 0) != std::string::npos) {
+      lineData = LineMemData::PSS;
+    }
+
+    if (lineData == LineMemData::IGN) {
+      continue;
+    }
+
+    while (ssm >> buf) {
+      tokens.push_back(buf);
+    }
+
+    if (tokens.size() < 3) {
+      logError() << "Proc smaps_rollup file parse error";
+      return false;
+    }
+
+    switch (lineData) {
+    case LineMemData::RSS:
+      m_info.set_mem_rss(std::stoull(tokens[1]));
+      complete--;
+      break;
+    case LineMemData::PSS:
+      m_info.set_mem_pss(std::stoull(tokens[1]));
+      complete--;
+      break;
+    default:
+      break;
+    }
+
+    if (complete == 0) {
+      break;
+    }
+    tokens.clear();
+  }
 
   return true;
 }

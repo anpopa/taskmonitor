@@ -24,8 +24,8 @@ void ContextEntry::resetData()
 {
   m_data.set_total_cpu_time(0);
   m_data.set_total_cpu_percent(0);
-  m_data.set_total_mem_vmrss(0);
-  m_data.set_total_mem_shared(0);
+  m_data.set_total_mem_rss(0);
+  m_data.set_total_mem_pss(0);
 }
 
 } // namespace tkm::monitor

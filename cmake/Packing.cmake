@@ -23,7 +23,7 @@ set(CPACK_RPM_CHANGELOG_FILE "${CMAKE_SOURCE_DIR}/CHANGELOG")
 set(CPACK_RPM_PACKAGE_DESCRIPTION ${CPACK_PACKAGE_DESCRIPTION_SUMMARY})
 set(CPACK_RPM_PACKAGE_GROUP "Applications/System")
 set(CPACK_RPM_PACKAGE_REQUIRES
-  "libtaskmonitor-bin >= 1.0.7, systemd >= 243, libnl3 >= 3.4.0, protobuf >= 3.14.0")
+  "libtaskmonitor-bin >= 1.1.0, systemd >= 243, libnl3 >= 3.4.0, protobuf >= 3.14.0")
 list(APPEND CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST_ADDITION "/usr/sbin")
 
 # DEB

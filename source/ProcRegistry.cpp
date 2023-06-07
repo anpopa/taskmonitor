@@ -476,11 +476,10 @@ static bool doCollectAndSendContextInfo(const std::shared_ptr<ProcRegistry> mgr,
         auto totalCPUPercent =
             ctxEntry->getData().total_cpu_percent() + procEntry->getData().cpu_percent();
         ctxEntry->getData().set_total_cpu_percent(totalCPUPercent);
-        auto totalMEMrss = ctxEntry->getData().total_mem_vmrss() + procEntry->getData().mem_vmrss();
-        ctxEntry->getData().set_total_mem_vmrss(totalMEMrss);
-        auto totalMEMshd =
-            ctxEntry->getData().total_mem_shared() + procEntry->getData().mem_shared();
-        ctxEntry->getData().set_total_mem_shared(totalMEMshd);
+        auto totalMEMrss = ctxEntry->getData().total_mem_rss() + procEntry->getData().mem_rss();
+        ctxEntry->getData().set_total_mem_rss(totalMEMrss);
+        auto totalMEMpss = ctxEntry->getData().total_mem_pss() + procEntry->getData().mem_pss();
+        ctxEntry->getData().set_total_mem_pss(totalMEMpss);
         found = true;
       }
     });
