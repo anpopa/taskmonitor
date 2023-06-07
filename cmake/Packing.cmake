@@ -32,6 +32,6 @@ set(CPACK_DEBIAN_DEBUGINFO_PACKAGE OFF)
 set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Alin Popa")
 set(CPACK_DEBIAN_PACKAGE_SECTION "Utilities")
 set(CPACK_DEBIAN_PACKAGE_DEPENDS
-  "libtaskmonitor-bin (>=1.0.7), systemd (>= 243), libnl-3-200 (>= 3.4.0), libnl-genl-3-200 (>=3.4.0), libprotobuf17 (>=3.0.0)")
+  "libtaskmonitor-bin (>=1.1.0), systemd (>= 243), libnl-3-200 (>= 3.4.0), libnl-genl-3-200 (>=3.4.0), libprotobuf17 (>=3.0.0)")
 
 include(CPack)
