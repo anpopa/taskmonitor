@@ -82,11 +82,18 @@ static bool doUpdateStats(const std::shared_ptr<SysProcMemInfo> mgr)
   std::ifstream memInfoStream{"/proc/meminfo"};
 
   typedef enum _LineData {
-    Unset,
+    Unknown,
     MemTotal,
     MemFree,
     MemAvailable,
     MemCached,
+    Active,
+    Inactive,
+    Slab,
+    KReclaimable,
+    SReclaimable,
+    SUnreclaim,
+    KernelStack,
     SwapTotal,
     SwapFree,
     SwapCached,
@@ -100,33 +107,46 @@ static bool doUpdateStats(const std::shared_ptr<SysProcMemInfo> mgr)
 
   std::string line;
   while (std::getline(memInfoStream, line)) {
-    LineData lineData = LineData::Unset;
+    LineData lineData = LineData::Unknown;
     std::vector<std::string> tokens;
     std::stringstream ss(line);
     std::string buf;
 
-    if (line.find("MemTotal") != std::string::npos) {
+    if (line.rfind("MemTotal:", 0) != std::string::npos) {
       lineData = LineData::MemTotal;
-    } else if (line.find("MemFree") != std::string::npos) {
+    } else if (line.rfind("MemFree:", 0) != std::string::npos) {
       lineData = LineData::MemFree;
-    } else if (line.find("MemAvailable") != std::string::npos) {
+    } else if (line.rfind("MemAvailable:", 0) != std::string::npos) {
       lineData = LineData::MemAvailable;
-      // We have to check SwapCached first to avoid wrong match
-    } else if (line.find("SwapCached") != std::string::npos) {
-      lineData = LineData::SwapCached;
-    } else if (line.find("Cached") != std::string::npos) {
+    } else if (line.rfind("Cached:", 0) != std::string::npos) {
       lineData = LineData::MemCached;
-    } else if (line.find("SwapTotal") != std::string::npos) {
+    } else if (line.rfind("Active:", 0) != std::string::npos) {
+      lineData = LineData::Active;
+    } else if (line.rfind("Inactive:", 0) != std::string::npos) {
+      lineData = LineData::Inactive;
+    } else if (line.rfind("Slab:", 0) != std::string::npos) {
+      lineData = LineData::Slab;
+    } else if (line.rfind("KReclaimable:", 0) != std::string::npos) {
+      lineData = LineData::KReclaimable;
+    } else if (line.rfind("SReclaimable:", 0) != std::string::npos) {
+      lineData = LineData::SReclaimable;
+    } else if (line.rfind("SUnreclaim:", 0) != std::string::npos) {
+      lineData = LineData::SUnreclaim;
+    } else if (line.rfind("KernelStack:", 0) != std::string::npos) {
+      lineData = LineData::KernelStack;
+    } else if (line.rfind("SwapTotal:", 0) != std::string::npos) {
       lineData = LineData::SwapTotal;
-    } else if (line.find("SwapFree") != std::string::npos) {
+    } else if (line.rfind("SwapFree:", 0) != std::string::npos) {
       lineData = LineData::SwapFree;
-    } else if (line.find("CmaTotal") != std::string::npos) {
+    } else if (line.rfind("SwapCached:", 0) != std::string::npos) {
+      lineData = LineData::SwapCached;
+    } else if (line.rfind("CmaTotal:", 0) != std::string::npos) {
       lineData = LineData::CmaTotal;
-    } else if (line.find("CmaFree") != std::string::npos) {
+    } else if (line.rfind("CmaFree:", 0) != std::string::npos) {
       lineData = LineData::CmaFree;
     }
 
-    if (lineData == LineData::Unset) {
+    if (lineData == LineData::Unknown) {
       continue;
     }
 
@@ -151,6 +171,27 @@ static bool doUpdateStats(const std::shared_ptr<SysProcMemInfo> mgr)
       break;
     case LineData::MemCached:
       mgr->getProcMemInfo().set_mem_cached(std::stoul(tokens[1].c_str()));
+      break;
+    case LineData::Active:
+      mgr->getProcMemInfo().set_active(std::stoul(tokens[1].c_str()));
+      break;
+    case LineData::Inactive:
+      mgr->getProcMemInfo().set_inactive(std::stoul(tokens[1].c_str()));
+      break;
+    case LineData::Slab:
+      mgr->getProcMemInfo().set_slab(std::stoul(tokens[1].c_str()));
+      break;
+    case LineData::KReclaimable:
+      mgr->getProcMemInfo().set_kreclaimable(std::stoul(tokens[1].c_str()));
+      break;
+    case LineData::SReclaimable:
+      mgr->getProcMemInfo().set_sreclaimable(std::stoul(tokens[1].c_str()));
+      break;
+    case LineData::SUnreclaim:
+      mgr->getProcMemInfo().set_sunreclaim(std::stoul(tokens[1].c_str()));
+      break;
+    case LineData::KernelStack:
+      mgr->getProcMemInfo().set_kernel_stack(std::stoul(tokens[1].c_str()));
       break;
     case LineData::SwapTotal:
       mgr->getProcMemInfo().set_swap_total(std::stoul(tokens[1].c_str()));
