@@ -1,3 +1,6 @@
+* Thu Jul 12 2023 Alin Popa <alin.popa@fxdata.ro> - 1.6.1
+- Add interface for ProcInfo file descriptor count
+
 * Thu Jun 7 2023 Alin Popa <alin.popa@fxdata.ro> - 1.6.0
 - read RSS and PSS for process memory info
 - this requiere libtaskmonitor v1.1.0 and brakes interface with
