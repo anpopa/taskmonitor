@@ -31,6 +31,9 @@
 #include "SysProcPressure.h"
 #include "SysProcStat.h"
 #include "SysProcWireless.h"
+#ifdef WITH_VM_STAT
+#include "SysProcVMStat.h"
+#endif
 #include "TCPServer.h"
 #include "UDSServer.h"
 
@@ -85,6 +88,9 @@ public:
 #ifdef WITH_STARTUP_DATA
   auto getStartupData(void) -> const std::shared_ptr<StartupData> { return m_startupData; }
 #endif
+#ifdef WITH_VM_STAT
+  auto getSysProcVMStat(void) -> const std::shared_ptr<SysProcVMStat> { return m_sysProcVMStat; }
+#endif
   auto getSysProcStat(void) -> const std::shared_ptr<SysProcStat> { return m_sysProcStat; }
   auto getSysProcMemInfo(void) -> const std::shared_ptr<SysProcMemInfo> { return m_sysProcMemInfo; }
   auto getSysProcWireless(void) -> const std::shared_ptr<SysProcWireless>
@@ -138,6 +144,9 @@ private:
 #endif
 #ifdef WITH_STARTUP_DATA
   std::shared_ptr<StartupData> m_startupData = nullptr;
+#endif
+#ifdef WITH_VM_STAT
+  std::shared_ptr<SysProcVMStat> m_sysProcVMStat = nullptr;
 #endif
   std::shared_ptr<ProcRegistry> m_procRegistry = nullptr;
   std::shared_ptr<SysProcStat> m_sysProcStat = nullptr;

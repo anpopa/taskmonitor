@@ -33,6 +33,8 @@ public:
     EnableTCPServer,
     EnableUDSServer,
     EnableStartupData,
+    EnableProcFDCount,
+    EnableSysProcVMStat,
     UpdateOnProcEvent,
     StartupDataCleanupTime,
     ProdModeFastLaneInt,
@@ -76,6 +78,8 @@ public:
     m_table.insert(std::pair<Default, std::string>(Default::EnableTCPServer, "true"));
     m_table.insert(std::pair<Default, std::string>(Default::EnableUDSServer, "false"));
     m_table.insert(std::pair<Default, std::string>(Default::EnableStartupData, "false"));
+    m_table.insert(std::pair<Default, std::string>(Default::EnableProcFDCount, "false"));
+    m_table.insert(std::pair<Default, std::string>(Default::EnableSysProcVMStat, "false"));
     m_table.insert(std::pair<Default, std::string>(Default::UpdateOnProcEvent, "true"));
     m_table.insert(std::pair<Default, std::string>(Default::StartupDataCleanupTime, "60000000"));
     m_table.insert(std::pair<Default, std::string>(Default::TCPServerAddress, "localhost"));

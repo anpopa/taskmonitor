@@ -21,6 +21,8 @@ namespace fs = std::filesystem;
 namespace fs = std::experimental::filesystem;
 #endif
 
+bool gProcInfoFDCollect = false;
+
 namespace tkm::monitor
 {
 
@@ -33,6 +35,13 @@ ProcEntry::ProcEntry(int pid, const std::string &name)
 {
   setName(name);
   initInfoData();
+
+  if (App()->getOptions() != nullptr) {
+    if (App()->getOptions()->getFor(Options::Key::EnableProcFDCount) ==
+      tkmDefaults.valFor(Defaults::Val::True)) {
+        gProcInfoFDCollect = true;
+    }
+  }
 }
 
 #ifdef WITH_PROC_ACCT
@@ -266,8 +275,10 @@ bool ProcEntry::updateInfoData(void)
     return false;
   }
 
-  if (!countFileDescriptors()) {
-    return false;
+  if (gProcInfoFDCollect) {
+    if (!countFileDescriptors()) {
+      return false;
+    }
   }
 
   return true;

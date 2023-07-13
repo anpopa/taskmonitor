@@ -28,6 +28,9 @@ static bool doGetSysProcPressure(const std::shared_ptr<UDSCollector> collector);
 static bool doGetSysProcBuddyInfo(const std::shared_ptr<UDSCollector> collector);
 static bool doGetSysProcWireless(const std::shared_ptr<UDSCollector> collector);
 static bool doGetContextInfo(const std::shared_ptr<UDSCollector> collector);
+#ifdef WITH_VM_STAT
+static bool doGetSysProcVMStat(const std::shared_ptr<UDSCollector> collector);
+#endif
 
 UDSCollector::UDSCollector(int fd)
 : ICollector("UDSCollector", fd)
@@ -93,6 +96,13 @@ UDSCollector::UDSCollector(int fd)
             break;
           case tkm::msg::collector::Request_Type_GetSysProcWireless:
             status = doGetSysProcWireless(getShared());
+            break;
+          case tkm::msg::collector::Request_Type_GetSysProcVMStat:
+#ifdef WITH_VM_STAT
+            status = doGetSysProcVMStat(getShared());
+#else
+            status = true;
+#endif
             break;
           case tkm::msg::collector::Request_Type_KeepAlive:
             status = true;
@@ -205,6 +215,12 @@ static bool doCreateSession(const std::shared_ptr<UDSCollector> collector)
     collector->getSessionInfo().add_slow_lane_sources(
         msg::monitor::SessionInfo_DataSource_SysProcWireless);
   }
+#ifdef WITH_VM_STAT
+  if (App()->getSysProcVMStat() != nullptr) {
+    collector->getSessionInfo().add_slow_lane_sources(
+        msg::monitor::SessionInfo_DataSource_SysProcVMStat);
+  }
+#endif
 
   message.set_type(tkm::msg::monitor::Message::Type::Message_Type_SetSession);
   message.mutable_payload()->PackFrom(collector->getSessionInfo());
@@ -320,5 +336,17 @@ static bool doGetContextInfo(const std::shared_ptr<UDSCollector> collector)
                               .collector = collector};
   return App()->getProcRegistry()->pushRequest(rq);
 }
+
+#ifdef WITH_VM_STAT
+static bool doGetSysProcVMStat(const std::shared_ptr<UDSCollector> collector)
+{
+  if (App()->getSysProcVMStat() != nullptr) {
+    SysProcVMStat::Request rq = {.action = SysProcVMStat::Action::CollectAndSend,
+                                    .collector = collector};
+    return App()->getSysProcVMStat()->pushRequest(rq);
+  }
+  return true;
+}
+#endif
 
 } // namespace tkm::monitor

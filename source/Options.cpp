@@ -221,6 +221,20 @@ auto Options::getFor(Key key) -> string const
       return prop.value_or(tkmDefaults.getFor(Defaults::Default::EnableStartupData));
     }
     return tkmDefaults.getFor(Defaults::Default::EnableStartupData);
+  case Key::EnableProcFDCount:
+    if (hasConfigFile()) {
+      const optional<string> prop =
+          m_configFile->getPropertyValue("monitor", -1, "EnableProcFDCount");
+      return prop.value_or(tkmDefaults.getFor(Defaults::Default::EnableProcFDCount));
+    }
+    return tkmDefaults.getFor(Defaults::Default::EnableProcFDCount);
+  case Key::EnableSysProcVMStat:
+    if (hasConfigFile()) {
+      const optional<string> prop =
+          m_configFile->getPropertyValue("monitor", -1, "EnableSysProcVMStat");
+      return prop.value_or(tkmDefaults.getFor(Defaults::Default::EnableSysProcVMStat));
+    }
+    return tkmDefaults.getFor(Defaults::Default::EnableSysProcVMStat);
   case Key::UpdateOnProcEvent:
     if (hasConfigFile()) {
       const optional<string> prop =

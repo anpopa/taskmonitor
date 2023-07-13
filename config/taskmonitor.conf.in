@@ -38,6 +38,11 @@ EnableUDSServer=false
 ; Cache startup data in profiling mode if built with WITH_STARTUP_DATA
 ; If WITH_STARTUP_DATA is disabled at build time this option has no effect
 EnableStartupData=false
+; Enable ProcInfo file descriptors count data collector
+EnableProcFDCount=false
+; Collect data for SysProcVMStat (/proc/vmstat)
+; If WITH_VM_STAT is disabled at build time this option has no effect
+EnableSysProcVMStat=false
 ; LXC containers path if WITH_LXC feature is enabled
 ContainersPath=/var/lib/lxc
 ; Set a path to determine at runtime profiling mode. If path exists profiling
