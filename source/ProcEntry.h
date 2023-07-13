@@ -53,6 +53,9 @@ public:
 private:
   void initInfoData(void);
   bool updateInfoData(void);
+  bool readProcStat(void);
+  bool readProcSmapsRollup(void);
+  bool countFileDescriptors(void);
 #ifdef WITH_PROC_ACCT
   bool updateProcAcct(void);
 #endif

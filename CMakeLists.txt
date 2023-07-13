@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.7.2)
 project(TaskMonitor
         LANGUAGES CXX
-        VERSION 1.6.0
+        VERSION 1.6.1
 )
 
 set(CMAKE_PROJECT_HOMEPAGE_URL "https://gitlab.com/taskmonitor/taskmonitor")
@@ -19,6 +19,7 @@ option(WITH_SYSTEMD "Build with systemd watchdog and journald support" Y)
 option(WITH_STARTUP_DATA "Build with StartupData module support" Y)
 option(WITH_PROC_EVENT "Enable ProcEvent module" Y)
 option(WITH_PROC_ACCT "Enable ProcAcct module" Y)
+option(WITH_VM_STAT "Enable SysProcVMStat module" Y)
 option(WITH_INSTALL_CONFIG "Install default taskmonitor.conf on target" Y)
 option(WITH_INSTALL_LICENSE "Install license file on target" Y)
 option(WITH_TESTS "Build test suite" N)
@@ -41,6 +42,10 @@ endif()
 
 if(WITH_PROC_ACCT)
     add_compile_options("-DWITH_PROC_ACCT")
+endif()
+
+if(WITH_VM_STAT)
+    add_compile_options("-DWITH_VM_STAT")
 endif()
 
 if(WITH_STARTUP_DATA)
@@ -176,6 +181,10 @@ if(WITH_PROC_EVENT)
     LIST(APPEND BINARY_SRC source/ProcEvent.cpp)
 endif()
 
+if(WITH_VM_STAT)
+    LIST(APPEND BINARY_SRC source/SysProcVMStat.cpp)
+endif()
+
 if(WITH_PROC_ACCT)
     LIST(APPEND BINARY_SRC source/ProcAcct.cpp)
     # workarounds to get absolute paths
@@ -303,6 +312,7 @@ message (STATUS "WITH_SYSTEMD: "            ${WITH_SYSTEMD})
 message (STATUS "WITH_STARTUP_DATA: "       ${WITH_STARTUP_DATA})
 message (STATUS "WITH_PROC_EVENT: "         ${WITH_PROC_EVENT})
 message (STATUS "WITH_PROC_ACCT: "          ${WITH_PROC_ACCT})
+message (STATUS "WITH_VM_STAT: "            ${WITH_VM_STAT})
 message (STATUS "WITH_INSTALL_CONFIG: "     ${WITH_INSTALL_CONFIG})
 message (STATUS "WITH_INSTALL_LICENSE: "    ${WITH_INSTALL_LICENSE})
 message (STATUS "WITH_TESTS: "              ${WITH_TESTS})

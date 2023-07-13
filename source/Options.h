@@ -44,6 +44,8 @@ public:
     EnableTCPServer,
     EnableUDSServer,
     EnableStartupData,
+    EnableProcFDCount,
+    EnableSysProcVMStat,
     UpdateOnProcEvent,
     StartupDataCleanupTime,
     TCPServerAddress,

@@ -13,6 +13,16 @@
 #include "Application.h"
 #include "Helpers.h"
 
+#if __has_include(<filesystem>)
+#include <filesystem>
+namespace fs = std::filesystem;
+#else
+#include <experimental/filesystem>
+namespace fs = std::experimental::filesystem;
+#endif
+
+bool gProcInfoFDCollect = false;
+
 namespace tkm::monitor
 {
 
@@ -25,6 +35,13 @@ ProcEntry::ProcEntry(int pid, const std::string &name)
 {
   setName(name);
   initInfoData();
+
+  if (App()->getOptions() != nullptr) {
+    if (App()->getOptions()->getFor(Options::Key::EnableProcFDCount) ==
+      tkmDefaults.valFor(Defaults::Val::True)) {
+        gProcInfoFDCollect = true;
+    }
+  }
 }
 
 #ifdef WITH_PROC_ACCT
@@ -126,7 +143,7 @@ void ProcEntry::initInfoData(void)
   }
 }
 
-bool ProcEntry::updateInfoData(void)
+bool ProcEntry::readProcStat(void)
 {
   std::ifstream statStream{"/proc/" + std::to_string(m_pid) + "/stat"};
   if (!statStream.is_open()) {
@@ -170,11 +187,19 @@ bool ProcEntry::updateInfoData(void)
                                                  static_cast<uint64_t>(durationUs)));
   }
 
+  return true;
+}
+
+bool ProcEntry::readProcSmapsRollup(void)
+{
   std::ifstream memStream{"/proc/" + std::to_string(m_pid) + "/smaps_rollup"};
   if (!memStream.is_open()) {
     return false;
   }
-  tokens.clear();
+
+  std::vector<std::string> tokens;
+  std::string line;
+  std::string buf;
 
   typedef enum _LineMemData { IGN, RSS, PSS } LineMemData;
 
@@ -219,6 +244,41 @@ bool ProcEntry::updateInfoData(void)
       break;
     }
     tokens.clear();
+  }
+
+  return true;
+}
+
+bool ProcEntry::countFileDescriptors(void)
+{
+  auto dirIter = fs::directory_iterator("/proc/" + std::to_string(m_pid) + "/fd");
+  auto fdCount = m_info.fd_count();
+
+  try {
+    fdCount = std::count_if(begin(dirIter), end(dirIter), [](auto& entry) { return entry.is_symlink(); });
+  } catch(...) {
+    return false;
+  }
+
+  m_info.set_fd_count(fdCount);
+
+  return true;
+}
+
+bool ProcEntry::updateInfoData(void)
+{
+  if (!readProcStat()) {
+    return false;
+  }
+
+  if (!readProcSmapsRollup()) {
+    return false;
+  }
+
+  if (gProcInfoFDCollect) {
+    if (!countFileDescriptors()) {
+      return false;
+    }
   }
 
   return true;

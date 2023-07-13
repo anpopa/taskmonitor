@@ -166,6 +166,17 @@ Application::Application(const std::string &name,
     m_dataSources.append(m_sysProcWireless);
   }
 
+#ifdef WITH_VM_STAT
+  if ((m_options->getFor(Options::Key::EnableSysProcVMStat) ==
+      tkmDefaults.valFor(Defaults::Val::True)) && (fs::exists("/proc/vmstat"))) {
+    m_sysProcVMStat = std::make_shared<SysProcVMStat>(m_options);
+    m_sysProcVMStat->setUpdateLane(IDataSource::UpdateLane::Slow);
+    m_sysProcVMStat->setUpdateInterval(m_slowLaneInterval);
+    m_sysProcVMStat->setEventSource();
+    m_dataSources.append(m_sysProcVMStat);
+  }
+#endif
+
   // Commit our final data source list
   m_dataSources.commit();
 

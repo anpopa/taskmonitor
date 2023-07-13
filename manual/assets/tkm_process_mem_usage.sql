@@ -4,8 +4,7 @@ SELECT
 	datetime(ReceiveTime,'unixepoch') as 'ReceiveTime',
 	MonotonicTime as 'MonotonicTime',
 	MemRSS as 'RSS',
-	MemPSS as 'PSS',
-	MemShared as 'Shared'
+	MemPSS as 'PSS'
 FROM
 	tkmProcInfo
 WHERE
