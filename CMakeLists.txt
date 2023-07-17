@@ -156,6 +156,21 @@ find_package(Threads REQUIRED)
 find_package(Protobuf REQUIRED)
 find_package(tkm REQUIRED)
 
+if(WITH_SYSTEMD)
+    pkg_check_modules     (LIBSYSTEMD libsystemd REQUIRED)
+    include_directories   (${LIBSYSTEMD_INCLUDE_DIRS})
+endif()
+
+set(ENV{PKG_CONFIG_SYSROOT_DIR} "")
+
+pkg_check_modules     (LIBCRYPTO libcrypto REQUIRED)
+set(LIBLXC_EXTRA_LIBS "-l:libutil.a -l:libssl.a -l:libcrypto.a -ldl -lpthread")
+
+pkg_check_modules     (LIBCAP libcap)
+if(LIBCAP_FOUND)
+    string(APPEND LIBLXC_EXTRA_LIBS " -l:libcap.a")
+endif()
+
 if(WITH_PROC_ACCT)
     pkg_check_modules     (LIBNL libnl-3.0 REQUIRED)
     pkg_check_modules     (LIBNLGENL libnl-genl-3.0 REQUIRED)
@@ -165,12 +180,6 @@ if(WITH_LXC)
     pkg_check_modules     (LIBLXC lxc>=3.0 REQUIRED)
     include_directories   (${LIBLXC_INCLUDE_DIRS})
     add_compile_options   ("-DWITH_LXC")
-endif()
-
-if(WITH_SYSTEMD)
-    pkg_check_modules     (LIBSYSTEMD libsystemd REQUIRED)
-    include_directories   (${LIBSYSTEMD_INCLUDE_DIRS})
-    LIST(APPEND LIBS ${LIBSYSTEMD_LIBRARIES})
 endif()
 
 if(WITH_STARTUP_DATA)
@@ -266,6 +275,7 @@ target_link_libraries(taskmonitor
         ${LIBNL3_WRAP}
         ${LIBNLGENL3_WRAP}
         ${LIBLXC_WRAP}
+        ${LIBLXC_EXTRA_LIBS}
         ${LIBSYSTEMD_WRAP}
 )
 
