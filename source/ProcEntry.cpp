@@ -255,7 +255,13 @@ bool ProcEntry::countFileDescriptors(void)
   auto fdCount = m_info.fd_count();
 
   try {
-    fdCount = std::count_if(begin(dirIter), end(dirIter), [](auto& entry) { return entry.is_symlink(); });
+    fdCount = std::count_if(begin(dirIter), end(dirIter), [](auto& entry) {
+#if __has_include(<filesystem>)
+      return entry.is_symlink();
+#else
+      return fs::is_symlink(entry);
+#endif
+    });
   } catch(...) {
     return false;
   }
