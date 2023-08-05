@@ -52,6 +52,7 @@ public:
     TCPServerPort,
     UDSServerSocketPath,
     CollectorInactiveTimeout,
+    UDSMonitorCollectorInactivity,
   };
 
 public:

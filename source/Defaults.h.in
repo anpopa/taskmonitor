@@ -50,6 +50,7 @@ public:
     TCPServerPort,
     UDSServerSocketPath,
     CollectorInactiveTimeout,
+    UDSMonitorCollectorInactivity,
   };
 
   enum class Val { True, False, None, ProcAcct, ProcInfo };
@@ -87,6 +88,7 @@ public:
     m_table.insert(std::pair<Default, std::string>(Default::UDSServerSocketPath,
                                                    "/run/taskmonitor/taskmonitor.sock"));
     m_table.insert(std::pair<Default, std::string>(Default::CollectorInactiveTimeout, "10000000"));
+    m_table.insert(std::pair<Default, std::string>(Default::UDSMonitorCollectorInactivity, "false"));
 
     m_vals.insert(std::pair<Val, std::string>(Val::True, "true"));
     m_vals.insert(std::pair<Val, std::string>(Val::False, "false"));

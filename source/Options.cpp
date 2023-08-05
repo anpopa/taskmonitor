@@ -297,6 +297,12 @@ auto Options::getFor(Key key) -> string const
       return prop.value_or(tkmDefaults.getFor(Defaults::Default::UDSServerSocketPath));
     }
     return tkmDefaults.getFor(Defaults::Default::UDSServerSocketPath);
+  case Key::UDSMonitorCollectorInactivity:
+    if (hasConfigFile()) {
+      const optional<string> prop = m_configFile->getPropertyValue("udsserver", -1, "MonitorCollectorInactivity");
+      return prop.value_or(tkmDefaults.getFor(Defaults::Default::UDSMonitorCollectorInactivity));
+    }
+    return tkmDefaults.getFor(Defaults::Default::UDSMonitorCollectorInactivity);
   default:
     logError() << "Unknown option key";
     break;

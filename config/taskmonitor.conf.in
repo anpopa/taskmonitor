@@ -95,6 +95,8 @@ ServerPort=3357
 [udsserver]
 ; Set UDSServer filesystem socket path
 SocketPath=/run/taskmonitor/taskmonitor.sock
+; Disconnect client collector if inactive (see CollectorInactiveTimeout)
+MonitorCollectorInactivity=false
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Monitoring blacklist for process accounting
