@@ -38,7 +38,7 @@ static bool doGetSysProcVMStat(const std::shared_ptr<TCPCollector> collector);
 #endif
 
 TCPCollector::TCPCollector(int fd)
-: ICollector("TCPCollector", fd)
+: ICollector("TCPCollector", ICollector::Type::TCP, fd)
 {
   bswi::event::Pollable::lateSetup(
       [this]() {

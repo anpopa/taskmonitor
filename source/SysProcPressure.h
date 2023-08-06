@@ -49,7 +49,6 @@ private:
 class SysProcPressure : public IDataSource, public std::enable_shared_from_this<SysProcPressure>
 {
 public:
-public:
   enum class Action { UpdateStats, CollectAndSend };
   typedef struct Request {
     Action action;

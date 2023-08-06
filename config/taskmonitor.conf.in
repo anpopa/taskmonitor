@@ -88,6 +88,8 @@ StartupDataCleanupTime=60000000
 ServerAddress=any
 ; Set TCPServer port to listen for connections. Default 3357
 ServerPort=3357
+; Hold a wakelock if server has an active client (build option WITH_WAKE_LOCK)
+ActiveWakeLock=true
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; UDSServer options

@@ -33,7 +33,7 @@ static bool doGetSysProcVMStat(const std::shared_ptr<UDSCollector> collector);
 #endif
 
 UDSCollector::UDSCollector(int fd)
-: ICollector("UDSCollector", fd)
+: ICollector("UDSCollector", ICollector::Type::UDS, fd)
 {
   bswi::event::Pollable::lateSetup(
       [this]() {

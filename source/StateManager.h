@@ -31,6 +31,7 @@ public:
   enum class Action {
     MonitorCollector,
     RemoveCollector,
+    UpdateWakeLock
   };
 
   typedef struct Request {

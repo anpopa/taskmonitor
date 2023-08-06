@@ -291,6 +291,12 @@ auto Options::getFor(Key key) -> string const
       return prop.value_or(tkmDefaults.getFor(Defaults::Default::TCPServerPort));
     }
     return tkmDefaults.getFor(Defaults::Default::TCPServerPort);
+  case Key::TCPActiveWakeLock:
+    if (hasConfigFile()) {
+      const optional<string> prop = m_configFile->getPropertyValue("tcpserver", -1, "ActiveWakeLock");
+      return prop.value_or(tkmDefaults.getFor(Defaults::Default::TCPActiveWakeLock));
+    }
+    return tkmDefaults.getFor(Defaults::Default::TCPActiveWakeLock);
   case Key::UDSServerSocketPath:
     if (hasConfigFile()) {
       const optional<string> prop = m_configFile->getPropertyValue("udsserver", -1, "SocketPath");

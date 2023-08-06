@@ -24,8 +24,11 @@ namespace tkm::monitor
 class ICollector : public Pollable
 {
 public:
-  explicit ICollector(const std::string &name, int fd)
+  enum class Type { TCP, UDS };
+
+    explicit ICollector(const std::string &name, ICollector::Type type, int fd)
   : Pollable(name, fd)
+  , m_type(type)
   , m_reader(std::make_unique<tkm::EnvelopeReader>(fd))
   , m_writer(std::make_unique<tkm::EnvelopeWriter>(fd))
   {
@@ -72,6 +75,7 @@ public:
   auto getDescriptor(void) -> tkm::msg::collector::Descriptor & { return m_descriptor; }
   auto getSessionInfo(void) -> tkm::msg::monitor::SessionInfo & { return m_sessionInfo; }
   auto getFD(void) -> int { return m_fd; }
+  auto getType(void) -> const ICollector::Type { return m_type; }
 
   void setLastUpdateTime(std::chrono::time_point<std::chrono::steady_clock> newTime)
   {
@@ -92,6 +96,7 @@ private:
   std::unique_ptr<tkm::EnvelopeWriter> m_writer = nullptr;
   tkm::msg::collector::Descriptor m_descriptor{};
   tkm::msg::monitor::SessionInfo m_sessionInfo{};
+  ICollector::Type m_type;
 };
 
 } // namespace tkm::monitor

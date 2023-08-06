@@ -53,6 +53,7 @@ public:
     UDSServerSocketPath,
     CollectorInactiveTimeout,
     UDSMonitorCollectorInactivity,
+    TCPActiveWakeLock,
   };
 
 public:

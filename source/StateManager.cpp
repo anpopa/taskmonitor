@@ -9,8 +9,20 @@
  *-
  */
 
-#include "StateManager.h"
+#ifdef WITH_WAKE_LOCK
+#if __has_include(<filesystem>)
+#include <filesystem>
+namespace fs = std::filesystem;
+#else
+#include <experimental/filesystem>
+namespace fs = std::experimental::filesystem;
+#endif
+#include <fstream>
+#endif
+
 #include "Application.h"
+#include "ICollector.h"
+#include "StateManager.h"
 
 namespace tkm::monitor
 {
@@ -19,6 +31,13 @@ static bool doMonitorCollector(const std::shared_ptr<StateManager> mgr,
                                const StateManager::Request &rq);
 static bool doRemoveCollector(const std::shared_ptr<StateManager> mgr,
                               const StateManager::Request &rq);
+static bool doUpdateWakeLock(const std::shared_ptr<StateManager> mgr,
+                             const StateManager::Request &rq);
+
+#ifdef WITH_WAKE_LOCK
+static const std::string gWakeLockName{"taskmonitor"};
+static bool gActiveWakeLock = false;
+#endif
 
 StateManager::StateManager(const std::shared_ptr<Options> options)
 : m_options(options)
@@ -82,6 +101,8 @@ auto StateManager::requestHandler(const StateManager::Request &request) -> bool
     return doMonitorCollector(getShared(), request);
   case StateManager::Action::RemoveCollector:
     return doRemoveCollector(getShared(), request);
+  case StateManager::Action::UpdateWakeLock:
+    return doUpdateWakeLock(getShared(), request);
   default:
     break;
   }
@@ -94,6 +115,13 @@ static bool doMonitorCollector(const std::shared_ptr<StateManager> mgr,
                                const StateManager::Request &rq)
 {
   mgr->getActiveCollectorList().append(rq.collector, true);
+
+  // Update wake lock
+  if (rq.collector->getType() == ICollector::Type::TCP) {
+    StateManager::Request wrq = {.action = StateManager::Action::UpdateWakeLock,
+                                 .collector = rq.collector};
+    mgr->pushRequest(wrq);
+  }
   return true;
 }
 
@@ -108,6 +136,53 @@ static bool doRemoveCollector(const std::shared_ptr<StateManager> mgr,
   // Remove our reference
   mgr->getActiveCollectorList().remove(rq.collector, true);
 
+  // Update wake lock
+  if (rq.collector->getType() == ICollector::Type::TCP) {
+    StateManager::Request wrq = {.action = StateManager::Action::UpdateWakeLock,
+                                 .collector = rq.collector};
+    mgr->pushRequest(wrq);
+  }
+
+  return true;
+}
+
+static bool doUpdateWakeLock(const std::shared_ptr<StateManager> mgr,
+                             const StateManager::Request &rq)
+{
+#ifdef WITH_WAKE_LOCK
+  if (options->getFor(Options::Key::TCPActiveWakeLock) == tkmDefaults.valFor(Defaults::Val::True)) {
+    bool haveTcpCollector = false;
+
+    mgr->getActiveCollectorList().foreach (
+        [&haveTcpCollector](const std::shared_ptr<ICollector> &entry) {
+          if (entry->getType() == ICollector::Type::TCP) {
+            haveTcp = true;
+          }
+        });
+
+    if (haveTcpCollector && !gActiveWakeLock) {
+      if (fs::exists("/sys/power/wake_lock")) {
+        std::ofstream fLock("/sys/power/wake_lock");
+        fLock << gWakeLockName;
+        gActiveWakeLock = true;
+        logInfo() << "TCP collectors wake lock enabled";
+      } else {
+        logWarn() << "Wake lock sysfs interface not available";
+      }
+    }
+
+    if (!haveTcpCollector && gActiveWakeLock) {
+      if (fs::exists("/sys/power/wake_unlock")) {
+        std::ofstream fLock("/sys/power/wake_unlock");
+        fLock << gWakeLockName;
+        gActiveWakeLock = false;
+        logInfo() << "TCP collectors wake lock disabled";
+      } else {
+        logWarn() << "Wake unlock sysfs interface not available";
+      }
+    }
+  }
+#endif
   return true;
 }
 
