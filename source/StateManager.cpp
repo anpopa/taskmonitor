@@ -150,13 +150,14 @@ static bool doUpdateWakeLock(const std::shared_ptr<StateManager> mgr,
                              const StateManager::Request &rq)
 {
 #ifdef WITH_WAKE_LOCK
-  if (options->getFor(Options::Key::TCPActiveWakeLock) == tkmDefaults.valFor(Defaults::Val::True)) {
+  if (App()->getOptions()->getFor(Options::Key::TCPActiveWakeLock) ==
+      tkmDefaults.valFor(Defaults::Val::True)) {
     bool haveTcpCollector = false;
 
     mgr->getActiveCollectorList().foreach (
         [&haveTcpCollector](const std::shared_ptr<ICollector> &entry) {
           if (entry->getType() == ICollector::Type::TCP) {
-            haveTcp = true;
+            haveTcpCollector = true;
           }
         });
 
