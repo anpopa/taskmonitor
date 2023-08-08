@@ -1,3 +1,7 @@
+* Thu Aug 8 2023 Alin Popa <alin.popa@fxdata.ro> - 1.6.2
+- Add option to monitor UDS clients explicitly
+- Add support for PM wake locks
+
 * Thu Jul 12 2023 Alin Popa <alin.popa@fxdata.ro> - 1.6.1
 - Add interface for ProcInfo file descriptor count
 

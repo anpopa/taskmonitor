@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.7.2)
 project(TaskMonitor
         LANGUAGES CXX
-        VERSION 1.6.1
+        VERSION 1.6.2
 )
 
 set(CMAKE_PROJECT_HOMEPAGE_URL "https://gitlab.com/taskmonitor/taskmonitor")
