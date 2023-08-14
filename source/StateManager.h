@@ -11,6 +11,7 @@
 
 #pragma once
 
+#include <sdbus-c++/IProxy.h>
 #include <string>
 
 #include "ICollector.h"
@@ -19,6 +20,10 @@
 #include "../bswinfra/source/AsyncQueue.h"
 #include "../bswinfra/source/SafeList.h"
 #include "../bswinfra/source/Timer.h"
+
+#ifdef WITH_WAKE_LOCK
+#include <sdbus-c++/sdbus-c++.h>
+#endif
 
 using namespace bswi::event;
 
@@ -32,7 +37,8 @@ public:
     MonitorCollector,
     RemoveCollector,
     UpdateWakeLock,
-    UpdateProcessList
+    UpdateProcessList,
+    ResetBSHPowerManagerProxy
   };
 
   typedef struct Request {
@@ -57,6 +63,14 @@ public:
   {
     return m_activeCollectorList;
   }
+#ifdef WITH_WAKE_LOCK
+  auto getBSHPowerManagerProxy(void) -> std::shared_ptr<sdbus::IProxy>
+  {
+    return m_bshPowerManagerProxy;
+  }
+  void resetBSHPowerManagerProxy(void);
+#endif
+
   auto pushRequest(StateManager::Request &request) -> int;
 
 private:
@@ -64,6 +78,10 @@ private:
 
 private:
   bswi::util::SafeList<std::shared_ptr<ICollector>> m_activeCollectorList{"ActiveCollectorList"};
+#ifdef WITH_WAKE_LOCK
+  std::shared_ptr<sdbus::IProxy> m_bshPowerManagerProxy = nullptr;
+#endif
+  std::shared_ptr<Timer> m_wakeLockRefreshTimer = nullptr;
   std::shared_ptr<AsyncQueue<Request>> m_queue = nullptr;
   std::shared_ptr<Timer> m_collectorsTimer = nullptr;
   std::shared_ptr<Options> m_options = nullptr;

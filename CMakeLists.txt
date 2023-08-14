@@ -203,6 +203,11 @@ if(WITH_LXC)
     find_library(LIBLXC_LIBRARIES_ABS ${LIBLXC_LIBRARIES})
 endif()
 
+if(WITH_WAKE_LOCK)
+    find_package(sdbus-c++ REQUIRED)
+    set(LIBSDBUS_WRAP SDBusCpp::sdbus-c++)
+endif()
+
 include_directories(
     ${LIBNL_INCLUDE_DIRS}
     ${LIBNLGENL_INCLUDE_DIRS}
@@ -269,6 +274,7 @@ target_link_libraries(taskmonitor
         pthread
         stdc++fs
         ${LIBTKM_WRAP}
+        ${LIBSDBUS_WRAP}
         ${LIBPROTOBUF_WRAP}
         ${LIBNL3_WRAP}
         ${LIBNLGENL3_WRAP}
