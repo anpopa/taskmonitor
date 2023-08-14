@@ -31,8 +31,8 @@ static bool doMonitorCollector(const std::shared_ptr<StateManager> mgr,
                                const StateManager::Request &rq);
 static bool doRemoveCollector(const std::shared_ptr<StateManager> mgr,
                               const StateManager::Request &rq);
-static bool doUpdateWakeLock(const std::shared_ptr<StateManager> mgr,
-                             const StateManager::Request &rq);
+static bool doUpdateWakeLock(const std::shared_ptr<StateManager> mgr);
+static bool doUpdateProcessList(void);
 
 #ifdef WITH_WAKE_LOCK
 static const std::string gWakeLockName{"taskmonitor"};
@@ -76,6 +76,12 @@ StateManager::StateManager(const std::shared_ptr<Options> options)
   });
 
   m_collectorsTimer->start(collectorTimeout, true);
+
+  if (fs::exists("/sys/power/wake_unlock")) {
+    std::ofstream fLock("/sys/power/wake_unlock");
+    fLock << gWakeLockName;
+    logInfo() << "Remove any existing taskmonitor wake locks";
+  }
 }
 
 auto StateManager::pushRequest(Request &request) -> int
@@ -102,7 +108,9 @@ auto StateManager::requestHandler(const StateManager::Request &request) -> bool
   case StateManager::Action::RemoveCollector:
     return doRemoveCollector(getShared(), request);
   case StateManager::Action::UpdateWakeLock:
-    return doUpdateWakeLock(getShared(), request);
+    return doUpdateWakeLock(getShared());
+  case StateManager::Action::UpdateProcessList:
+    return doUpdateProcessList();
   default:
     break;
   }
@@ -146,8 +154,7 @@ static bool doRemoveCollector(const std::shared_ptr<StateManager> mgr,
   return true;
 }
 
-static bool doUpdateWakeLock(const std::shared_ptr<StateManager> mgr,
-                             const StateManager::Request &rq)
+static bool doUpdateWakeLock(const std::shared_ptr<StateManager> mgr)
 {
 #ifdef WITH_WAKE_LOCK
   if (App()->getOptions()->getFor(Options::Key::TCPActiveWakeLock) ==
@@ -184,6 +191,14 @@ static bool doUpdateWakeLock(const std::shared_ptr<StateManager> mgr,
     }
   }
 #endif
+  return true;
+}
+
+static bool doUpdateProcessList(void)
+{
+  if (App()->getProcRegistry() != nullptr) {
+    App()->getProcRegistry()->updateProcessList();
+  }
   return true;
 }
 

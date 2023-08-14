@@ -68,8 +68,17 @@ ProcEvent::ProcEvent(const std::shared_ptr<Options> options)
         if (rc == 0) {
           return true;
         } else if (rc == -1) {
-          logError() << "NetLink process receive error: " << ::strerror(errno);
-          return false;
+          if (errno != ENOBUFS) {
+            logError() << "NetLink process receive error: " << ::strerror(errno);
+            return false;
+          }
+
+          logWarn() << "ProcEvent NetLink buffer space error";
+          // In case of buffer size errors we trigger a process list update manually
+          StateManager::Request rq = {.action = StateManager::Action::UpdateProcessList};
+          App()->getStateManager()->pushRequest(rq);
+
+          return true;
         }
 
         switch (proc_ev->what) {
