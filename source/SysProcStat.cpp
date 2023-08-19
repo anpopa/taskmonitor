@@ -27,11 +27,20 @@ void CPUStat::updateStats(const CPUStatData &data)
     m_last.copyFrom(data);
   } else {
     auto diffData = data.getDiff(m_last);
-    m_last.copyFrom(data);
-    m_data.set_usr(static_cast<uint32_t>(diffData.getPercent(CPUStatData::DataField::UserTime)));
-    m_data.set_sys(static_cast<uint32_t>(diffData.getPercent(CPUStatData::DataField::SystemTime)));
-    m_data.set_iow(static_cast<uint32_t>(diffData.getPercent(CPUStatData::DataField::IOWaitTime)));
-    m_data.set_all(m_data.usr() + m_data.sys() + m_data.iow());
+    auto usr = static_cast<uint32_t>(diffData.getPercent(CPUStatData::DataField::UserTime));
+    auto sys = static_cast<uint32_t>(diffData.getPercent(CPUStatData::DataField::SystemTime));
+    auto iow = static_cast<uint32_t>(diffData.getPercent(CPUStatData::DataField::IOWaitTime));
+    // During resume the computed time can be invalid depending when we sleep, if not valid
+    // we clear m_last and copy only on the first valid data in the next updates
+    if ((usr + sys + iow) <= 100) {
+      m_last.copyFrom(data);
+      m_data.set_usr(usr);
+      m_data.set_sys(sys);
+      m_data.set_iow(iow);
+      m_data.set_all(usr + sys + iow);
+    } else {
+      m_last.clear();
+    }
   }
 }
 

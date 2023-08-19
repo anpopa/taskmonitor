@@ -85,6 +85,20 @@ struct CPUStatData {
     guestNiceTime = src.guestNiceTime;
   }
 
+  void clear(void)
+  {
+    userTime = 0;
+    niceTime = 0;
+    systemTime = 0;
+    idleTime = 0;
+    ioWaitTime = 0;
+    irqTime = 0;
+    softIRQTime = 0;
+    stealTime = 0;
+    guestTime = 0;
+    guestNiceTime = 0;
+  }
+
   uint64_t getPercent(DataField type)
   {
     switch (type) {
