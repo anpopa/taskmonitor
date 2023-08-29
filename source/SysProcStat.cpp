@@ -11,6 +11,7 @@
 
 #include "SysProcStat.h"
 #include "Application.h"
+#include "Logger.h"
 #include <cstring>
 #include <string>
 
@@ -92,6 +93,32 @@ auto SysProcStat::getCPUStat(const std::string &name) -> const std::shared_ptr<C
   });
 
   return cpuStat;
+}
+
+bool SysProcStat::sendTo(IUDPSink &sink)
+{
+  tkm::msg::monitor::SysProcStat statEvent;
+  tkm::msg::monitor::Data data;
+
+  data.set_what(tkm::msg::monitor::Data_What_SysProcStat);
+
+  struct timespec currentTime;
+  clock_gettime(CLOCK_REALTIME, &currentTime);
+  data.set_system_time_sec(static_cast<uint64_t>(currentTime.tv_sec));
+  clock_gettime(CLOCK_MONOTONIC, &currentTime);
+  data.set_monotonic_time_sec(static_cast<uint64_t>(currentTime.tv_sec));
+
+  getCPUStatList().foreach ([&statEvent](const std::shared_ptr<CPUStat> &entry) {
+    if (entry->getType() == CPUStat::StatType::Cpu) {
+      statEvent.mutable_cpu()->CopyFrom(entry->getData());
+    } else {
+      statEvent.add_core()->CopyFrom(entry->getData());
+    }
+  });
+
+  data.mutable_payload()->PackFrom(statEvent);
+  logInfo() << "!!!!Send SysProcStat on UDP";
+  return sink.send(data);
 }
 
 auto SysProcStat::requestHandler(const Request &request) -> bool

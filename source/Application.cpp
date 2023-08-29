@@ -81,6 +81,16 @@ Application::Application(const std::string &name,
     }
   }
 
+  if (m_options->getFor(Options::Key::EnableUDPServer) == tkmDefaults.valFor(Defaults::Val::True)) {
+    m_udpServer = std::make_shared<UDPServer>(m_options);
+    try {
+      m_udpServer->bindAndListen();
+      m_udpServer->setEventSource();
+    } catch (std::exception &e) {
+      logError() << "Fail to start UDP server. Exception: " << e.what();
+    }
+  }
+
 #ifdef WITH_PROC_EVENT
   if (m_options->getFor(Options::Key::EnableProcEvent) == tkmDefaults.valFor(Defaults::Val::True)) {
     m_procEvent = std::make_shared<ProcEvent>(m_options);
@@ -200,9 +210,10 @@ Application::Application(const std::string &name,
 void Application::enableUpdateLanes(void)
 {
   m_fastLaneTimer = std::make_shared<Timer>("FastLaneTimer", [this]() {
-    m_dataSources.foreach ([](const std::shared_ptr<IDataSource> &entry) {
+    m_dataSources.foreach ([this](const std::shared_ptr<IDataSource> &entry) {
       if (entry->getUpdateLane() == IDataSource::UpdateLane::Fast) {
         entry->update();
+        entry->sendTo(*m_udpServer);
       } else if (entry->getUpdateLane() == IDataSource::UpdateLane::Any) {
         entry->update(IDataSource::UpdateLane::Fast);
       }

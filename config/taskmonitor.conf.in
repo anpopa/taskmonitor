@@ -35,6 +35,8 @@ EnableProcAcct=true
 EnableTCPServer=true
 ; Enable UDP server module
 EnableUDSServer=false
+; Enable UDP server module
+EnableUDPServer=false
 ; Cache startup data in profiling mode if built with WITH_STARTUP_DATA
 ; If WITH_STARTUP_DATA is disabled at build time this option has no effect
 EnableStartupData=false
@@ -99,6 +101,16 @@ ActiveWakeLock=true
 SocketPath=/run/taskmonitor/taskmonitor.sock
 ; Disconnect client collector if inactive (see CollectorInactiveTimeout)
 MonitorCollectorInactivity=false
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; UDPServer options
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+[udpserver]
+; Set network address UDPServer module should bind and listen the server port.
+; If set to 'any' will bind to all addresses
+ServerAddress=any
+; Set UDPServer port to listen for connections. Default 3358
+ServerPort=3358
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Monitoring blacklist for process accounting

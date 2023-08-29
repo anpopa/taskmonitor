@@ -36,6 +36,7 @@
 #endif
 #include "TCPServer.h"
 #include "UDSServer.h"
+#include "UDPServer.h"
 
 #include "../bswinfra/source/IApplication.h"
 #include "../bswinfra/source/SafeList.h"
@@ -135,6 +136,7 @@ private:
   std::shared_ptr<Options> m_options = nullptr;
   std::shared_ptr<TCPServer> m_netServer = nullptr;
   std::shared_ptr<UDSServer> m_udsServer = nullptr;
+  std::shared_ptr<UDPServer> m_udpServer = nullptr;
   std::shared_ptr<StateManager> m_stateManager = nullptr;
 #ifdef WITH_PROC_ACCT
   std::shared_ptr<ProcAcct> m_procAcct = nullptr;

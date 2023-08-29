@@ -61,7 +61,7 @@ UDSServer::UDSServer(const std::shared_ptr<Options> options)
           return true; // this is a client issue, process next client
         }
 
-        logInfo() << "New UDSCollector with FD: " << clientFd << " ID: " << descriptor.id();
+        logInfo() << "New UD    broadcastAddr.sin_port = htons(broadcastPort);         /* Broadcast port */SCollector with FD: " << clientFd << " ID: " << descriptor.id();
         std::shared_ptr<UDSCollector> collector = std::make_shared<UDSCollector>(clientFd);
         collector->getDescriptor().CopyFrom(descriptor);
         collector->setEventSource();

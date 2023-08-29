@@ -32,6 +32,7 @@ public:
     EnableProcAcct,
     EnableTCPServer,
     EnableUDSServer,
+    EnableUDPServer,
     EnableStartupData,
     EnableProcFDCount,
     EnableSysProcVMStat,
@@ -48,6 +49,8 @@ public:
     ReadProcAtInit,
     TCPServerAddress,
     TCPServerPort,
+    UDPServerAddress,
+    UDPServerPort,
     UDSServerSocketPath,
     CollectorInactiveTimeout,
     UDSMonitorCollectorInactivity,
@@ -79,6 +82,7 @@ public:
     m_table.insert(std::pair<Default, std::string>(Default::EnableProcAcct, "true"));
     m_table.insert(std::pair<Default, std::string>(Default::EnableTCPServer, "true"));
     m_table.insert(std::pair<Default, std::string>(Default::EnableUDSServer, "false"));
+    m_table.insert(std::pair<Default, std::string>(Default::EnableUDPServer, "false"));
     m_table.insert(std::pair<Default, std::string>(Default::EnableStartupData, "false"));
     m_table.insert(std::pair<Default, std::string>(Default::EnableProcFDCount, "false"));
     m_table.insert(std::pair<Default, std::string>(Default::EnableSysProcVMStat, "false"));
@@ -86,6 +90,8 @@ public:
     m_table.insert(std::pair<Default, std::string>(Default::StartupDataCleanupTime, "60000000"));
     m_table.insert(std::pair<Default, std::string>(Default::TCPServerAddress, "localhost"));
     m_table.insert(std::pair<Default, std::string>(Default::TCPServerPort, "3357"));
+    m_table.insert(std::pair<Default, std::string>(Default::UDPServerAddress, "localhost"));
+    m_table.insert(std::pair<Default, std::string>(Default::UDPServerPort, "3358"));
     m_table.insert(std::pair<Default, std::string>(Default::UDSServerSocketPath,
                                                    "/run/taskmonitor/taskmonitor.sock"));
     m_table.insert(std::pair<Default, std::string>(Default::CollectorInactiveTimeout, "10000000"));

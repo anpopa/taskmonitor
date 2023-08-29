@@ -182,6 +182,7 @@ public:
   auto getCPUStatList() -> bswi::util::SafeList<std::shared_ptr<CPUStat>> & { return m_cpus; }
   auto pushRequest(SysProcStat::Request &request) -> int;
   void setEventSource(bool enabled = true);
+  bool sendTo(IUDPSink &sink) final;
   bool update(void) final;
 
 private:

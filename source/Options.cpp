@@ -214,6 +214,13 @@ auto Options::getFor(Key key) -> string const
       return prop.value_or(tkmDefaults.getFor(Defaults::Default::EnableUDSServer));
     }
     return tkmDefaults.getFor(Defaults::Default::EnableUDSServer);
+  case Key::EnableUDPServer:
+    if (hasConfigFile()) {
+      const optional<string> prop =
+          m_configFile->getPropertyValue("monitor", -1, "EnableUDPServer");
+      return prop.value_or(tkmDefaults.getFor(Defaults::Default::EnableUDPServer));
+    }
+    return tkmDefaults.getFor(Defaults::Default::EnableUDPServer);
   case Key::EnableStartupData:
     if (hasConfigFile()) {
       const optional<string> prop =
@@ -309,6 +316,19 @@ auto Options::getFor(Key key) -> string const
       return prop.value_or(tkmDefaults.getFor(Defaults::Default::UDSMonitorCollectorInactivity));
     }
     return tkmDefaults.getFor(Defaults::Default::UDSMonitorCollectorInactivity);
+  case Key::UDPServerAddress:
+    if (hasConfigFile()) {
+      const optional<string> prop =
+          m_configFile->getPropertyValue("udpserver", -1, "ServerAddress");
+      return prop.value_or(tkmDefaults.getFor(Defaults::Default::UDPServerAddress));
+    }
+    return tkmDefaults.getFor(Defaults::Default::UDPServerAddress);
+  case Key::UDPServerPort:
+    if (hasConfigFile()) {
+      const optional<string> prop = m_configFile->getPropertyValue("udpserver", -1, "ServerPort");
+      return prop.value_or(tkmDefaults.getFor(Defaults::Default::UDPServerPort));
+    }
+    return tkmDefaults.getFor(Defaults::Default::UDPServerPort);
   default:
     logError() << "Unknown option key";
     break;

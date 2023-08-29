@@ -33,7 +33,7 @@ TCPServer::TCPServer(const std::shared_ptr<Options> options)
   int enable = 1;
   setsockopt(m_sockFd,
              SOL_SOCKET,
-             (SO_REUSEPORT | SO_REUSEADDR | SO_DEBUG),
+             (SO_REUSEPORT | SO_REUSEADDR),
              (char *) &enable,
              sizeof(enable));
 

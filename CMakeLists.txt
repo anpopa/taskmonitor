@@ -222,6 +222,7 @@ add_executable(taskmonitor
     source/TCPServer.cpp
     source/UDSCollector.cpp
     source/UDSServer.cpp
+    source/UDPServer.cpp
     source/SysProcStat.cpp
     source/SysProcMemInfo.cpp
     source/SysProcPressure.cpp

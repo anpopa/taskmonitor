@@ -11,8 +11,10 @@
 
 #pragma once
 
-#include <string>
+#include "IUDPSink.h"
+
 #include <cstdint>
+#include <string>
 
 namespace tkm::monitor
 {
@@ -43,6 +45,7 @@ public:
   virtual bool update(const std::string &) { return update(); };
   virtual bool update(UpdateLane) { return update(); };
   virtual bool update(void) = 0;
+  virtual bool sendTo(IUDPSink &sink) { return true; };
 
 protected:
   bool getUpdatePending(void) { return m_updatePending; }
