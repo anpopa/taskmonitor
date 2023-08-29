@@ -77,11 +77,13 @@ StateManager::StateManager(const std::shared_ptr<Options> options)
 
   m_collectorsTimer->start(collectorTimeout, true);
 
+#ifdef WITH_WAKE_LOCK
   if (fs::exists("/sys/power/wake_unlock")) {
     std::ofstream fLock("/sys/power/wake_unlock");
     fLock << gWakeLockName;
     logInfo() << "Remove any existing taskmonitor wake locks";
   }
+#endif
 }
 
 auto StateManager::pushRequest(Request &request) -> int
