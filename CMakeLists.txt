@@ -161,6 +161,8 @@ find_package(Threads REQUIRED)
 find_package(Protobuf REQUIRED)
 find_package(tkm REQUIRED)
 
+set(ENV{PKG_CONFIG_SYSROOT_DIR} "")
+
 if(WITH_PROC_ACCT)
     pkg_check_modules     (LIBNL libnl-3.0 REQUIRED)
     pkg_check_modules     (LIBNLGENL libnl-genl-3.0 REQUIRED)
