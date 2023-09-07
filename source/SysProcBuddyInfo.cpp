@@ -140,7 +140,7 @@ static bool doUpdateStats(const std::shared_ptr<SysProcBuddyInfo> mgr)
 
     if (!found) {
       std::shared_ptr<BuddyInfo> entry = std::make_shared<BuddyInfo>(nameToken, zoneToken);
-      logInfo() << "Adding new buddyinfo entry with name=" << nameToken << " zone=" << zoneToken;
+      logDebug() << "Adding new buddyinfo entry with name=" << nameToken << " zone=" << zoneToken;
       mgr->getBuddyInfoList().append(entry);
       mgr->getBuddyInfoList().commit();
       updateBuddyInfoEntry(entry);

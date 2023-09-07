@@ -148,7 +148,7 @@ static bool doUpdateStats(const std::shared_ptr<SysProcWireless> mgr)
 
     if (!found) {
       std::shared_ptr<WlanInterface> entry = std::make_shared<WlanInterface>(name);
-      logInfo() << "Adding new wlan inteface with name=" << name;
+      logDebug() << "Adding new wlan inteface with name=" << name;
       mgr->getWlanInterfaceList().append(entry);
       mgr->getWlanInterfaceList().commit();
       updateWlanInterfaceEntry(entry);

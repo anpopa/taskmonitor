@@ -33,6 +33,7 @@ static bool isProfMode(const std::shared_ptr<tkm::monitor::Options> opts);
 
 Application::Application(const std::string &name,
                          const std::string &description,
+                         const Logger::Message::Type logLevel,
                          const std::string &configFile)
 : bswi::app::IApplication(name, description)
 {
@@ -40,6 +41,8 @@ Application::Application(const std::string &name,
     throw bswi::except::SingleInstance();
   }
   appInstance = this;
+
+  Logger::setLogLevel(logLevel);
 
   m_options = std::make_shared<Options>(configFile);
   bool profModeEnabled = isProfMode(m_options);
@@ -270,7 +273,7 @@ void Application::startWatchdog(void)
     }
   }
 #else
-  logInfo() << "Watchdog build time disabled";
+  logDebug() << "Watchdog build time disabled";
 #endif
 }
 

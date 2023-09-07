@@ -86,7 +86,7 @@ ProcEvent::ProcEvent(const std::shared_ptr<Options> options)
           logDebug() << "ProcEvent Set mcast listen OK";
           break;
         case proc_event::what::PROC_EVENT_FORK: {
-          logInfo() << "proc.event[fork]:"
+          logDebug() << "proc.event[fork]:"
                     << " parent_pid=" << proc_ev->event_data.fork.parent_pid
                     << " parent_tgid=" << proc_ev->event_data.fork.parent_tgid
                     << " child_pid=" << proc_ev->event_data.fork.child_pid
@@ -103,7 +103,7 @@ ProcEvent::ProcEvent(const std::shared_ptr<Options> options)
           break;
         }
         case proc_event::what::PROC_EVENT_EXEC: {
-          logInfo() << "proc.event[exec]:"
+          logDebug() << "proc.event[exec]:"
                     << " process_pid=" << proc_ev->event_data.exec.process_pid
                     << " process_tgid=" << proc_ev->event_data.exec.process_tgid;
           m_eventData.set_exec_count(m_eventData.exec_count() + 1);
@@ -114,7 +114,7 @@ ProcEvent::ProcEvent(const std::shared_ptr<Options> options)
           break;
         }
         case proc_event::what::PROC_EVENT_UID: {
-          logInfo() << "proc.event[uid]:"
+          logDebug() << "proc.event[uid]:"
                     << " process_pid=" << proc_ev->event_data.id.process_pid
                     << " process_tgid=" << proc_ev->event_data.id.process_tgid
                     << " ruid=" << proc_ev->event_data.id.r.ruid
@@ -123,7 +123,7 @@ ProcEvent::ProcEvent(const std::shared_ptr<Options> options)
           break;
         }
         case proc_event::what::PROC_EVENT_GID: {
-          logInfo() << "proc.event[gid]:"
+          logDebug() << "proc.event[gid]:"
                     << " process_pid=" << proc_ev->event_data.id.process_pid
                     << " process_tgid=" << proc_ev->event_data.id.process_tgid
                     << " rgid=" << proc_ev->event_data.id.r.rgid
@@ -132,7 +132,7 @@ ProcEvent::ProcEvent(const std::shared_ptr<Options> options)
           break;
         }
         case proc_event::what::PROC_EVENT_EXIT: {
-          logInfo() << "proc.event[exit]:"
+          logDebug() << "proc.event[exit]:"
                     << " process_pid=" << proc_ev->event_data.id.process_pid
                     << " process_tgid=" << proc_ev->event_data.id.process_tgid
                     << " exit_code=" << proc_ev->event_data.exit.exit_code;
@@ -157,7 +157,7 @@ ProcEvent::ProcEvent(const std::shared_ptr<Options> options)
 
   // If the event is removed we stop the main application
   setFinalize([this]() {
-    logInfo() << "ProcEvent kernel closed connection";
+    logWarn() << "ProcEvent kernel closed connection";
     if (m_options->getFor(Options::Key::UpdateOnProcEvent) ==
         tkmDefaults.valFor(Defaults::Val::True)) {
       logError() << "ProcEvent source lost. Terminate taskmonitor";

@@ -162,7 +162,7 @@ static bool doUpdateStats(const std::shared_ptr<SysProcStat> mgr)
       std::shared_ptr<CPUStat> entry = std::make_shared<CPUStat>(name);
       entry->updateStats(data);
 
-      logInfo() << "Adding new cpu core '" << entry->getName() << "' for statistics";
+      logDebug() << "Adding new cpu core '" << entry->getName() << "' for statistics";
       mgr->getCPUStatList().append(entry);
       mgr->getCPUStatList().commit();
     }

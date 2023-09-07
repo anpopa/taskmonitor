@@ -178,7 +178,7 @@ static bool doCreateSession(const std::shared_ptr<TCPCollector> collector)
   collector->getDescriptor().set_id(std::to_string(tkm::jnkHsh(idContent.c_str())));
   collector->getSessionInfo().set_hash(collector->getDescriptor().id());
   collector->getSessionInfo().set_core_count(static_cast<uint32_t>(sysconf(_SC_NPROCESSORS_ONLN)));
-  logInfo() << "Send new sessionID=" << collector->getSessionInfo().hash();
+  logDebug() << "Send new sessionID=" << collector->getSessionInfo().hash();
 
   auto keepAliveInterval =
       std::stoul(App()->getOptions()->getFor(Options::Key::CollectorInactiveTimeout));
@@ -241,7 +241,7 @@ static bool doCreateSession(const std::shared_ptr<TCPCollector> collector)
   envelope.set_target(tkm::msg::Envelope_Recipient_Collector);
   envelope.set_origin(tkm::msg::Envelope_Recipient_Monitor);
 
-  logDebug() << "Send session id: " << collector->getSessionInfo().hash()
+  logInfo() << "Send session id: " << collector->getSessionInfo().hash()
              << " to collector: " << collector->getFD();
   return collector->writeEnvelope(envelope);
 }

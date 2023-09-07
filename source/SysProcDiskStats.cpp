@@ -131,7 +131,7 @@ static bool doUpdateStats(const std::shared_ptr<SysProcDiskStats> mgr)
       std::shared_ptr<DiskStat> entry =
           std::make_shared<DiskStat>(tokens[2], std::stoul(tokens[0]), std::stoul(tokens[1]));
 
-      logInfo() << "Adding new diskstat entry '" << entry->getData().name() << "' for statistics";
+      logDebug() << "Adding new diskstat entry '" << entry->getData().name() << "' for statistics";
       mgr->getDiskStatList().append(entry);
       mgr->getDiskStatList().commit();
       updateDiskStatEntry(entry);

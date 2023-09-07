@@ -150,7 +150,7 @@ void ProcRegistry::addProcEntry(int pid)
     try {
       procName = getProcNameForPID(pid);
     } catch (...) {
-      logWarn() << "Proc entry removed before entry added";
+      logDebug() << "Proc entry removed before entry added";
       return;
     }
 
@@ -244,7 +244,7 @@ auto ProcRegistry::getProcNameForPID(int pid) -> std::string
   std::ifstream statusStream{statusPath};
 
   if (!statusStream.is_open()) {
-    logError() << "Failed to open status file for pid " << pid;
+    logDebug() << "Failed to open status file for pid " << pid;
     throw std::runtime_error("Fail to open /proc/<pid>/status file");
   }
 

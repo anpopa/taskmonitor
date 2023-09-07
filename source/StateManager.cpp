@@ -81,7 +81,7 @@ StateManager::StateManager(const std::shared_ptr<Options> options)
   if (fs::exists("/sys/power/wake_unlock")) {
     std::ofstream fLock("/sys/power/wake_unlock");
     fLock << gWakeLockName;
-    logInfo() << "Remove any existing taskmonitor wake locks";
+    logDebug() << "Remove any existing taskmonitor wake locks";
   }
 #endif
 }
@@ -175,7 +175,7 @@ static bool doUpdateWakeLock(const std::shared_ptr<StateManager> mgr)
         std::ofstream fLock("/sys/power/wake_lock");
         fLock << gWakeLockName;
         gActiveWakeLock = true;
-        logInfo() << "TCP collectors wake lock enabled";
+        logDebug() << "TCP collectors wake lock enabled";
       } else {
         logWarn() << "Wake lock sysfs interface not available";
       }
@@ -186,7 +186,7 @@ static bool doUpdateWakeLock(const std::shared_ptr<StateManager> mgr)
         std::ofstream fLock("/sys/power/wake_unlock");
         fLock << gWakeLockName;
         gActiveWakeLock = false;
-        logInfo() << "TCP collectors wake lock disabled";
+        logDebug() << "TCP collectors wake lock disabled";
       } else {
         logWarn() << "Wake unlock sysfs interface not available";
       }

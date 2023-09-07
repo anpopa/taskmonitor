@@ -51,6 +51,7 @@ class Application final : public bswi::app::IApplication
 public:
   explicit Application(const std::string &name,
                        const std::string &description,
+                       const Logger::Message::Type logLevel,
                        const std::string &configFile);
 
   ~Application()
@@ -64,6 +65,7 @@ public:
     return appInstance == nullptr
                ? appInstance = new Application("TKM",
                                                "TaskMonitor Application",
+                                               Logger::Message::Type::Verbose,
                                                tkmDefaults.getFor(Defaults::Default::ConfPath))
                : appInstance;
   }

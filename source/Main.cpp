@@ -9,6 +9,7 @@
  *-
  */
 
+#include "Logger.h"
 #include <csignal>
 #include <cstdlib>
 #include <getopt.h>
@@ -37,18 +38,23 @@ static void terminate(int signum)
 auto main(int argc, char **argv) -> int
 {
   const char *config_path = nullptr;
+  const char *log_level = nullptr;
   int long_index = 0;
   bool help = false;
   int c;
 
   struct option longopts[] = {{"config", required_argument, nullptr, 'c'},
+                              {"log", required_argument, nullptr, 'l'},
                               {"help", no_argument, nullptr, 'h'},
                               {nullptr, 0, nullptr, 0}};
 
-  while ((c = getopt_long(argc, argv, "c:h", longopts, &long_index)) != -1) {
+  while ((c = getopt_long(argc, argv, "c:l:h", longopts, &long_index)) != -1) {
     switch (c) {
     case 'c':
       config_path = optarg;
+      break;
+    case 'l':
+      log_level = optarg;
       break;
     case 'h':
     default:
@@ -63,7 +69,9 @@ auto main(int argc, char **argv) -> int
               << " libtkm: " << TKMLIB_VERSION << "\n\n";
     std::cout << "Usage: taskmonitor [OPTIONS] \n\n";
     std::cout << "  General:\n";
-    std::cout << "     --config, -c  <string> Configuration file path\n";
+    std::cout << "     --config, -c <string> Configuration file path\n";
+    std::cout << "     --log, -l    <string> Log level: verbose,debug,info,"
+                 "notice,warn,error,fatal\n";
     std::cout << "  Help:\n";
     std::cout << "     --help, -h             Print this help\n\n";
 
@@ -73,6 +81,24 @@ auto main(int argc, char **argv) -> int
   ::signal(SIGPIPE, SIG_IGN);
   ::signal(SIGINT, terminate);
   ::signal(SIGTERM, terminate);
+
+  auto logLevel = Logger::Message::Type::Verbose;
+  if (log_level != nullptr) {
+    const auto logLevelString = std::string(log_level);
+    if (logLevelString.rfind("debug", 0) != std::string::npos) {
+      logLevel = Logger::Message::Type::Debug;
+    } else if (logLevelString.rfind("info", 0) != std::string::npos) {
+      logLevel = Logger::Message::Type::Info;
+    } else if (logLevelString.rfind("notice", 0) != std::string::npos) {
+      logLevel = Logger::Message::Type::Notice;
+    } else if (logLevelString.rfind("warn", 0) != std::string::npos) {
+      logLevel = Logger::Message::Type::Warn;
+    } else if (logLevelString.rfind("error", 0) != std::string::npos) {
+      logLevel = Logger::Message::Type::Error;
+    } else if (logLevelString.rfind("fatal", 0) != std::string::npos) {
+      logLevel = Logger::Message::Type::Fatal;
+    }
+  }
 
   try {
     TKMLIB_CHECK_VERSION;
@@ -90,7 +116,8 @@ auto main(int argc, char **argv) -> int
     configPath = std::string(config_path);
   }
 
-  app = std::make_unique<tkm::monitor::Application>("TaskMonitor", "TaskMonitor", configPath);
+  app = std::make_unique<tkm::monitor::Application>(
+      "TaskMonitor", "TaskMonitor", logLevel, configPath);
   app->run();
 
   return EXIT_SUCCESS;
