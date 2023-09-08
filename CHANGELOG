@@ -1,3 +1,10 @@
+* Thu Sep 8 2023 Alin Popa <alin.popa@fxdata.ro> - 1.6.4
+- Send libtkm version to collectors
+- Improve console log format
+- Fix build as conan package
+- Limit CPU percent to correct values
+- Fix build with wakelock off option
+
 * Thu Aug 16 2023 Alin Popa <alin.popa@fxdata.ro> - 1.6.3
 - Fix eventloop close after suspend
 - Handle netlink buffer full scenario in ProcEvent module

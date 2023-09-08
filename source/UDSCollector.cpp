@@ -164,6 +164,7 @@ static bool doCreateSession(const std::shared_ptr<UDSCollector> collector)
   logInfo() << "Session hash content: " << idContent
             << " jenkinsHash: " << tkm::jnkHsh(idContent.c_str());
   collector->getDescriptor().set_id(std::to_string(tkm::jnkHsh(idContent.c_str())));
+  collector->getSessionInfo().set_libtkm_version(TKMLIB_VERSION);
   collector->getSessionInfo().set_hash(collector->getDescriptor().id());
   collector->getSessionInfo().set_core_count(static_cast<uint32_t>(sysconf(_SC_NPROCESSORS_ONLN)));
   logDebug() << "Send new sessionID=" << collector->getSessionInfo().hash();
