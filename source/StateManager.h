@@ -28,12 +28,7 @@ namespace tkm::monitor
 class StateManager : public std::enable_shared_from_this<StateManager>
 {
 public:
-  enum class Action {
-    MonitorCollector,
-    RemoveCollector,
-    UpdateWakeLock,
-    UpdateProcessList
-  };
+  enum class Action { MonitorCollector, RemoveCollector, UpdateWakeLock, UpdateProcessList };
 
   typedef struct Request {
     Action action;

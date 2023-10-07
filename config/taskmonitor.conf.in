@@ -6,6 +6,8 @@
 ; Monitor configuration options
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 [monitor]
+; Set loglevel: debug, info, notice, warn, error, fatal
+LogLevel=info
 ; Set program runtime directory
 RuntimeDirectory=/run/taskmonitor
 ; Set rx sockets buffer size

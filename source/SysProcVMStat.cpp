@@ -47,7 +47,7 @@ bool SysProcVMStat::update()
   }
 
   SysProcVMStat::Request request = {.action = SysProcVMStat::Action::UpdateStats,
-                                     .collector = nullptr};
+                                    .collector = nullptr};
   bool status = pushRequest(request);
 
   if (status) {
@@ -193,7 +193,6 @@ static bool doUpdateStats(const std::shared_ptr<SysProcVMStat> mgr)
     } else if (line.rfind("thp_swpout_fallback ", 0) != std::string::npos) {
       lineData = LineData::thp_swpout_fallback;
     }
-
 
     if (lineData == LineData::unknown) {
       continue;

@@ -36,6 +36,12 @@ auto Options::getFor(Key key) -> string const
       return prop.value_or(tkmDefaults.getFor(Defaults::Default::RuntimeDirectory));
     }
     return tkmDefaults.getFor(Defaults::Default::RuntimeDirectory);
+  case Key::LogLevel:
+    if (hasConfigFile()) {
+      const optional<string> prop = m_configFile->getPropertyValue("monitor", -1, "LogLevel");
+      return prop.value_or(tkmDefaults.getFor(Defaults::Default::LogLevel));
+    }
+    return tkmDefaults.getFor(Defaults::Default::LogLevel);
   case Key::ContainersPath:
     if (hasConfigFile()) {
       const optional<string> prop = m_configFile->getPropertyValue("monitor", -1, "ContainersPath");
@@ -293,7 +299,8 @@ auto Options::getFor(Key key) -> string const
     return tkmDefaults.getFor(Defaults::Default::TCPServerPort);
   case Key::TCPActiveWakeLock:
     if (hasConfigFile()) {
-      const optional<string> prop = m_configFile->getPropertyValue("tcpserver", -1, "ActiveWakeLock");
+      const optional<string> prop =
+          m_configFile->getPropertyValue("tcpserver", -1, "ActiveWakeLock");
       return prop.value_or(tkmDefaults.getFor(Defaults::Default::TCPActiveWakeLock));
     }
     return tkmDefaults.getFor(Defaults::Default::TCPActiveWakeLock);
@@ -305,7 +312,8 @@ auto Options::getFor(Key key) -> string const
     return tkmDefaults.getFor(Defaults::Default::UDSServerSocketPath);
   case Key::UDSMonitorCollectorInactivity:
     if (hasConfigFile()) {
-      const optional<string> prop = m_configFile->getPropertyValue("udsserver", -1, "MonitorCollectorInactivity");
+      const optional<string> prop =
+          m_configFile->getPropertyValue("udsserver", -1, "MonitorCollectorInactivity");
       return prop.value_or(tkmDefaults.getFor(Defaults::Default::UDSMonitorCollectorInactivity));
     }
     return tkmDefaults.getFor(Defaults::Default::UDSMonitorCollectorInactivity);

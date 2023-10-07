@@ -33,7 +33,6 @@ static bool isProfMode(const std::shared_ptr<tkm::monitor::Options> opts);
 
 Application::Application(const std::string &name,
                          const std::string &description,
-                         const Logger::Message::Type logLevel,
                          const std::string &configFile)
 : bswi::app::IApplication(name, description)
 {
@@ -42,10 +41,25 @@ Application::Application(const std::string &name,
   }
   appInstance = this;
 
-  Logger::setLogLevel(logLevel);
-
   m_options = std::make_shared<Options>(configFile);
   bool profModeEnabled = isProfMode(m_options);
+
+  auto logLevel = Logger::Message::Type::Verbose;
+  const auto logLevelString = m_options->getFor(Options::Key::LogLevel);
+  if (logLevelString.rfind("debug", 0) != std::string::npos) {
+    logLevel = Logger::Message::Type::Debug;
+  } else if (logLevelString.rfind("info", 0) != std::string::npos) {
+    logLevel = Logger::Message::Type::Info;
+  } else if (logLevelString.rfind("notice", 0) != std::string::npos) {
+    logLevel = Logger::Message::Type::Notice;
+  } else if (logLevelString.rfind("warn", 0) != std::string::npos) {
+    logLevel = Logger::Message::Type::Warn;
+  } else if (logLevelString.rfind("error", 0) != std::string::npos) {
+    logLevel = Logger::Message::Type::Error;
+  } else if (logLevelString.rfind("fatal", 0) != std::string::npos) {
+    logLevel = Logger::Message::Type::Fatal;
+  }
+  Logger::setLogLevel(logLevel);
 
   // Set update lanes intervals based on runtime mode
   if (profModeEnabled) {
@@ -171,7 +185,8 @@ Application::Application(const std::string &name,
 
 #ifdef WITH_VM_STAT
   if ((m_options->getFor(Options::Key::EnableSysProcVMStat) ==
-      tkmDefaults.valFor(Defaults::Val::True)) && (fs::exists("/proc/vmstat"))) {
+       tkmDefaults.valFor(Defaults::Val::True)) &&
+      (fs::exists("/proc/vmstat"))) {
     m_sysProcVMStat = std::make_shared<SysProcVMStat>(m_options);
     m_sysProcVMStat->setUpdateLane(IDataSource::UpdateLane::Slow);
     m_sysProcVMStat->setUpdateInterval(m_slowLaneInterval);
@@ -251,7 +266,7 @@ void Application::startWatchdog(void)
 
   status = sd_watchdog_enabled(0, &usec);
   if (status > 0) {
-    logInfo() << "Systemd watchdog enabled with timeout seconds: " << USEC2SEC(usec);
+    logDebug() << "Systemd watchdog enabled with timeout seconds: " << USEC2SEC(usec);
 
     auto timer = std::make_shared<Timer>("Watchdog", []() {
       if (sd_notify(0, "WATCHDOG=1") < 0) {

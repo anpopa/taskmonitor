@@ -38,8 +38,8 @@ ProcEntry::ProcEntry(int pid, const std::string &name)
 
   if (App()->getOptions() != nullptr) {
     if (App()->getOptions()->getFor(Options::Key::EnableProcFDCount) ==
-      tkmDefaults.valFor(Defaults::Val::True)) {
-        gProcInfoFDCollect = true;
+        tkmDefaults.valFor(Defaults::Val::True)) {
+      gProcInfoFDCollect = true;
     }
   }
 }
@@ -255,14 +255,14 @@ bool ProcEntry::countFileDescriptors(void)
   auto fdCount = m_info.fd_count();
 
   try {
-    fdCount = std::count_if(begin(dirIter), end(dirIter), [](auto& entry) {
+    fdCount = std::count_if(begin(dirIter), end(dirIter), [](auto &entry) {
 #if __has_include(<filesystem>)
       return entry.is_symlink();
 #else
       return fs::is_symlink(entry);
 #endif
     });
-  } catch(...) {
+  } catch (...) {
     return false;
   }
 

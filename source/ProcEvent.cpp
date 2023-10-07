@@ -87,10 +87,10 @@ ProcEvent::ProcEvent(const std::shared_ptr<Options> options)
           break;
         case proc_event::what::PROC_EVENT_FORK: {
           logDebug() << "proc.event[fork]:"
-                    << " parent_pid=" << proc_ev->event_data.fork.parent_pid
-                    << " parent_tgid=" << proc_ev->event_data.fork.parent_tgid
-                    << " child_pid=" << proc_ev->event_data.fork.child_pid
-                    << " child_tgid=" << proc_ev->event_data.fork.child_tgid;
+                     << " parent_pid=" << proc_ev->event_data.fork.parent_pid
+                     << " parent_tgid=" << proc_ev->event_data.fork.parent_tgid
+                     << " child_pid=" << proc_ev->event_data.fork.child_pid
+                     << " child_tgid=" << proc_ev->event_data.fork.child_tgid;
           m_eventData.set_fork_count(m_eventData.fork_count() + 1);
 
           // We only add a process entry in registry for processes
@@ -104,8 +104,8 @@ ProcEvent::ProcEvent(const std::shared_ptr<Options> options)
         }
         case proc_event::what::PROC_EVENT_EXEC: {
           logDebug() << "proc.event[exec]:"
-                    << " process_pid=" << proc_ev->event_data.exec.process_pid
-                    << " process_tgid=" << proc_ev->event_data.exec.process_tgid;
+                     << " process_pid=" << proc_ev->event_data.exec.process_pid
+                     << " process_tgid=" << proc_ev->event_data.exec.process_tgid;
           m_eventData.set_exec_count(m_eventData.exec_count() + 1);
           if (m_options->getFor(Options::Key::UpdateOnProcEvent) ==
               tkmDefaults.valFor(Defaults::Val::True)) {
@@ -115,27 +115,27 @@ ProcEvent::ProcEvent(const std::shared_ptr<Options> options)
         }
         case proc_event::what::PROC_EVENT_UID: {
           logDebug() << "proc.event[uid]:"
-                    << " process_pid=" << proc_ev->event_data.id.process_pid
-                    << " process_tgid=" << proc_ev->event_data.id.process_tgid
-                    << " ruid=" << proc_ev->event_data.id.r.ruid
-                    << " euid=" << proc_ev->event_data.id.e.euid;
+                     << " process_pid=" << proc_ev->event_data.id.process_pid
+                     << " process_tgid=" << proc_ev->event_data.id.process_tgid
+                     << " ruid=" << proc_ev->event_data.id.r.ruid
+                     << " euid=" << proc_ev->event_data.id.e.euid;
           m_eventData.set_uid_count(m_eventData.uid_count() + 1);
           break;
         }
         case proc_event::what::PROC_EVENT_GID: {
           logDebug() << "proc.event[gid]:"
-                    << " process_pid=" << proc_ev->event_data.id.process_pid
-                    << " process_tgid=" << proc_ev->event_data.id.process_tgid
-                    << " rgid=" << proc_ev->event_data.id.r.rgid
-                    << " egid=" << proc_ev->event_data.id.e.egid;
+                     << " process_pid=" << proc_ev->event_data.id.process_pid
+                     << " process_tgid=" << proc_ev->event_data.id.process_tgid
+                     << " rgid=" << proc_ev->event_data.id.r.rgid
+                     << " egid=" << proc_ev->event_data.id.e.egid;
           m_eventData.set_gid_count(m_eventData.gid_count() + 1);
           break;
         }
         case proc_event::what::PROC_EVENT_EXIT: {
           logDebug() << "proc.event[exit]:"
-                    << " process_pid=" << proc_ev->event_data.id.process_pid
-                    << " process_tgid=" << proc_ev->event_data.id.process_tgid
-                    << " exit_code=" << proc_ev->event_data.exit.exit_code;
+                     << " process_pid=" << proc_ev->event_data.id.process_pid
+                     << " process_tgid=" << proc_ev->event_data.id.process_tgid
+                     << " exit_code=" << proc_ev->event_data.exit.exit_code;
           m_eventData.set_exit_count(m_eventData.exit_count() + 1);
           if (proc_ev->event_data.exit.process_pid == proc_ev->event_data.exit.process_tgid) {
             if (m_options->getFor(Options::Key::UpdateOnProcEvent) ==

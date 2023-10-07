@@ -26,7 +26,7 @@ class ICollector : public Pollable
 public:
   enum class Type { TCP, UDS };
 
-    explicit ICollector(const std::string &name, ICollector::Type type, int fd)
+  explicit ICollector(const std::string &name, ICollector::Type type, int fd)
   : Pollable(name, fd)
   , m_type(type)
   , m_reader(std::make_unique<tkm::EnvelopeReader>(fd))

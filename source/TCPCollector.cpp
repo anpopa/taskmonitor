@@ -243,7 +243,7 @@ static bool doCreateSession(const std::shared_ptr<TCPCollector> collector)
   envelope.set_origin(tkm::msg::Envelope_Recipient_Monitor);
 
   logInfo() << "Send session id: " << collector->getSessionInfo().hash()
-             << " to collector: " << collector->getFD();
+            << " to collector: " << collector->getFD();
   return collector->writeEnvelope(envelope);
 }
 
@@ -370,7 +370,7 @@ static bool doGetSysProcVMStat(const std::shared_ptr<TCPCollector> collector)
 {
   if (App()->getSysProcVMStat() != nullptr) {
     SysProcVMStat::Request rq = {.action = SysProcVMStat::Action::CollectAndSend,
-                                    .collector = collector};
+                                 .collector = collector};
     return App()->getSysProcVMStat()->pushRequest(rq);
   }
   return true;

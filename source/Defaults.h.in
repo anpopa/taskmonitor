@@ -23,6 +23,7 @@ public:
   enum class Default {
     Version,
     ConfPath,
+    LogLevel,
     ContainersPath,
     RuntimeDirectory,
     RxBufferSize,
@@ -61,6 +62,7 @@ public:
   {
     m_table.insert(std::pair<Default, std::string>(Default::Version, "@PROJECT_VERSION@"));
     m_table.insert(std::pair<Default, std::string>(Default::ConfPath, "@TKM_CONFIG_FILE@"));
+    m_table.insert(std::pair<Default, std::string>(Default::LogLevel, "info"));
     m_table.insert(std::pair<Default, std::string>(Default::ContainersPath, "/var/lib/lxc"));
     m_table.insert(std::pair<Default, std::string>(Default::RuntimeDirectory, "/run/taskmonitor"));
     m_table.insert(std::pair<Default, std::string>(Default::RxBufferSize, "524288"));
@@ -89,7 +91,8 @@ public:
     m_table.insert(std::pair<Default, std::string>(Default::UDSServerSocketPath,
                                                    "/run/taskmonitor/taskmonitor.sock"));
     m_table.insert(std::pair<Default, std::string>(Default::CollectorInactiveTimeout, "10000000"));
-    m_table.insert(std::pair<Default, std::string>(Default::UDSMonitorCollectorInactivity, "false"));
+    m_table.insert(
+        std::pair<Default, std::string>(Default::UDSMonitorCollectorInactivity, "false"));
     m_table.insert(std::pair<Default, std::string>(Default::TCPActiveWakeLock, "false"));
 
     m_vals.insert(std::pair<Val, std::string>(Val::True, "true"));

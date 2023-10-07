@@ -343,7 +343,7 @@ static bool doGetSysProcVMStat(const std::shared_ptr<UDSCollector> collector)
 {
   if (App()->getSysProcVMStat() != nullptr) {
     SysProcVMStat::Request rq = {.action = SysProcVMStat::Action::CollectAndSend,
-                                    .collector = collector};
+                                 .collector = collector};
     return App()->getSysProcVMStat()->pushRequest(rq);
   }
   return true;

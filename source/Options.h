@@ -26,6 +26,7 @@ class Options
 public:
   enum class Key {
     RuntimeDirectory,
+    LogLevel,
     ContainersPath,
     RxBufferSize,
     TxBufferSize,
